@@ -100,15 +100,7 @@ public class GenomeErrorFree {
             int[] firstGsAs = {asIndex, 0};
             overlappedGenomeString.assembledStrings.add(firstGsAs);
             
-            //TODO: checking overlap matches isn't working here.
-            //get it working and figure out where bad overlaps are.
-            if(!matchOverlaps(overlappedGenomeString.str, newAstr.str, 0)){
-                System.out.println("bad overlap");
-            }
             int[] secondGsAs = {asIndex, nextOverlap.overlapPoint};
-            if(!matchOverlaps(overlappingGenomeString.str, newAstr.str, nextOverlap.overlapPoint)){
-                System.out.println("bad overlap");
-            }
             overlappingGenomeString.assembledStrings.add(secondGsAs);
             // loop through the assembledstrings in each first genome string
             ArrayList<int[]> genomeAssembledStringsCopy = new ArrayList<>(overlappedGenomeString.assembledStrings);
@@ -117,7 +109,7 @@ public class GenomeErrorFree {
                 AssembledString nextAssembledString = assembledStrings.get(nextAssembledStringRef[0]);
                 //the overlap point is where overlappingGenomeString overlaps the assembledString
                 //plus where overlappedGenomeString overlaps overlappingGenomeString
-                int olPoint = nextAssembledStringRef[1];
+                int olPoint = nextAssembledStringRef[1]+nextOverlap.overlapPoint;
                 //if we're at the start of the string
                 //or if the assembled string is already longer than the length of the 
                 //secondGS string, continue
@@ -127,6 +119,9 @@ public class GenomeErrorFree {
 //                } catch (IndexOutOfBoundsException e){
 //                    System.out.println(e);
 //                }
+                //TODO: okay, the problem is that olPint is wrong. It needs to be the
+                //point where overlappedString is on the nextAssembledString plus where
+                //the overlapping string is on the overlappedString
                 //add the string to the assembled string which will do all the updating
                     nextAssembledString.addString(overlappingGenomeString, asIndex, olPoint);
                 //if all of the genomes are completed return nextAssembledString's string
