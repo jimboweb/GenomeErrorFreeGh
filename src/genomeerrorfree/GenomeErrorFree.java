@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
@@ -74,10 +76,10 @@ public class GenomeErrorFree {
         
         OverlapGraph gr = new OverlapGraph(input);
         gr = findAllOverlaps(gr);
-         
+        
+        return assembleString(gr);
         
         
-        return "Genome not found";
     }
     
     /**
@@ -138,8 +140,77 @@ public class GenomeErrorFree {
                 
         return  (potentialOverlappingStringSub.equals(potentialOverlappedStringSub));
     }
-
     
+    private String assembleString(OverlapGraph gr){
+        String rtrn = "";
+        Integer[][] path = greedyHamiltonianPath(gr);
+        if(path==null)
+            return "string not found";
+        int nextNodeNumber = 0;
+        do{
+            nextNodeNumber = path[nextNodeNumber][0];
+            rtrn = combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn, path[nextNodeNumber][1]);
+        } while (nextNodeNumber!=0);
+        
+        return rtrn;
+    }
+
+    /**
+     * 
+     * @param input The overlap graph
+     * @return Integer[][] of form {next string, overlap length}
+     */
+    private Integer[][] greedyHamiltonianPath(OverlapGraph input){
+        Integer[][] rtrn = new Integer[input.stringSegments.length][2];
+        boolean[] usedNodes = new boolean[input.stringSegments.length];
+        int nodeNumber = 0;
+        for(OverlapGraph.StringSegment nodePaths:input.stringSegments){
+            Collections.sort(
+                    nodePaths.suffixOverlaps, 
+                    (OverlapGraph.SuffixOverlap o1, OverlapGraph.SuffixOverlap o2) 
+                            -> ((Integer)o1.lengthOfOverlap).compareTo(o2.lengthOfOverlap)
+            );
+        }
+        
+        PriorityQueue pq = new PriorityQueue<>(
+            (OverlapGraph.StringSegment o1, OverlapGraph.StringSegment o2) 
+                    -> ((Integer)o1.suffixOverlaps.get(0).lengthOfOverlap).compareTo(o2.suffixOverlaps.get(0).lengthOfOverlap));
+
+        while(!pq.isEmpty()){
+            OverlapGraph.StringSegment nextStringSeg = (OverlapGraph.StringSegment) pq.poll();
+            rtrn[nextStringSeg.index]=findNextPath(nextStringSeg, usedNodes);
+            if (rtrn[nextStringSeg.index] == null)
+                //then there was no further path available
+                return null;
+        }
+        return rtrn;
+    }
+    
+    /**
+     * Find the next path for each string
+     * @param nextStringSeg
+     * @param usedNodes
+     * @return an Integer {the next node, the length of the overlap}
+     */
+    private Integer[] findNextPath(OverlapGraph.StringSegment nextStringSeg, boolean[] usedNodes){
+            Integer nextNodeNumber;
+            int olLength;
+            int iterator = 0;
+            do{
+                OverlapGraph.SuffixOverlap overlap = nextStringSeg.suffixOverlaps.get(iterator);
+                nextNodeNumber = overlap.overlappingString;
+                olLength = overlap.lengthOfOverlap;
+                if(iterator>=nextStringSeg.suffixOverlaps.size())
+                    //that means that there are no available strings that 
+                    //overlap with this
+                    return null;
+                iterator++;
+            } while (usedNodes[nextNodeNumber]);
+            usedNodes[nextNodeNumber] = true;
+            Integer[] addedOverlap = {nextNodeNumber, olLength};
+            return addedOverlap;
+
+    }
     
         /**
      * Combines overlapping strings into a single string
@@ -191,15 +262,17 @@ class OverlapGraph{
     public OverlapGraph(ArrayList<String> stringSegments){
         this.stringSegments = new StringSegment[stringSegments.size()];
         for(int i=0;i<stringSegments.size();i++){
-            this.stringSegments[i]=new StringSegment(stringSegments.get(i));
+            this.stringSegments[i]=new StringSegment(stringSegments.get(i), i);
         }
     }
     class StringSegment{
         ArrayList<SuffixOverlap> suffixOverlaps;
-        String str;
-        public StringSegment(String str){
+        final String str;
+        final int index;
+        public StringSegment(String str, int index){
             this.str=str;
             this.suffixOverlaps=new ArrayList<>();
+            this.index = index;
         }
         public StringSegment addOverlap(int overlappingString, int lengthOfOverlap){
             suffixOverlaps.add(new SuffixOverlap(overlappingString, lengthOfOverlap));
