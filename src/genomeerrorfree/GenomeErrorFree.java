@@ -98,10 +98,21 @@ public class GenomeErrorFree {
             );
             assembledStrings.add(newAstr);
             int[] firstGsAs = {asIndex, 0};
-            overlappedGenomeString.assembledStrings.add(firstGsAs);
+            //overlappedGenomeString.assembledStrings.add(firstGsAs);
             
             int[] secondGsAs = {asIndex, nextOverlap.overlapPoint};
             overlappingGenomeString.assembledStrings.add(secondGsAs);
+            
+            
+            //debug section start
+            if(!matchOverlaps(overlappingGenomeString.str,newAstr.str,nextOverlap.overlapPoint)){
+                throw new IllegalArgumentException("string " + overlappingGenomeString.str + " and string " + newAstr.str + " do not overlap at point " + nextOverlap.overlapPoint + " !");
+            }
+            //debug section end
+            
+            
+            
+            
             // loop through the assembledstrings in each first genome string
             ArrayList<int[]> genomeAssembledStringsCopy = new ArrayList<>(overlappedGenomeString.assembledStrings);
             for(int[] nextAssembledStringRef:genomeAssembledStringsCopy){
@@ -113,23 +124,26 @@ public class GenomeErrorFree {
                 //if we're at the start of the string
                 //or if the assembled string is already longer than the length of the 
                 //secondGS string, continue
-//                try{
-                    if(olPoint==0 || nextAssembledString.str.substring(olPoint).length()>overlappingGenomeString.str.length())
+                //TODO: THIS NEXT
+                //overlappingString = GAG
+                //nextAssembledString = GAGAGCT
+                //overlap point = 6
+                //why? should be 0
+                //also overlaps at 2, which is correct
+                //last in list of assembled strings
+                //OH THIS LINE IS SO KLUGY
+                    if(olPoint<=0 || olPoint>nextAssembledString.str.length() || nextAssembledString.str.substring(olPoint).length()>overlappingGenomeString.str.length())
                         continue;
-//                } catch (IndexOutOfBoundsException e){
-//                    System.out.println(e);
-//                }
-                //TODO: okay, the problem is that olPint is wrong. It needs to be the
-                //point where overlappedString is on the nextAssembledString plus where
-                //the overlapping string is on the overlappedString
-                //add the string to the assembled string which will do all the updating
-                    nextAssembledString.addString(overlappingGenomeString, asIndex, olPoint);
+                nextAssembledString.addString(overlappingGenomeString, asIndex, olPoint);
                 //if all of the genomes are completed return nextAssembledString's string
                 if(nextAssembledString.checkForCompletion(genomeStrings.size()))
                    return nextAssembledString.str;
             }
         }
         //if we don't find the genome string
+        
+        //TODO: ADD DEBUG
+        //TEST EACH OF THESE AGAINST THE ORIGINAL STRING
         return "Genome not found";
     }
     
@@ -222,7 +236,8 @@ public class GenomeErrorFree {
         //TODO: exception coming here because we're getting overaps that aren't
         //actually overlapping
         if(!matchOverlaps(overlappingString,overlappedString,olPoint)){
-            throw new IllegalArgumentException("string " + overlappingString + " and string " + overlappedString + " do not overlap at point " + olPoint + " !");
+            return overlappedString;
+            //throw new IllegalArgumentException("string " + overlappingString + " and string " + overlappedString + " do not overlap at point " + olPoint + " !");
         }
         
         return overlappedString.substring(0, olPoint) + overlappingString;
@@ -309,9 +324,12 @@ class AssembledString{
      * @param olPoint the point where it overlaps the string
      */
     protected void addString(GenomeString gs, int asRef, int olPoint){
-                this.str = GenomeErrorFree.combineOverlaps(gs.str, this.str, olPoint);
+                String newStr = GenomeErrorFree.combineOverlaps(gs.str, this.str, olPoint);
+                if (newStr.equals(this.str))
+                        return;
+                this.str = newStr;
                 int[] newAsRef = {asRef,olPoint};
-                gs.assembledStrings.add(newAsRef);
+                gs.assembledStrings.add(newAsRef);                
                 this.genomeStringIsUsed[olPoint] = true;
                 this.numberOfGenomeStrings++;
     }
