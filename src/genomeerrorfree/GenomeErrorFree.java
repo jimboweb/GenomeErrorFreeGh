@@ -75,7 +75,7 @@ public class GenomeErrorFree {
         OverlapGraph gr = new OverlapGraph(input);
         gr = findAllOverlaps(gr);
          
-        ArrayList<AssembledString> assembledStrings = new ArrayList<>();
+        
         
         return "Genome not found";
     }
@@ -141,96 +141,12 @@ public class GenomeErrorFree {
 
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
         /**
-     * Find all points where the strings overlap
-     * @param gs the genome strings
-     * @return the genome strings with the overlaps in each one
-     */
-    public ArrayList<GenomeString> findAllOverlaps(ArrayList<GenomeString> gs){
-        if(findAllOverlapsIsNaive){
-            for(int i=0;i<gs.size();i++){
-                GenomeString str1 = gs.get(i);
-                for(GenomeString str2:gs){
-                    findOverlaps(str1, str2, i);
-                }
-            }
-        }
-        
-        return gs;
-    }
-
-     /**
-     * Find out if two strings overlap at one or more points
-     * @param str1 the string that might overlap
-     * @param str2 the string that might be overlapped
-     * @param str1Pos the index of string 1
-     * @deprecated 
-     */
-    public void findOverlaps(GenomeString str1, GenomeString str2, int str1Pos){
-        if(findOverlapsIsNaive){
-            int stopPoint = Math.max(0, str1.str.length()-str2.str.length());
-            for(int i=str2.str.length()-1;i>stopPoint;i--){
-                if(matchOverlaps(str1.str, str2.str, i)){
-                    int[] nextOl = new int[2];
-                    nextOl[0] = str1Pos;
-                    nextOl[1] = i;
-                    str2.overlaps.add(nextOl);
-                }
-            }
-            return;
-        }
-    }
-
-    // returned overlap stack will contain:
-    // - the reference of the genome that's overlapping
-    // - the reference of the genome that's overlapped
-    // - where they overlap
-    /**
-     * 
-     * @param gs
-     * @return 
-     * @deprecated 
-     */
-    Stack<Overlap> getOverlapsByLength(ArrayList<GenomeString> gs){
-        Stack<Overlap> obl = new Stack<>();
-        ArrayList<Integer[]> olRef = new ArrayList<>();
-        for(int i=0;i<gs.size();i++){
-            GenomeString overlappingGenomeString = gs.get(i);
-            for(int j=0;j<overlappingGenomeString.overlaps.size();j++){
-                int[] overlapReferences = overlappingGenomeString.overlaps.get(j);              
-                GenomeString overlappedGenomeString = gs.get(overlapReferences[0]);
-                Overlap nextOverlap = new Overlap(overlapReferences[0], i, overlapReferences[1], overlappedGenomeString.str.length() - overlapReferences[1]);
-                obl.add(nextOverlap);
-            }
-        }
-        Collections.sort(obl);
-        return obl;
-    }
-    
-    /**
      * Combines overlapping strings into a single string
      * @param overlappingString the string that overlaps (starts in the middle of the other one)
      * @param overlappedString the string that's overlapped (the other one starts in the middle)
      * @param olPoint the point where they overlap
      * @return the string combining the two at the overlap point
-     * @deprecated 
      */
     protected static String combineOverlaps(String overlappingString, String overlappedString, int olPoint){
         
@@ -243,6 +159,27 @@ public class GenomeErrorFree {
         
         return overlappedString.substring(0, olPoint) + overlappingString;
     }
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+    
 }
 
 // GenomeString & AssembledString might be able to be combined into 
@@ -285,158 +222,6 @@ class OverlapGraph{
 
 
 
-class GenomeString{
-    String str;
-    // [0] = the other GenomeString it overlaps with and 
-    // [1] = the point where it overlaps
-    ArrayList<int[]> overlaps;
-    // [0] = the other AssembledString it overlaps with and 
-    // [1] = the point where it overlaps
-    ArrayList<int[]> assembledStrings;
-    int location = -1; //location -1 means I don't know it yet
-    public GenomeString(String str){
-        this.str=str;
-        this.overlaps = new ArrayList<>();
-        this.assembledStrings = new ArrayList<>();
-    }
-    public GenomeString(String str, int location){
-        this.str = str;
-        this.location = location;
-        this.overlaps = new ArrayList<>();
-        this.assembledStrings = new ArrayList<>();
-    }
-    
-    
-/**
- * 
- * @author jimstewart
- * @deprecated 
- */
-    public AssembledString assembleGenomeStrings(GenomeString overlappingGenomeString, 
-                                                    Overlap nextOverlap,
-                                                    int genomeStringsSize,
-                                                    int asIndex){
-            // get the strings in them
-            String firstString = overlappingGenomeString.str;
-            String secondString = this.str;
-            // get the overlap point
-            int overlapPoint = nextOverlap.overlapPoint;
-            // create the assembled string
-            // assuming we didn't screw up the overlap before
-            String newAstr = combineOverlaps(firstString, secondString, overlapPoint);
-            //array of the genome string references that will be added to the assembledString
-            Integer[] genomeStringsUsed = {nextOverlap.overlappedString, nextOverlap.overlappingString};
-            // add the assembled string to arraylist
-            AssembledString rtrn = new AssembledString(newAstr, genomeStringsSize,genomeStringsUsed,asIndex);
-            rtrn.setGenomeStringUsed(nextOverlap.overlappedString);
-            rtrn.setGenomeStringUsed(nextOverlap.overlappingString);
-//            rtrn.numberOfGenomeStrings +=2;
-            return rtrn;
-    }
-    
-}
-
-/**
- * 
- * @author jimstewart
- * @deprecated 
- */
-class AssembledString{
-    public String str;
-    public BitSet genomeStringIsUsed;
-    public int numberOfGenomeStrings;
-    public int index;
-    
-/**
- * 
- * @author jimstewart
- * @deprecated 
- */
-    public AssembledString(String str, int genomeStringsAvailable, int index){
-        this.str=str;
-        genomeStringIsUsed=new BitSet(genomeStringsAvailable);
-        //Arrays.fill(genomeStringIsUsed, false); //probably don't need this
-        numberOfGenomeStrings = genomeStringIsUsed.cardinality();
-        this.index=index;
-    }
-/**
- * 
- * @author jimstewart
- * @deprecated 
- */
-    public AssembledString(String str, int genomeStringsAvailable, Integer [] gStrsUsed, int index){
-        this.str=str;
-        genomeStringIsUsed=new BitSet(genomeStringsAvailable);
-        //Arrays.fill(genomeStringIssed, false); //probably don't need this
-        numberOfGenomeStrings = 0;
-        for(int gStrUsed:gStrsUsed){
-            setGenomeStringUsed(gStrUsed);
-        }
-        this.index=index;
-    }
-    
-    /**
-     * Adds a string to the assembled string and marks that it's used
-     * @param gs the string to add
-     * @param gsRef the reference of the assembled string 
-     * @param olPoint the point where it overlaps the string
-     */
-/**
- * 
- * @author jimstewart
- * @deprecated 
- */
-    protected void addString(GenomeString gs, int asRef, int olPoint){
-                String newStr = GenomeErrorFree.combineOverlaps(gs.str, this.str, olPoint);
-//                if (newStr.equals(this.str))
-//                        return;
-                this.str = newStr;
-                int[] newAsRef = {asRef,olPoint};
-                gs.assembledStrings.add(newAsRef);                
-                this.genomeStringIsUsed.set(olPoint);
-                this.numberOfGenomeStrings = genomeStringIsUsed.cardinality();
-    }
-    
-    protected boolean checkForCompletion(int totalGenomes){
-        int gStrUsed=genomeStringIsUsed.cardinality();
-        return genomeStringIsUsed.cardinality() == totalGenomes; 
-    }
-    
-    protected void setGenomeStringUsed(int genomeStringNumber){
-        genomeStringIsUsed.set(genomeStringNumber);
-        numberOfGenomeStrings = genomeStringIsUsed.cardinality();
-    }
-    
-}
-/**
- * 
- * @author jimstewart
- * @deprecated 
- */
-class Overlap implements Comparable<Overlap>{
-    public int overlappingString;
-    public int overlappedString;
-    public int overlapPoint;
-    public int overlapLength;
-    public Overlap(int overlappingString, int overlappedString, int overlapPoint, int overlapLength){
-        this.overlappingString=overlappingString;
-        this.overlappedString=overlappedString;
-        this.overlapPoint=overlapPoint;
-        this.overlapLength = overlapLength;
-    }
-
-/**
- * 
- * @author jimstewart
- * @deprecated 
- */
-    @Override
-    public int compareTo(Overlap o) {
-        Integer thisOverlapLength = this.overlapLength;
-        Integer otherOverlapLength = o.overlapLength;
-        return thisOverlapLength.compareTo(otherOverlapLength);
-    }    
-}
 
 class CircularString implements CharSequence {
 
