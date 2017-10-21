@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.Stack;
 import java.util.StringTokenizer;
@@ -98,20 +99,10 @@ public class GenomeErrorFree {
             );
             assembledStrings.add(newAstr);
             int[] firstGsAs = {asIndex, 0};
-            //overlappedGenomeString.assembledStrings.add(firstGsAs);
+            overlappedGenomeString.assembledStrings.add(firstGsAs);
             
             int[] secondGsAs = {asIndex, nextOverlap.overlapPoint};
             overlappingGenomeString.assembledStrings.add(secondGsAs);
-            
-            
-            //debug section start
-            if(!matchOverlaps(overlappingGenomeString.str,newAstr.str,nextOverlap.overlapPoint)){
-                throw new IllegalArgumentException("string " + overlappingGenomeString.str + " and string " + newAstr.str + " do not overlap at point " + nextOverlap.overlapPoint + " !");
-            }
-            //debug section end
-            
-            
-            
             
             // loop through the assembledstrings in each first genome string
             ArrayList<int[]> genomeAssembledStringsCopy = new ArrayList<>(overlappedGenomeString.assembledStrings);
@@ -124,20 +115,13 @@ public class GenomeErrorFree {
                 //if we're at the start of the string
                 //or if the assembled string is already longer than the length of the 
                 //secondGS string, continue
-                //TODO: THIS NEXT
-                //overlappingString = GAG
-                //nextAssembledString = GAGAGCT
-                //overlap point = 6
-                //why? should be 0
-                //also overlaps at 2, which is correct
-                //last in list of assembled strings
-                //OH THIS LINE IS SO KLUGY
-                    if(olPoint<=0 || olPoint>nextAssembledString.str.length() || nextAssembledString.str.substring(olPoint).length()>overlappingGenomeString.str.length())
+                if(olPoint<=0 || olPoint>nextAssembledString.str.length() || nextAssembledString.str.substring(olPoint).length()>overlappingGenomeString.str.length())
                         continue;
                 nextAssembledString.addString(overlappingGenomeString, asIndex, olPoint);
                 //if all of the genomes are completed return nextAssembledString's string
-                if(nextAssembledString.checkForCompletion(genomeStrings.size()))
-                   return nextAssembledString.str;
+                if(nextAssembledString.checkForCompletion(genomeStrings.size())){
+                    return nextAssembledString.str;
+                }
             }
         }
         //if we don't find the genome string
@@ -284,9 +268,9 @@ class GenomeString{
             Integer[] genomeStringsUsed = {nextOverlap.overlappedString, nextOverlap.overlappingString};
             // add the assembled string to arraylist
             AssembledString rtrn = new AssembledString(newAstr, genomeStringsSize,genomeStringsUsed,asIndex);
-            rtrn.genomeStringIsUsed[nextOverlap.overlappedString] = true;
-            rtrn.genomeStringIsUsed[nextOverlap.overlappingString] = true;
-            rtrn.numberOfGenomeStrings +=2;
+            rtrn.setGenomeStringUsed(nextOverlap.overlappedString);
+            rtrn.setGenomeStringUsed(nextOverlap.overlappingString);
+//            rtrn.numberOfGenomeStrings +=2;
             return rtrn;
     }
     
@@ -294,25 +278,24 @@ class GenomeString{
 
 class AssembledString{
     public String str;
-    public boolean[] genomeStringIsUsed;
+    public BitSet genomeStringIsUsed;
     public int numberOfGenomeStrings;
     public int index;
     
     public AssembledString(String str, int genomeStringsAvailable, int index){
         this.str=str;
-        genomeStringIsUsed=new boolean[genomeStringsAvailable];
+        genomeStringIsUsed=new BitSet(genomeStringsAvailable);
         //Arrays.fill(genomeStringIsUsed, false); //probably don't need this
-        numberOfGenomeStrings = 0;
+        numberOfGenomeStrings = genomeStringIsUsed.cardinality();
         this.index=index;
     }
     public AssembledString(String str, int genomeStringsAvailable, Integer [] gStrsUsed, int index){
         this.str=str;
-        genomeStringIsUsed=new boolean[genomeStringsAvailable];
-        //Arrays.fill(genomeStringIsUsed, false); //probably don't need this
+        genomeStringIsUsed=new BitSet(genomeStringsAvailable);
+        //Arrays.fill(genomeStringIssed, false); //probably don't need this
         numberOfGenomeStrings = 0;
         for(int gStrUsed:gStrsUsed){
-            genomeStringIsUsed[gStrUsed] = true;
-            numberOfGenomeStrings++;
+            setGenomeStringUsed(gStrUsed);
         }
         this.index=index;
     }
@@ -325,17 +308,23 @@ class AssembledString{
      */
     protected void addString(GenomeString gs, int asRef, int olPoint){
                 String newStr = GenomeErrorFree.combineOverlaps(gs.str, this.str, olPoint);
-                if (newStr.equals(this.str))
-                        return;
+//                if (newStr.equals(this.str))
+//                        return;
                 this.str = newStr;
                 int[] newAsRef = {asRef,olPoint};
                 gs.assembledStrings.add(newAsRef);                
-                this.genomeStringIsUsed[olPoint] = true;
-                this.numberOfGenomeStrings++;
+                this.genomeStringIsUsed.set(olPoint);
+                this.numberOfGenomeStrings = genomeStringIsUsed.cardinality();
     }
     
     protected boolean checkForCompletion(int totalGenomes){
-        return numberOfGenomeStrings == totalGenomes;
+        int gStrUsed=genomeStringIsUsed.cardinality();
+        return genomeStringIsUsed.cardinality() == totalGenomes; 
+    }
+    
+    protected void setGenomeStringUsed(int genomeStringNumber){
+        genomeStringIsUsed.set(genomeStringNumber);
+        numberOfGenomeStrings = genomeStringIsUsed.cardinality();
     }
     
 }
