@@ -77,7 +77,7 @@ public class GenomeErrorFree {
         OverlapGraph gr = new OverlapGraph(input);
         gr = findAllOverlaps(gr);
         
-        return assembleString(gr);
+        return assembleString(gr).toString();
         
         
     }
@@ -133,13 +133,13 @@ public class GenomeErrorFree {
      * @param overlap the point where potentialOverlappingString would match potentialOverlappedString
      * @return true if they overlap, false if they don't 
      */
-    protected static boolean matchOverlaps(CircularString potentialOverlappingString, CircularString potentialOverlappedString, int overlap){
+    protected static boolean matchOverlaps(String potentialOverlappingString, String potentialOverlappedString, int overlap){
         if(overlap<0)
             return false;
         int overlapLength = potentialOverlappingString.length();
         //int polgstrlen = potentialOverlappingString.length();
-        String potentialOverlappingStringSub = potentialOverlappingString.subString(0, overlapLength);
-        String potentialOverlappedStringSub = potentialOverlappedString.subString( overlap );
+        String potentialOverlappingStringSub = potentialOverlappingString.substring(0, overlapLength);
+        String potentialOverlappedStringSub = potentialOverlappedString.substring( overlap );
                 
         return  (potentialOverlappingStringSub.equals(potentialOverlappedStringSub));
     }
@@ -152,7 +152,7 @@ public class GenomeErrorFree {
         int nextNodeNumber = 0;
         do{
             nextNodeNumber = path[nextNodeNumber][0];
-            rtrn = combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn, path[nextNodeNumber][1]);
+            rtrn = new CircularString(combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn.toString(), path[nextNodeNumber][1]));
         } while (nextNodeNumber!=0);
         
         return rtrn;
@@ -223,7 +223,7 @@ public class GenomeErrorFree {
      * @param olPoint the point where they overlap
      * @return the string combining the two at the overlap point
      */
-    protected static CircularString combineOverlaps(CircularString overlappingString, CircularString overlappedString, int olPoint){
+    protected static String combineOverlaps(String overlappingString, String overlappedString, int olPoint){
         
         //TODO: exception coming here because we're getting overaps that aren't
         //actually overlapping
@@ -232,7 +232,7 @@ public class GenomeErrorFree {
             //throw new IllegalArgumentException("string " + overlappingString + " and string " + overlappedString + " do not overlap at point " + olPoint + " !");
         }
         
-        return new CircularString(overlappedString.subString(0, olPoint) + overlappingString);
+        return overlappedString.substring(0, olPoint) + overlappingString;
     }
 }
 
@@ -250,10 +250,10 @@ class OverlapGraph{
     }
     class StringSegment{
         ArrayList<SuffixOverlap> suffixOverlaps;
-        final CircularString str;
+        final String str;
         final int index;
         public StringSegment(String str, int index){
-            this.str=new CircularString(str);
+            this.str= str;
             this.suffixOverlaps=new ArrayList<>();
             this.index = index;
         }
