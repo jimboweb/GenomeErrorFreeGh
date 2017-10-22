@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.PriorityQueue;
 import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
@@ -76,10 +74,19 @@ public class GenomeErrorFree {
         
         OverlapGraph gr = new OverlapGraph(input);
         gr = findAllOverlaps(gr);
+<<<<<<< HEAD
         
+<<<<<<< HEAD
+        return assembleString(gr).toString();
+=======
+         
+>>>>>>> parent of 4259b9e... OverlapGraph written but untested
+=======
         return assembleString(gr);
+>>>>>>> parent of e0d3656... failed fix
         
         
+        return "Genome not found";
     }
     
     /**
@@ -91,8 +98,11 @@ public class GenomeErrorFree {
         if(findAllOverlapsIsNaive){
             for(int i=0;i<gr.stringSegments.length;i++){
                 OverlapGraph.StringSegment str1 = gr.stringSegments[i];
-                for(OverlapGraph.StringSegment str2:gr.stringSegments){
-                    str1 = findOverlaps(str1, str2.str, i);
+                for(int j=0;j<gr.stringSegments.length;j++){
+                    if(j!=i){
+                        OverlapGraph.StringSegment str2 = gr.stringSegments[j];;
+                        str1 = findOverlaps(str1, str2, i);
+                    }
                 }
             }
         }
@@ -107,13 +117,13 @@ public class GenomeErrorFree {
      * @param str1Pos the index of string 1
      * @return StringSegment with the overlaps added
      */
-    public OverlapGraph.StringSegment findOverlaps(OverlapGraph.StringSegment str1, String str2, int str1Pos){
+    public OverlapGraph.StringSegment findOverlaps(OverlapGraph.StringSegment str1, OverlapGraph.StringSegment str2, int str1Pos){
         
         if(findOverlapsIsNaive){
-            int stopPoint = Math.max(0, str1.str.length()-str2.length());
-            for(int i=str2.length()-1;i>stopPoint;i--){
-                if(matchOverlaps(str2, str1.str, i)){
-                    str1 = str1.addOverlap(str1Pos, i);
+            int stopPoint = Math.max(0, str1.str.length()-str2.str.length());
+            for(int i=str2.str.length()-1;i>stopPoint;i--){
+                if(matchOverlaps(str2.str, str1.str, i)){
+                    str1 = str2.addOverlap(str1Pos, i);
                 }
             }
         }
@@ -130,22 +140,23 @@ public class GenomeErrorFree {
      * @param overlap the point where potentialOverlappingString would match potentialOverlappedString
      * @return true if they overlap, false if they don't 
      */
-    protected static boolean matchOverlaps(String potentialOverlappingString, String potentialOverlappedString, int overlap){
+    protected static boolean matchOverlaps(CircularString potentialOverlappingString, CircularString potentialOverlappedString, int overlap){
         if(overlap<0)
             return false;
-        int overlapLength = Math.min(potentialOverlappedString.length() - overlap, potentialOverlappingString.length());
+        int overlapLength = potentialOverlappingString.length();
         //int polgstrlen = potentialOverlappingString.length();
-        String potentialOverlappingStringSub = potentialOverlappingString.substring(0, overlapLength);
-        String potentialOverlappedStringSub = potentialOverlappedString.substring( overlap );
+        String potentialOverlappingStringSub = potentialOverlappingString.subString(0, overlapLength);
+        String potentialOverlappedStringSub = potentialOverlappedString.subString( overlap );
                 
         return  (potentialOverlappingStringSub.equals(potentialOverlappedStringSub));
     }
+<<<<<<< HEAD
     
-    private String assembleString(OverlapGraph gr){
-        String rtrn = "";
+    private CircularString assembleString(OverlapGraph gr){
+        CircularString rtrn = new CircularString("");
         Integer[][] path = greedyHamiltonianPath(gr);
         if(path==null)
-            return "string not found";
+            return new CircularString("string not found");
         int nextNodeNumber = 0;
         do{
             nextNodeNumber = path[nextNodeNumber][0];
@@ -174,8 +185,9 @@ public class GenomeErrorFree {
         
         PriorityQueue pq = new PriorityQueue<>(
             (OverlapGraph.StringSegment o1, OverlapGraph.StringSegment o2) 
-                    -> ((Integer)o1.suffixOverlaps.get(0).lengthOfOverlap).compareTo(o2.suffixOverlaps.get(0).lengthOfOverlap));
-
+                    -> ((Integer)o1.suffixOverlaps.get(0).lengthOfOverlap)
+                            .compareTo(o2.suffixOverlaps.get(0).lengthOfOverlap));
+        pq.addAll(Arrays.asList(input.stringSegments));
         while(!pq.isEmpty()){
             OverlapGraph.StringSegment nextStringSeg = (OverlapGraph.StringSegment) pq.poll();
             rtrn[nextStringSeg.index]=findNextPath(nextStringSeg, usedNodes);
@@ -197,13 +209,13 @@ public class GenomeErrorFree {
             int olLength;
             int iterator = 0;
             do{
-                OverlapGraph.SuffixOverlap overlap = nextStringSeg.suffixOverlaps.get(iterator);
-                nextNodeNumber = overlap.overlappingString;
-                olLength = overlap.lengthOfOverlap;
                 if(iterator>=nextStringSeg.suffixOverlaps.size())
                     //that means that there are no available strings that 
                     //overlap with this
                     return null;
+                OverlapGraph.SuffixOverlap overlap = nextStringSeg.suffixOverlaps.get(iterator);
+                nextNodeNumber = overlap.overlappingString;
+                olLength = overlap.lengthOfOverlap;
                 iterator++;
             } while (usedNodes[nextNodeNumber]);
             usedNodes[nextNodeNumber] = true;
@@ -211,6 +223,10 @@ public class GenomeErrorFree {
             return addedOverlap;
 
     }
+=======
+
+    
+>>>>>>> parent of 4259b9e... OverlapGraph written but untested
     
         /**
      * Combines overlapping strings into a single string
@@ -219,7 +235,7 @@ public class GenomeErrorFree {
      * @param olPoint the point where they overlap
      * @return the string combining the two at the overlap point
      */
-    protected static String combineOverlaps(String overlappingString, String overlappedString, int olPoint){
+    protected static CircularString combineOverlaps(CircularString overlappingString, CircularString overlappedString, int olPoint){
         
         //TODO: exception coming here because we're getting overaps that aren't
         //actually overlapping
@@ -228,29 +244,8 @@ public class GenomeErrorFree {
             //throw new IllegalArgumentException("string " + overlappingString + " and string " + overlappedString + " do not overlap at point " + olPoint + " !");
         }
         
-        return overlappedString.substring(0, olPoint) + overlappingString;
+        return new CircularString(overlappedString.subString(0, olPoint) + overlappingString);
     }
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-    
 }
 
 // GenomeString & AssembledString might be able to be combined into 
@@ -262,17 +257,29 @@ class OverlapGraph{
     public OverlapGraph(ArrayList<String> stringSegments){
         this.stringSegments = new StringSegment[stringSegments.size()];
         for(int i=0;i<stringSegments.size();i++){
-            this.stringSegments[i]=new StringSegment(stringSegments.get(i), i);
+            this.stringSegments[i]=new StringSegment(stringSegments.get(i));
         }
     }
     class StringSegment{
         ArrayList<SuffixOverlap> suffixOverlaps;
+<<<<<<< HEAD
+<<<<<<< HEAD
         final String str;
         final int index;
         public StringSegment(String str, int index){
+            this.str= str;
+=======
+        String str;
+        public StringSegment(String str){
             this.str=str;
+>>>>>>> parent of 4259b9e... OverlapGraph written but untested
+=======
+        final CircularString str;
+        final int index;
+        public StringSegment(String str, int index){
+            this.str=new CircularString(str);
+>>>>>>> parent of e0d3656... failed fix
             this.suffixOverlaps=new ArrayList<>();
-            this.index = index;
         }
         public StringSegment addOverlap(int overlappingString, int lengthOfOverlap){
             suffixOverlaps.add(new SuffixOverlap(overlappingString, lengthOfOverlap));
@@ -338,6 +345,10 @@ class CircularString implements CharSequence {
     
     public String subString(int start, int end){
         return subSequence(start,end).toString();
+    }
+    
+    public CircularString concatenate (String str){
+        return new CircularString(characters.toString()+str);
     }
     
     /**
