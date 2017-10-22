@@ -1,11 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="5">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="2">
         <file>
             <url>src/genomeerrorfree/GenomeErrorFree.java</url>
-            <bookmark id="5">
+            <bookmark id="2">
                 <name/>
+<<<<<<< HEAD
                 <line>241</line>
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> parent of 6695ea8... bla
+=======
+>>>>>>> parent of 6358bc8... back to how it was
+                <line>242</line>
+=======
+                <line>270</line>
+>>>>>>> parent of 4259b9e... OverlapGraph written but untested
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+=======
+                <line>270</line>
+>>>>>>> parent of 4259b9e... OverlapGraph written but untested
+>>>>>>> parent of 6695ea8... bla
+=======
+>>>>>>> parent of 6358bc8... back to how it was
+=======
+                <line>259</line>
+>>>>>>> parent of e0d3656... failed fix
+>>>>>>> 532c9a5f5da74f3a230a471e88218ca54da7170f
                 <key/>
             </bookmark>
         </file>
