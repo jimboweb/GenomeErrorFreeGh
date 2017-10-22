@@ -184,8 +184,8 @@ public class GenomeErrorFree {
         
         PriorityQueue pq = new PriorityQueue<>(
             (OverlapGraph.StringSegment o1, OverlapGraph.StringSegment o2) 
-                    -> ((Integer)o1.suffixOverlaps.get(0).lengthOfOverlap)
-                            .compareTo(o2.suffixOverlaps.get(0).lengthOfOverlap));
+                    -> ((Integer)o2.suffixOverlaps.get(0).lengthOfOverlap)
+                            .compareTo(o1.suffixOverlaps.get(0).lengthOfOverlap));
         pq.addAll(Arrays.asList(input.stringSegments));
         while(!pq.isEmpty()){
             OverlapGraph.StringSegment nextStringSeg = (OverlapGraph.StringSegment) pq.poll();

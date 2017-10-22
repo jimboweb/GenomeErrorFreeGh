@@ -89,7 +89,7 @@ public class GenomeErrorFreeTest {
         int lastStrBegin = 0;
         while(lastStrBegin<cString.length()){
             rtrn.add(cString.subString(lastStrBegin, lastStrBegin+strLen));
-            lastStrBegin=lastStrBegin+rnd.nextInt(strLen-1)+1;
+            lastStrBegin=lastStrBegin+rnd.nextInt(strLen/2)+1;
         }
 //        for(int i=rtrn.size();i<numberOfSegments;i++){
 //            lastStrBegin = rnd.nextInt(cString.length());
