@@ -87,11 +87,11 @@ public class GenomeErrorFree {
     public OverlapGraph findAllOverlaps(OverlapGraph gr){
         if(findAllOverlapsIsNaive){
             for(int i=0;i<gr.stringSegments.length;i++){
-                OverlapGraph.StringSegment str1 = gr.stringSegments[i];
+                OverlapGraph.StringSegment potentialOverlappedString = gr.stringSegments[i];
                 for(int j=0;j<gr.stringSegments.length;j++){
                     if(j!=i){
-                        OverlapGraph.StringSegment str2 = gr.stringSegments[j];;
-                        str1 = findOverlaps(str1, str2, i);
+                        OverlapGraph.StringSegment potentialOverlappingString = gr.stringSegments[j];;
+                        potentialOverlappedString = findOverlaps(potentialOverlappingString, potentialOverlappedString, i);
                     }
                 }
             }
@@ -102,22 +102,22 @@ public class GenomeErrorFree {
     
     /**
      * Find out if two strings overlap at one or more points
-     * @param str1 the string that might overlap
-     * @param str2 the string that might be overlapped
+     * @param potentialOverlappingString the string that might overlap
+     * @param potentialOverlappedString the string that might be overlapped
      * @param str1Pos the index of string 1
      * @return StringSegment with the overlaps added
      */
-    public OverlapGraph.StringSegment findOverlaps(OverlapGraph.StringSegment str1, OverlapGraph.StringSegment str2, int str1Pos){
+    public OverlapGraph.StringSegment findOverlaps(OverlapGraph.StringSegment potentialOverlappingString, OverlapGraph.StringSegment potentialOverlappedString, int str1Pos){
         
         if(findOverlapsIsNaive){
-            int stopPoint = Math.max(0, str1.str.length()-str2.str.length());
-            for(int i=str2.str.length()-1;i>stopPoint;i--){
-                if(matchOverlaps(str2.str, str1.str, i)){
-                    str1 = str2.addOverlap(str1Pos, i);
+            int stopPoint = Math.max(0, potentialOverlappingString.str.length()-potentialOverlappedString.str.length());
+            for(int i=potentialOverlappedString.str.length()-1;i>stopPoint;i--){
+                if(matchOverlaps(potentialOverlappingString.str, potentialOverlappedString.str, i)){
+                    potentialOverlappedString = potentialOverlappedString.addOverlap(str1Pos, i);
                 }
             }
         }
-        return str1;
+        return potentialOverlappedString;
     }
 //        TODO: efficient method here
 //        return;
@@ -133,11 +133,16 @@ public class GenomeErrorFree {
     protected static boolean matchOverlaps(String potentialOverlappingString, String potentialOverlappedString, int overlap){
         if(overlap<0)
             return false;
-        int overlapLength = potentialOverlappingString.length();
+        int overlapLength = potentialOverlappingString.length()-overlap;
         //int polgstrlen = potentialOverlappingString.length();
         String potentialOverlappingStringSub = potentialOverlappingString.substring(0, overlapLength);
-        String potentialOverlappedStringSub = potentialOverlappedString.substring( overlap );
+
+        
+        String potentialOverlappedStringSub = potentialOverlappedStringSub = potentialOverlappedString.substring( overlap );
                 
+        
+        
+        //debug
         return  (potentialOverlappingStringSub.equals(potentialOverlappedStringSub));
     }
     
@@ -221,7 +226,12 @@ public class GenomeErrorFree {
      * @return the string combining the two at the overlap point
      */
     protected static String combineOverlaps(String overlappingString, String overlappedString, int olPoint){
-        
+        if("".equals(overlappedString)){
+            return overlappingString;
+        }
+        if("".equals(overlappingString)){
+            return overlappedString;
+        }
         //TODO: exception coming here because we're getting overaps that aren't
         //actually overlapping
         if(!matchOverlaps(overlappingString,overlappedString,olPoint)){
@@ -287,6 +297,11 @@ class CircularString implements CharSequence {
         for(int i=0;i<length;i++){
             characters[i] = str.charAt(i);
         }
+    }
+    
+    @Override 
+    public String toString(){
+        return new String(characters);
     }
     
     @Override
