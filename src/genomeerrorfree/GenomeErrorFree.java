@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.PriorityQueue;
 import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
@@ -76,10 +74,15 @@ public class GenomeErrorFree {
         
         OverlapGraph gr = new OverlapGraph(input);
         gr = findAllOverlaps(gr);
+<<<<<<< HEAD
         
         return assembleString(gr).toString();
+=======
+         
+>>>>>>> parent of 4259b9e... OverlapGraph written but untested
         
         
+        return "Genome not found";
     }
     
     /**
@@ -143,6 +146,7 @@ public class GenomeErrorFree {
                 
         return  (potentialOverlappingStringSub.equals(potentialOverlappedStringSub));
     }
+<<<<<<< HEAD
     
     private CircularString assembleString(OverlapGraph gr){
         CircularString rtrn = new CircularString("");
@@ -215,6 +219,10 @@ public class GenomeErrorFree {
             return addedOverlap;
 
     }
+=======
+
+    
+>>>>>>> parent of 4259b9e... OverlapGraph written but untested
     
         /**
      * Combines overlapping strings into a single string
@@ -245,17 +253,22 @@ class OverlapGraph{
     public OverlapGraph(ArrayList<String> stringSegments){
         this.stringSegments = new StringSegment[stringSegments.size()];
         for(int i=0;i<stringSegments.size();i++){
-            this.stringSegments[i]=new StringSegment(stringSegments.get(i), i);
+            this.stringSegments[i]=new StringSegment(stringSegments.get(i));
         }
     }
     class StringSegment{
         ArrayList<SuffixOverlap> suffixOverlaps;
+<<<<<<< HEAD
         final String str;
         final int index;
         public StringSegment(String str, int index){
             this.str= str;
+=======
+        String str;
+        public StringSegment(String str){
+            this.str=str;
+>>>>>>> parent of 4259b9e... OverlapGraph written but untested
             this.suffixOverlaps=new ArrayList<>();
-            this.index = index;
         }
         public StringSegment addOverlap(int overlappingString, int lengthOfOverlap){
             suffixOverlaps.add(new SuffixOverlap(overlappingString, lengthOfOverlap));
