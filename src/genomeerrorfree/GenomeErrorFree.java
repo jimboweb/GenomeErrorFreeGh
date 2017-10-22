@@ -76,10 +76,14 @@ public class GenomeErrorFree {
         gr = findAllOverlaps(gr);
 <<<<<<< HEAD
         
+<<<<<<< HEAD
         return assembleString(gr).toString();
 =======
          
 >>>>>>> parent of 4259b9e... OverlapGraph written but untested
+=======
+        return assembleString(gr);
+>>>>>>> parent of e0d3656... failed fix
         
         
         return "Genome not found";
@@ -136,13 +140,13 @@ public class GenomeErrorFree {
      * @param overlap the point where potentialOverlappingString would match potentialOverlappedString
      * @return true if they overlap, false if they don't 
      */
-    protected static boolean matchOverlaps(String potentialOverlappingString, String potentialOverlappedString, int overlap){
+    protected static boolean matchOverlaps(CircularString potentialOverlappingString, CircularString potentialOverlappedString, int overlap){
         if(overlap<0)
             return false;
         int overlapLength = potentialOverlappingString.length();
         //int polgstrlen = potentialOverlappingString.length();
-        String potentialOverlappingStringSub = potentialOverlappingString.substring(0, overlapLength);
-        String potentialOverlappedStringSub = potentialOverlappedString.substring( overlap );
+        String potentialOverlappingStringSub = potentialOverlappingString.subString(0, overlapLength);
+        String potentialOverlappedStringSub = potentialOverlappedString.subString( overlap );
                 
         return  (potentialOverlappingStringSub.equals(potentialOverlappedStringSub));
     }
@@ -156,7 +160,7 @@ public class GenomeErrorFree {
         int nextNodeNumber = 0;
         do{
             nextNodeNumber = path[nextNodeNumber][0];
-            rtrn = new CircularString(combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn.toString(), path[nextNodeNumber][1]));
+            rtrn = combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn, path[nextNodeNumber][1]);
         } while (nextNodeNumber!=0);
         
         return rtrn;
@@ -231,7 +235,7 @@ public class GenomeErrorFree {
      * @param olPoint the point where they overlap
      * @return the string combining the two at the overlap point
      */
-    protected static String combineOverlaps(String overlappingString, String overlappedString, int olPoint){
+    protected static CircularString combineOverlaps(CircularString overlappingString, CircularString overlappedString, int olPoint){
         
         //TODO: exception coming here because we're getting overaps that aren't
         //actually overlapping
@@ -240,7 +244,7 @@ public class GenomeErrorFree {
             //throw new IllegalArgumentException("string " + overlappingString + " and string " + overlappedString + " do not overlap at point " + olPoint + " !");
         }
         
-        return overlappedString.substring(0, olPoint) + overlappingString;
+        return new CircularString(overlappedString.subString(0, olPoint) + overlappingString);
     }
 }
 
@@ -259,6 +263,7 @@ class OverlapGraph{
     class StringSegment{
         ArrayList<SuffixOverlap> suffixOverlaps;
 <<<<<<< HEAD
+<<<<<<< HEAD
         final String str;
         final int index;
         public StringSegment(String str, int index){
@@ -268,6 +273,12 @@ class OverlapGraph{
         public StringSegment(String str){
             this.str=str;
 >>>>>>> parent of 4259b9e... OverlapGraph written but untested
+=======
+        final CircularString str;
+        final int index;
+        public StringSegment(String str, int index){
+            this.str=new CircularString(str);
+>>>>>>> parent of e0d3656... failed fix
             this.suffixOverlaps=new ArrayList<>();
         }
         public StringSegment addOverlap(int overlappingString, int lengthOfOverlap){
