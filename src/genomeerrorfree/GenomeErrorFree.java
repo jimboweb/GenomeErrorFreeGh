@@ -75,8 +75,12 @@ public class GenomeErrorFree {
         OverlapGraph gr = new OverlapGraph(input);
         gr = findAllOverlaps(gr);
 <<<<<<< HEAD
+<<<<<<< HEAD
         
         return assembleString(gr).toString();
+=======
+         
+>>>>>>> parent of 4259b9e... OverlapGraph written but untested
 =======
          
 >>>>>>> parent of 4259b9e... OverlapGraph written but untested
@@ -146,6 +150,7 @@ public class GenomeErrorFree {
                 
         return  (potentialOverlappingStringSub.equals(potentialOverlappedStringSub));
     }
+<<<<<<< HEAD
 <<<<<<< HEAD
     
     private CircularString assembleString(OverlapGraph gr){
@@ -223,6 +228,10 @@ public class GenomeErrorFree {
 
     
 >>>>>>> parent of 4259b9e... OverlapGraph written but untested
+=======
+
+    
+>>>>>>> parent of 4259b9e... OverlapGraph written but untested
     
         /**
      * Combines overlapping strings into a single string
@@ -259,11 +268,14 @@ class OverlapGraph{
     class StringSegment{
         ArrayList<SuffixOverlap> suffixOverlaps;
 <<<<<<< HEAD
+<<<<<<< HEAD
         final String str;
         final int index;
         public StringSegment(String str, int index){
             this.str= str;
 =======
+=======
+>>>>>>> parent of 4259b9e... OverlapGraph written but untested
         String str;
         public StringSegment(String str){
             this.str=str;
