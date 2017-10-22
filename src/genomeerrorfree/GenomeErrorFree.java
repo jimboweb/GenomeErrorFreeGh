@@ -152,6 +152,8 @@ public class GenomeErrorFree {
         if(path==null)
             return new CircularString("string not found");
         int nextNodeNumber = 0;
+        //TODO: path is leading me back to the 
+        //beginning too early. 
         do{
             nextNodeNumber = path[nextNodeNumber][0];
             rtrn = new CircularString(combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn.toString(), path[nextNodeNumber][1]));
