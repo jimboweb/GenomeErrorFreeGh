@@ -91,7 +91,7 @@ public class GenomeErrorFree {
                 for(int j=0;j<gr.stringSegments.length;j++){
                     if(j!=i){
                         OverlapGraph.StringSegment potentialOverlappingString = gr.stringSegments[j];;
-                        potentialOverlappedString = findOverlaps(potentialOverlappingString, potentialOverlappedString, i);
+                        potentialOverlappedString = findOverlaps(potentialOverlappingString, potentialOverlappedString, j);
                     }
                 }
             }
@@ -113,7 +113,8 @@ public class GenomeErrorFree {
             int stopPoint = Math.max(0, potentialOverlappingString.str.length()-potentialOverlappedString.str.length());
             for(int i=potentialOverlappedString.str.length()-1;i>stopPoint;i--){
                 if(matchOverlaps(potentialOverlappingString.str, potentialOverlappedString.str, i)){
-                    potentialOverlappedString = potentialOverlappedString.addOverlap(str1Pos, i);
+                    int overlapLength = potentialOverlappingString.str.length()-i;
+                    potentialOverlappedString = potentialOverlappedString.addOverlap(str1Pos, overlapLength);
                 }
             }
         }
@@ -154,10 +155,12 @@ public class GenomeErrorFree {
         int nextNodeNumber = 0;
         //TODO: path is leading me back to the 
         //beginning too early. 
+        int iterator = 0;
         do{
             nextNodeNumber = path[nextNodeNumber][0];
             rtrn = new CircularString(combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn.toString(), path[nextNodeNumber][1]));
-        } while (nextNodeNumber!=0);
+            iterator++;
+        } while (iterator<path.length);
         
         return rtrn;
     }
@@ -175,7 +178,7 @@ public class GenomeErrorFree {
             Collections.sort(
                     nodePaths.suffixOverlaps, 
                     (OverlapGraph.SuffixOverlap o1, OverlapGraph.SuffixOverlap o2) 
-                            -> ((Integer)o1.lengthOfOverlap).compareTo(o2.lengthOfOverlap)
+                            -> ((Integer)o2.lengthOfOverlap).compareTo(o1.lengthOfOverlap)
             );
         }
         
