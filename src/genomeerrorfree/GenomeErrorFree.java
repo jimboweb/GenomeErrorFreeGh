@@ -11,10 +11,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Collections;
 import java.util.PriorityQueue;
-import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -113,15 +111,13 @@ public class GenomeErrorFree {
             int stopPoint = Math.max(0, potentialOverlappingString.str.length()-potentialOverlappedString.str.length());
             for(int i=potentialOverlappedString.str.length()-1;i>stopPoint;i--){
                 if(matchOverlaps(potentialOverlappingString.str, potentialOverlappedString.str, i)){
-                    int overlapLength = potentialOverlappingString.str.length()-i;
-                    potentialOverlappedString = potentialOverlappedString.addOverlap(str1Pos, overlapLength);
+                    int overlapPoint = i;
+                    potentialOverlappedString = potentialOverlappedString.addOverlap(str1Pos, overlapPoint);
                 }
             }
         }
         return potentialOverlappedString;
     }
-//        TODO: efficient method here
-//        return;
     
     
         /**
@@ -135,15 +131,18 @@ public class GenomeErrorFree {
         if(overlap<0)
             return false;
         int overlapLength = potentialOverlappingString.length()-overlap;
-        //int polgstrlen = potentialOverlappingString.length();
-        String potentialOverlappingStringSub = potentialOverlappingString.substring(0, overlapLength);
-
+        String potentialOverlappingStringSub = "";
+        //debug try
+        try{
+        potentialOverlappingStringSub = potentialOverlappingString.substring(0, overlapLength);
+        } catch (IndexOutOfBoundsException e){
+            System.out.println(e);
+        }
         
         String potentialOverlappedStringSub = potentialOverlappedStringSub = potentialOverlappedString.substring( overlap );
                 
         
         
-        //debug
         return  (potentialOverlappingStringSub.equals(potentialOverlappedStringSub));
     }
     
@@ -153,12 +152,14 @@ public class GenomeErrorFree {
         if(path==null)
             return new CircularString("string not found");
         int nextNodeNumber = 0;
-        //TODO: path is leading me back to the 
-        //beginning too early. 
         int iterator = 0;
+        //TODO: the currentOverlap isn't quite working
+        //but I don't know why yet. 
+        int currentOverlap = 0;
         do{
             nextNodeNumber = path[nextNodeNumber][0];
-            rtrn = new CircularString(combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn.toString(), path[nextNodeNumber][1]));
+            currentOverlap += path[nextNodeNumber][1];
+            rtrn = new CircularString(combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn.toString(), currentOverlap));
             iterator++;
         } while (iterator<path.length);
         
@@ -178,14 +179,14 @@ public class GenomeErrorFree {
             Collections.sort(
                     nodePaths.suffixOverlaps, 
                     (OverlapGraph.SuffixOverlap o1, OverlapGraph.SuffixOverlap o2) 
-                            -> ((Integer)o2.lengthOfOverlap).compareTo(o1.lengthOfOverlap)
+                            -> ((Integer)o1.overlapPoint).compareTo(o2.overlapPoint)
             );
         }
-        
+        //need to make this smallest to biggest again
         PriorityQueue pq = new PriorityQueue<>(
             (OverlapGraph.StringSegment o1, OverlapGraph.StringSegment o2) 
-                    -> ((Integer)o2.suffixOverlaps.get(0).lengthOfOverlap)
-                            .compareTo(o1.suffixOverlaps.get(0).lengthOfOverlap));
+                    -> ((Integer)o1.suffixOverlaps.get(0).overlapPoint)
+                            .compareTo(o2.suffixOverlaps.get(0).overlapPoint));
         pq.addAll(Arrays.asList(input.stringSegments));
         while(!pq.isEmpty()){
             OverlapGraph.StringSegment nextStringSeg = (OverlapGraph.StringSegment) pq.poll();
@@ -214,7 +215,7 @@ public class GenomeErrorFree {
                     return null;
                 OverlapGraph.SuffixOverlap overlap = nextStringSeg.suffixOverlaps.get(iterator);
                 nextNodeNumber = overlap.overlappingString;
-                olLength = overlap.lengthOfOverlap;
+                olLength = overlap.overlapPoint;
                 iterator++;
             } while (usedNodes[nextNodeNumber]);
             usedNodes[nextNodeNumber] = true;
@@ -237,8 +238,6 @@ public class GenomeErrorFree {
         if("".equals(overlappingString)){
             return overlappedString;
         }
-        //TODO: exception coming here because we're getting overaps that aren't
-        //actually overlapping
         if(!matchOverlaps(overlappingString,overlappedString,olPoint)){
             return overlappedString;
             //throw new IllegalArgumentException("string " + overlappingString + " and string " + overlappedString + " do not overlap at point " + olPoint + " !");
@@ -248,8 +247,6 @@ public class GenomeErrorFree {
     }
 }
 
-// GenomeString & AssembledString might be able to be combined into 
-// classes implementing interface. Or maybe not. 
 
 
 class OverlapGraph{
@@ -277,10 +274,10 @@ class OverlapGraph{
     
     class SuffixOverlap{
         int overlappingString;
-        int lengthOfOverlap;
+        int overlapPoint;
         public SuffixOverlap(int overlappingString,int lengthOfOverlap){
             this.overlappingString=overlappingString;
-            this.lengthOfOverlap=lengthOfOverlap;
+            this.overlapPoint=lengthOfOverlap;
         }
     }
     
