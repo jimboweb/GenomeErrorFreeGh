@@ -297,7 +297,7 @@ class AssembledString{
     /**
      * Adds a string to the assembled string and marks that it's used
      * @param gs the string to add
-     * @param gsRef the reference of the assembled string 
+     * @param gsRef the reference of the genome string 
      * @param asRef the reference of the assembled string
      * @param olPoint the point where it overlaps the string
      */
