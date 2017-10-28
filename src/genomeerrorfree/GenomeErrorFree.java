@@ -130,7 +130,7 @@ public class GenomeErrorFree {
     protected static boolean matchOverlaps(String potentialOverlappingString, String potentialOverlappedString, int overlap){
         if(overlap<0)
             return false;
-        int overlapLength = potentialOverlappingString.length()-overlap;
+        int overlapLength = potentialOverlappedString.length()-overlap;
         String potentialOverlappingStringSub = "";
         //debug try
         try{
@@ -138,11 +138,14 @@ public class GenomeErrorFree {
         } catch (IndexOutOfBoundsException e){
             System.out.println(e);
         }
+        String potentialOverlappedStringSub = "";//debug
+        try{//debug
+            potentialOverlappedStringSub = potentialOverlappedStringSub = potentialOverlappedString.substring( overlap );
+        } catch (StringIndexOutOfBoundsException e){//debug
+            System.out.println(e);//debug
+        }     //debug
         
-        String potentialOverlappedStringSub = potentialOverlappedStringSub = potentialOverlappedString.substring( overlap );
-                
-        
-        
+        boolean rtrn = potentialOverlappingStringSub.equals(potentialOverlappedStringSub);//debug
         return  (potentialOverlappingStringSub.equals(potentialOverlappedStringSub));
     }
     
@@ -157,9 +160,9 @@ public class GenomeErrorFree {
         //but I don't know why yet. 
         int currentOverlap = 0;
         do{
-            nextNodeNumber = path[nextNodeNumber][0];
-            currentOverlap += path[nextNodeNumber][1];
             rtrn = new CircularString(combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn.toString(), currentOverlap));
+            currentOverlap += path[nextNodeNumber][1];
+            nextNodeNumber = path[nextNodeNumber][0];
             iterator++;
         } while (iterator<path.length);
         
