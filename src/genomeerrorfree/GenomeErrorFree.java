@@ -159,12 +159,18 @@ public class GenomeErrorFree {
         //TODO: the currentOverlap isn't quite working
         //but I don't know why yet. 
         int currentOverlap = 0;
+        //TODO: OMG SO CLOSE the only problem now is that it's adding on the 
+        //remainder of the first string to the end so it's too long. 
+        //now all I need to do is make sure it doesn't do that. Not sure
+        //how yet. Either:
+        //- just get the expected string length and compare it to that if it's available
+        //- compare the end of the string to the beginning of the string and cut off the extra part
         do{
             rtrn = new CircularString(combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn.toString(), currentOverlap));
             currentOverlap += path[nextNodeNumber][1];
             nextNodeNumber = path[nextNodeNumber][0];
             iterator++;
-        } while (iterator<path.length);
+        } while (path[nextNodeNumber][0] != 0);
         
         return rtrn;
     }
