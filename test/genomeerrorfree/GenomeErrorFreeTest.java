@@ -30,8 +30,8 @@ public class GenomeErrorFreeTest {
     @Test
     public void testReturnGenome() {
         System.out.println("returnGenome");
-        String unbrokenString = createUnbrokenString(30);
-        ArrayList<String> input = createStringSegments(unbrokenString, 3, 8);
+        String unbrokenString = createUnbrokenString(9);
+        ArrayList<String> input = createStringSegments(unbrokenString, 3, 5);
         GenomeErrorFree instance = new GenomeErrorFree();
         CircularString expResult = new CircularString(unbrokenString);
         String result = instance.returnGenome(input);

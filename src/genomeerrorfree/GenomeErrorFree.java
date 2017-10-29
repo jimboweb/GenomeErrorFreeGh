@@ -155,22 +155,35 @@ public class GenomeErrorFree {
         if(path==null)
             return new CircularString("string not found");
         int nextNodeNumber = 0;
-        int iterator = 0;
-        //TODO: the currentOverlap isn't quite working
-        //but I don't know why yet. 
+
         int currentOverlap = 0;
+        int overlap = 0;
         //TODO: OMG SO CLOSE the only problem now is that it's adding on the 
         //remainder of the first string to the end so it's too long. 
-        //now all I need to do is make sure it doesn't do that. Not sure
-        //how yet. Either:
-        //- just get the expected string length and compare it to that if it's available
-        //- compare the end of the string to the beginning of the string and cut off the extra part
+        //now all I need to do is make sure it doesn't do that. 
+        //so we just need to check if it's the last string
+        //and compare it to the 
+        boolean endOfPath = false;
+        boolean started = false;
         do{
-            rtrn = new CircularString(combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn.toString(), currentOverlap));
-            currentOverlap += path[nextNodeNumber][1];
+            
+            if(nextNodeNumber==0 && started){
+                String rtrnStr = rtrn.toString();
+                
+                String croppedRtrnStr = rtrnStr.substring(0, rtrnStr.length()-overlap);
+                rtrn = new CircularString(rtrnStr);
+                endOfPath = true;
+
+            }
+            else
+            {
+                rtrn = new CircularString(combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn.toString(), currentOverlap));
+            }
+            overlap = path[nextNodeNumber][1];
+            currentOverlap += overlap;
             nextNodeNumber = path[nextNodeNumber][0];
-            iterator++;
-        } while (path[nextNodeNumber][0] != 0);
+            started = true;            
+        } while (!endOfPath);
         
         return rtrn;
     }
@@ -191,7 +204,7 @@ public class GenomeErrorFree {
                             -> ((Integer)o1.overlapPoint).compareTo(o2.overlapPoint)
             );
         }
-        //need to make this smallest to biggest again
+        
         PriorityQueue pq = new PriorityQueue<>(
             (OverlapGraph.StringSegment o1, OverlapGraph.StringSegment o2) 
                     -> ((Integer)o1.suffixOverlaps.get(0).overlapPoint)
@@ -254,6 +267,7 @@ public class GenomeErrorFree {
         
         return overlappedString.substring(0, olPoint) + overlappingString;
     }
+    
 }
 
 
