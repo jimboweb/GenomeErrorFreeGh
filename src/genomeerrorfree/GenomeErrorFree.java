@@ -169,9 +169,9 @@ public class GenomeErrorFree {
             
             if(nextNodeNumber==0 && started){
                 String rtrnStr = rtrn.toString();
-                
-                String croppedRtrnStr = rtrnStr.substring(0, rtrnStr.length()-overlap);
-                rtrn = new CircularString(rtrnStr);
+                int wrapLength = gr.stringSegments[0].str.length()-overlap;
+                String croppedRtrnStr = rtrnStr.substring(0, rtrnStr.length()-wrapLength);
+                rtrn = new CircularString(croppedRtrnStr);
                 endOfPath = true;
 
             }
