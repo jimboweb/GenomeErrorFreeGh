@@ -37,7 +37,8 @@ public class GenomeErrorFree {
 
         }, "1", 1<<26).start();
     }
-    
+    //TODO: insert the code to get the input and run the 
+    //returnGenome method
     public GenomeErrorFree(){
         
     }
@@ -149,6 +150,11 @@ public class GenomeErrorFree {
         return  (potentialOverlappingStringSub.equals(potentialOverlappedStringSub));
     }
     
+    /**
+     * Create the circular string from the overlap graph
+     * @param gr the overlap graph
+     * @return the circular string
+     */
     private CircularString assembleString(OverlapGraph gr){
         CircularString rtrn = new CircularString("");
         Integer[][] path = greedyHamiltonianPath(gr);
@@ -158,11 +164,6 @@ public class GenomeErrorFree {
 
         int currentOverlap = 0;
         int overlap = 0;
-        //TODO: OMG SO CLOSE the only problem now is that it's adding on the 
-        //remainder of the first string to the end so it's too long. 
-        //now all I need to do is make sure it doesn't do that. 
-        //so we just need to check if it's the last string
-        //and compare it to the 
         boolean endOfPath = false;
         boolean started = false;
         do{
@@ -189,7 +190,9 @@ public class GenomeErrorFree {
     }
 
     /**
-     * 
+     * traces through the overlap graph getting the largest 
+     * overlap and connecting it to the next largest overlap
+     * and so on until the end
      * @param input The overlap graph
      * @return Integer[][] of form {next string, overlap length}
      */
@@ -271,7 +274,11 @@ public class GenomeErrorFree {
 }
 
 
-
+/**
+ * an overlap graph of the strings
+ * contains an array of string segments
+ * @author jim.stewart
+ */
 class OverlapGraph{
     StringSegment[] stringSegments;
     public OverlapGraph(ArrayList<String> stringSegments){
@@ -280,6 +287,15 @@ class OverlapGraph{
             this.stringSegments[i]=new StringSegment(stringSegments.get(i),i);
         }
     }
+    /**
+     * <p>a string segment in the overlap graph
+     * contains:</p>
+     * <ul>
+     * <li> a string</li>
+     * <li>the index in the graph</li>
+     * <li>a list of suffixOverlaps of strings it overlaps with</li>
+     * </ul>
+     */
     class StringSegment{
         ArrayList<SuffixOverlap> suffixOverlaps;
         final String str;
@@ -295,6 +311,13 @@ class OverlapGraph{
         }
     }
     
+    /**
+     * <p> describes a suffix that overlaps. Contains:</p>
+     * <ul>
+     * <li>the index of the string that overlaps containing StringSegment</li>
+     * <li>the point at which the string segment overlaps</li>
+     * </ul>
+     */
     class SuffixOverlap{
         int overlappingString;
         int overlapPoint;
@@ -310,7 +333,14 @@ class OverlapGraph{
 
 
 
-
+/**
+ * <p>A character sequence that represents a circular string. Contains:</p>
+ * <ul>
+ * <li>a character array</li>
+ * <li>integer length of the string</li>
+ * </ul>
+ * @author jim.stewart
+ */
 class CircularString implements CharSequence {
 
     private final char[] characters;
@@ -324,16 +354,29 @@ class CircularString implements CharSequence {
         }
     }
     
+    /**
+     * 
+     * @return as a regular string
+     */
     @Override 
     public String toString(){
         return new String(characters);
     }
     
+    /**
+     * 
+     * @return the number of characters
+     */
     @Override
     public int length() {
         return characters.length;
     }
 
+    /**
+     * finds the character from the beginning of listed string
+     * @param index how far in
+     * @return the character at that point
+     */
     @Override
     public char charAt(int index) {
         index = index%length;
