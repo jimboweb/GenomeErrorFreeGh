@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 public class GenomeErrorFree {
     boolean findOverlapsIsNaive = true;
     boolean findAllOverlapsIsNaive = true;
-    private final int numberOfInputs = 5; //will be 1618
+    private final int numberOfInputs = 1618; //will be 1618
     /**
      * @param args the command line arguments
      */
