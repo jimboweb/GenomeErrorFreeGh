@@ -29,9 +29,10 @@ public class GenomeErrorFreeTest {
      */
     @Test
     public void testReturnGenome() {
+        //TODO: run a whole lot of these tests
         System.out.println("returnGenome");
-        String unbrokenString = createUnbrokenString(30);
-        ArrayList<String> input = createStringSegments(unbrokenString, 3, 8);
+        String unbrokenString = createUnbrokenString(9);
+        ArrayList<String> input = createStringSegments(unbrokenString, 3, 5);
         GenomeErrorFree instance = new GenomeErrorFree();
         CircularString expResult = new CircularString(unbrokenString);
         String result = instance.returnGenome(input);
@@ -91,10 +92,7 @@ public class GenomeErrorFreeTest {
             rtrn.add(cString.subString(lastStrBegin, lastStrBegin+strLen));
             lastStrBegin=lastStrBegin+rnd.nextInt(strLen/2)+1;
         }
-//        for(int i=rtrn.size();i<numberOfSegments;i++){
-//            lastStrBegin = rnd.nextInt(cString.length());
-//            rtrn.add(cString.subString(lastStrBegin, lastStrBegin+strLen));
-//        }
+        //TODO: mix the string segments up
         return rtrn;
     }
     
