@@ -46,6 +46,9 @@ public class GenomeErrorFree {
     private void run(){
         ArrayList<String> input = getInput();
         String genome = returnGenome(input);
+//        for(int i=0;i<100000;i++){//debug
+//            genome+="A";//debug
+//        }//debug
         System.out.println(genome);
     }
     
@@ -173,6 +176,7 @@ public class GenomeErrorFree {
                 int wrapLength = gr.stringSegments[0].str.length()-overlap;
                 String croppedRtrnStr = rtrnStr.substring(0, rtrnStr.length()-wrapLength);
                 rtrn = new CircularString(croppedRtrnStr);
+//                rtrn = new CircularString(combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn.toString(), currentOverlap));
                 endOfPath = true;
 
             }
