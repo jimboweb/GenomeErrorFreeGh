@@ -6,7 +6,6 @@
 package genomeerrorfree;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -87,7 +86,6 @@ public class GenomeErrorFreeTest {
     //circular. 
    private ArrayList<String> createStringSegments(String unbrokenString, int numberOfSegments, int strLen){
         Random rnd = new Random();
-        String[] stringSegments = new String[numberOfSegments];
         CircularString cString = new CircularString(unbrokenString);
         ArrayList<String> rtrn = new ArrayList<>();
         //rtrn.add(cString.subString(0, cString.length()));
@@ -96,7 +94,7 @@ public class GenomeErrorFreeTest {
             //TODO: make sure that I have coverage of all sections here
             String nextString = cString.subString(lastStrBegin, lastStrBegin+strLen);
             lastStrBegin = lastStrBegin + rnd.nextInt(strLen);
-            stringSegments[i] = nextString;
+            rtrn.add(nextString);
         }
 //        while(lastStrBegin<cString.length()){
 //            rtrn.add(cString.subString(lastStrBegin, lastStrBegin+strLen));
@@ -105,7 +103,6 @@ public class GenomeErrorFreeTest {
 //        for(int i=0;i<rtrn.size();i++){
 //            rtrn = swapSegments(rtrn,i,rnd.nextInt(rtrn.size()));
 //        }
-            rtrn = (ArrayList<String>)Arrays.asList(stringSegments);
         return rtrn;
     }
    
