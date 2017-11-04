@@ -411,6 +411,14 @@ class CircularString implements CharSequence {
         return new CircularString(characters.toString()+str);
     }
     
+    public boolean contains(String s){
+        int l = s.length();
+        for(int i=0;i<length;i++){
+            if(subString(i,i+l).equals(s));
+                return true;
+        }
+        return false;
+    }
     /**
      * Check for circular equality
      * 
