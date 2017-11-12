@@ -92,7 +92,7 @@ public class GenomeErrorFree {
                 OverlapGraph.StringSegment potentialOverlappedString = gr.stringSegments[i];
                 for(int j=0;j<gr.stringSegments.length;j++){
                     if(j!=i){
-                        OverlapGraph.StringSegment potentialOverlappingString = gr.stringSegments[j];;
+                        OverlapGraph.StringSegment potentialOverlappingString = gr.stringSegments[j];
                         potentialOverlappedString = findOverlaps(potentialOverlappingString, potentialOverlappedString, j);
                     }
                 }
@@ -203,7 +203,7 @@ public class GenomeErrorFree {
      * @param input The overlap graph
      * @return Integer[][] of form {next string, overlap length}
      */
-    private Integer[][] greedyHamiltonianPath(OverlapGraph input){
+    public Integer[][] greedyHamiltonianPath(OverlapGraph input){
         Integer[][] rtrn = new Integer[input.stringSegments.length][2];
         boolean[] usedNodes = new boolean[input.stringSegments.length];
         int nodeNumber = 0;
