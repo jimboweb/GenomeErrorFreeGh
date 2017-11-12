@@ -193,6 +193,9 @@ public class GenomeErrorFree {
         return rtrn;
     }
 
+    //TODO: Problem is here. I'm getting almost to the end, or to
+    //then end, but there are a few extras that aren't getting covered
+    //are these dupes? 
     /**
      * traces through the overlap graph getting the largest 
      * overlap and connecting it to the next largest overlap
