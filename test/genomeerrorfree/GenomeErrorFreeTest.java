@@ -6,6 +6,7 @@
 package genomeerrorfree;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -29,16 +30,19 @@ public class GenomeErrorFreeTest {
      */
     @Test
     public void testReturnGenome() {
-        for(int i=0;i<1;i++){
+        for(int i=0;i<10;i++){
+            int numberOfSegments = 1618;
+            int strLen = 100;
+            int maxOlPoint = 10;
             System.out.println("returnGenome");
             String unbrokenString = createUnbrokenString(10000);
             //String unbrokenString = "gagttttatcgcttccatgacgcagaagttaacactttcggatatttctgatgagtcgaaaaattatcttgataaagcaggaattactactgcttgtttacgaattaaatcgaagtggactgctggcggaaaatgagaaaattcgacctatccttgcgcagctcgagaagctcttactttgcgacctttcgccatcaactaacgattctgtcaaaaactgacgcgttggatgaggagaagtggcttaatatgcttggcacgttcgtcaaggactggtttagatatgagtcacattttgttcatggtagagattctcttgttgacattttaaaagagcgtggattactatctgagtccgatgctgttcaaccactaataggtaagaaatcatgagtcaagttactgaacaatccgtacgtttccagaccgctttggcctctattaagctcattcaggcttctgccgttttggatttaaccgaagatgatttcgattttctgacgagtaacaaagtttggattgctactgaccgctctcgtgctcgtcgctgcgttgaggcttgcgtttatggtacgctggactttgtgggataccctcgctttcctgctcctgttgagtttattgctgccgtcattgcttattatgttcatcccgtcaacattcaaacggcctgtctcatcatggaaggcgctgaatttacggaaaacattattaatggcgtcgagcgtccggttaaagccgctgaattgttcgcgtttaccttgcgtgtacgcgcaggaaacactgacgttcttactgacgcagaagaaaacgtgcgtcaaaaattacgtgcggaaggagtgatgtaatgtctaaaggtaaaaaacgttctggcgctcgccctggtcgtccgcagccgttgcgaggtactaaaggcaagcgtaaaggcgctcgtctttggtatgtaggtggtcaacaattttaattgcaggggcttcggccccttacttgaggataaattatgtctaatattcaaactggcgccgagcgtatgccgcatgacctttcccatcttggcttccttgctggtcagattggtcgtcttattaccatttcaactactccggttatcgctggcgactccttcgagatggacgccgttggcgctctccgtctttctccattgcgtcgtggccttgctattgactctactgtagacatttttactttttatgtccctcatcgtcacgtttatggtgaacagtggattaagttcatgaaggatggtgttaatgccactcctctcccgactgttaacactactggttatattgaccatgccgcttttcttggcacgattaaccctgataccaataaaatccctaagcatttgtttcagggttatttgaatatctataacaactattttaaagcgccgtggatgcctgaccgtaccgaggctaaccctaatgagcttaatcaagatgatgctcgttatggtttccgttgctgccatctcaaaaacatttggactgctccgcttcctcctgagactgagctttctcgccaaatgacgacttctaccacatctattgacattatgggtctgcaagctgcttatgctaatttgcatactgaccaagaacgtgattacttcatgcagcgttaccatgatgttatttcttcatttggaggtaaaacctcttatgacgctgacaaccgtcctttacttgtcatgcgctctaatctctgggcatctggctatgatgttgatggaactgaccaaacgtcgttaggccagttttctggtcgtgttcaacagacctataaacattctgtgccgcgtttctttgttcctgagcatggcactatgtttactcttgcgcttgttcgttttccgcctactgcgactaaagagattcagtaccttaacgctaaaggtgctttgacttataccgatattgctggcgaccctgttttgtatggcaacttgccgccgcgtgaaatttctatgaaggatgttttccgttctggtgattcgtctaagaagtttaagattgctgagggtcagtggtatcgttatgcgccttcgtatgtttctcctgcttatcaccttcttgaaggcttcccattcattcaggaaccgccttctggtgatttgcaagaacgcgtacttattcgccaccatgattatgaccagtgtttccagtccgttcagttgttgcagtggaatagtcaggttaaatttaatgtgaccgtttatcgcaatctgccgaccactcgcgattcaatcatgacttcgtgataaaagattgagtgtgaggttataacgccgaagcggtaaaaattttaatttttgccgctgaggggttgaccaagcgaagcgcggtaggttttctgcttaggagtttaatcatgtttcagacttttatttctcgccataattcaaactttttttctgataagctggttctcacttctgttactccagcttcttcggcacctgttttacagacacctaaagctacatcgtcaacgttatattttgatagtttgacggttaatgctggtaatggtggttttcttcattgcattcagatggatacatctgtcaacgccgctaatcaggttgtttctgttggtgctgatattgcttttgatgccgaccctaaattttttgcctgtttggttcgctttgagtcttcttcggttccgactaccctcccgactgcctatgatgtttatcctttgaatggtcgccatgatggtggttattataccgtcaaggactgtgtgactattgacgtccttccccgtacgccgggcaataacgtttatgttggtttcatggtttggtctaactttaccgctactaaatgccgcggattggtttcgctgaatcaggttattaaagagattatttgtctccagccacttaagtgaggtgatttatgtttggtgctattgctggcggtattgcttctgctcttgctggtggcgccatgtctaaattgtttggaggcggtcaaaaagccgcctccggtggcattcaaggtgatgtgcttgctaccgataacaatactgtaggcatgggtgatgctggtattaaatctgccattcaaggctctaatgttcctaaccctgatgaggccgcccctagttttgtttctggtgctatggctaaagctggtaaaggacttcttgaaggtacgttgcaggctggcacttctgccgtttctgataagttgcttgatttggttggacttggtggcaagtctgccgctgataaaggaaaggatactcgtgattatcttgctgctgcatttcctgagcttaatgcttgggagcgtgctggtgctgatgcttcctctgctggtatggttgacgccggatttgagaatcaaaaagagcttactaaaatgcaactggacaatcagaaagagattgccgagatgcaaaatgagactcaaaaagagattgctggcattcagtcggcgacttcacgccagaatacgaaagaccaggtatatgcacaaaatgagatgcttgcttatcaacagaaggagtctactgctcgcgttgcgtctattatggaaaacaccaatctttccaagcaacagcaggtttccgagattatgcgccaaatgcttactcaagctcaaacggctggtcagtattttaccaatgaccaaatcaaagaaatgactcgcaaggttagtgctgaggttgacttagttcatcagcaaacgcagaatcagcggtatggctcttctcatattggcgctactgcaaaggatatttctaatgtcgtcactgatgctgcttctggtgtggttgatatttttcatggtattgataaagctgttgccgatacttggaacaatttctggaaagacggtaaagctgatggtattggctctaatttgtctaggaaataaccgtcaggattgacaccctcccaattgtatgttttcatgcctccaaatcttggaggcttttttatggttcgttcttattacccttctgaatgtcacgctgattattttgactttgagcgtatcgaggctcttaaacctgctattgaggcttgtggcatttctactctttctcaatccccaatgcttggcttccataagcagatggataaccgcatcaagctcttggaagagattctgtcttttcgtatgcagggcgttgagttcgataatggtgatatgtatgttgacggccataaggctgcttctgacgttcgtgatgagtttgtatctgttactgagaagttaatggatgaattggcacaatgctacaatgtgctcccccaacttgatattaataacactatagaccaccgccccgaaggggacgaaaaatggtttttagagaacgagaagacggttacgcagttttgccgcaagctggctgctgaacgccctcttaaggatattcgcgatgagtataattaccccaaaaagaaaggtattaaggatgagtgttcaagattgctggaggcctccactatgaaatcgcgtagaggctttgctattcagcgtttgatgaatgcaatgcgacaggctcatgctgatggttggtttatcgtttttgacactctcacgttggctgacgaccgattagaggcgttttatgataatcccaatgctttgcgtgactattttcgtgatattggtcgtatggttcttgctgccgagggtcgcaaggctaatgattcacacgccgactgctatcagtatttttgtgtgcctgagtatggtacagctaatggccgtcttcatttccatgcggtgcactttatgcggacacttcctacaggtagcgttgaccctaattttggtcgtcgggtacgcaatcgccgccagttaaatagcttgcaaaatacgtggccttatggttacagtatgcccatcgcagttcgctacacgcaggacgctttttcacgttctggttggttgtggcctgttgatgctaaaggtgagccgcttaaagctaccagttatatggctgttggtttctatgtggctaaatacgttaacaaaaagtcagatatggaccttgctgctaaaggtctaggagctaaagaatggaacaactcactaaaaaccaagctgtcgctacttcccaagaagctgttcagaatcagaatgagccgcaacttcgggatgaaaatgctcacaatgacaaatctgtccacggagtgcttaatccaacttaccaagctgggttacgacgcgacgccgttcaaccagatattgaagcagaacgcaaaaagagagatgagattgaggctgggaaaagttactgtagccgacgttttggcggcgcaacctgtgacgacaaatctgctcaaatttatgcgcgcttcgataaaaatgattggcgtatccaacctgca";
-            ArrayList<String> input = createStringSegments(unbrokenString, 1618, 100);
+            ArrayList<String> input = createStringSegments(unbrokenString, numberOfSegments, strLen, maxOlPoint);
             GenomeErrorFree instance = new GenomeErrorFree();
             CircularString expResult = new CircularString(unbrokenString);
             String result = instance.returnGenome(input);
             CircularString cResult = new CircularString(result);
-            assertEquals(expResult, cResult);
+            assertEquals("Failed test number " + i + " got string " + result, expResult, result);
         }
     }
 
@@ -54,6 +58,12 @@ public class GenomeErrorFreeTest {
         String subStrExp = ")(kjs";
         String subStrTest = cStr1.subString(20, 3);
         assertEquals(subStrExp, subStrTest);
+        for(int i=0;i<1000;i++){
+            int start = rnd.nextInt(str1.length());
+            int end = rnd.nextInt(str1.length());
+            String testContainsStr = cStr1.subString(start, start+end);
+            assertTrue(cStr1.contains(testContainsStr));
+        }
     }
     
     /**
@@ -84,17 +94,26 @@ public class GenomeErrorFreeTest {
     //TODO: this never adds the last character of the string. More importantly, 
     //this whole program doesn't take into account the fact that the string is 
     //circular. 
-   private ArrayList<String> createStringSegments(String unbrokenString, int numberOfSegments, int strLen){
+   private ArrayList<String> createStringSegments(String unbrokenString, int numberOfSegments, int strLen, int maxOlPoint){
         Random rnd = new Random();
+        String[] segments = new String[numberOfSegments];
+        
+        String multString = unbrokenString;
+//        for(int i=0;i<5;i++){
+//            multString += multString;
+//        }
         CircularString cString = new CircularString(unbrokenString);
-        ArrayList<String> rtrn = new ArrayList<>();
+        ArrayList<String> rtrn;
         //rtrn.add(cString.subString(0, cString.length()));
         int lastStrBegin = 0;
+        String nextString = "";
         for(int i=0;i<numberOfSegments;i++){
-            //TODO: make sure that I have coverage of all sections here
-            String nextString = cString.subString(lastStrBegin, lastStrBegin+strLen);
-            lastStrBegin = lastStrBegin + rnd.nextInt(strLen);
-            rtrn.add(nextString);
+            nextString = multString.substring(lastStrBegin, lastStrBegin+strLen);
+            multString = multString.substring(lastStrBegin);
+            lastStrBegin =  rnd.nextInt(maxOlPoint);
+            if((lastStrBegin+200)>multString.length())
+                multString += unbrokenString;
+            segments[i] = nextString;
         }
 //        while(lastStrBegin<cString.length()){
 //            rtrn.add(cString.subString(lastStrBegin, lastStrBegin+strLen));
@@ -103,8 +122,24 @@ public class GenomeErrorFreeTest {
 //        for(int i=0;i<rtrn.size();i++){
 //            rtrn = swapSegments(rtrn,i,rnd.nextInt(rtrn.size()));
 //        }
+        boolean returnIsGood = testReturnString(segments, unbrokenString);
+        System.out.println("All segments in string: " + returnIsGood);
+        rtrn = new ArrayList<>(Arrays.asList(segments));
         return rtrn;
     }
+   
+   private boolean testReturnString(String[] rtrn, String unbrokenString){
+       CircularString cUnbr = new CircularString(unbrokenString);
+       for(int i=0;i<rtrn.length;i++){
+           String s = rtrn[i];
+           System.out.println(s);
+           if(!cUnbr.contains(s)){
+               return false;
+           }
+       }
+       
+       return true;
+   }
    
    private ArrayList<String> swapSegments(ArrayList<String> segments, int first, int second){
        String temp = segments.get(second);
