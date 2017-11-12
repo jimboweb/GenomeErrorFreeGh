@@ -84,9 +84,11 @@ public class GenomeErrorFreeTest {
         ReturnGenomeInputAndPath input = new ReturnGenomeInputAndPath(originalString,200,30,10);
         GenomeErrorFree instance = new GenomeErrorFree();
         OverlapGraph graph = new OverlapGraph(input.input);
-        //TODO: Oh this is not so easy because I have to have all the other possible
-        //overlaps too. 
-        //int[][] path = instance.greedyHamiltonianPath(input);
+        //Well this isn't so greate because I am not just testing a single function 
+        //but as far as I know findAllOverlaps always works
+        //so I'm not going to worry about it
+        graph = instance.findAllOverlaps(graph);
+        Integer[][] path = instance.greedyHamiltonianPath(graph);
     }
     
         /**
