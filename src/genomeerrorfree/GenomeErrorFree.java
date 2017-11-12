@@ -304,7 +304,7 @@ class OverlapGraph{
      * </ul>
      */
     class StringSegment{
-        ArrayList<SuffixOverlap> suffixOverlaps;
+        public ArrayList<SuffixOverlap> suffixOverlaps;
         final String str;
         final int index;
         public StringSegment(String str, int index){

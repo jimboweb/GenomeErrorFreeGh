@@ -82,6 +82,7 @@ public class GenomeErrorFreeTest {
     public void testGreedyHamiltonianPath(){
         String originalString = createUnbrokenString(1000, false);
         ReturnGenomeInputAndPath input = new ReturnGenomeInputAndPath(originalString,200,30,10);
+        //TODO: print out all original strings and overlap points
         GenomeErrorFree instance = new GenomeErrorFree();
         OverlapGraph graph = new OverlapGraph(input.input);
         //Well this isn't so greate because I am not just testing a single function 
@@ -89,6 +90,14 @@ public class GenomeErrorFreeTest {
         //so I'm not going to worry about it
         graph = instance.findAllOverlaps(graph);
         Integer[][] path = instance.greedyHamiltonianPath(graph);
+        for(int i=0;i<path.length;i++){
+            String errorString = "Path diverges at index " + i + 
+                    " expected: " + input.path[i][0] + ", " + input.path[i][1] + "\n" +
+                    " but got " + path[i][0] + ", " + path[i][1];
+            assertArrayEquals(errorString ,path, input.path);
+            System.out.println("Path matches at index " + i +
+                    " values: " + path[i][0] + ", " + path[i][1]);
+        }
     }
     
         /**
@@ -198,16 +207,16 @@ public class GenomeErrorFreeTest {
      */
     private class ReturnGenomeInputAndPath{
         ArrayList<String> input;
-        int[][] path;
+        Integer[][] path;
         
         private ReturnGenomeInputAndPath(int pathSize){
             input = new ArrayList<>();
-            path = new int[pathSize][2];
+            path = new Integer[pathSize][2];
         }
         
         public ReturnGenomeInputAndPath(String unbrokenString, int numberOfSegments, int strLen, int maxOlPoint){
             input = new ArrayList<>();
-            path = new int[numberOfSegments][2];
+            path = new Integer[numberOfSegments][2];
             createStringSegments(unbrokenString, numberOfSegments, strLen, maxOlPoint);
             mixUpArrayListAndPath();
         }
@@ -222,7 +231,7 @@ public class GenomeErrorFreeTest {
         private void createStringSegments(String unbrokenString, int numberOfSegments, int strLen, int maxOlPoint){
              Random rnd = new Random();
             String[] segments = new String[numberOfSegments];
-            path = new int[numberOfSegments][2];
+            path = new Integer[numberOfSegments][2];
             String multString = unbrokenString;
             CircularString cString = new CircularString(unbrokenString);
             ArrayList<String> rtrn;
@@ -260,8 +269,8 @@ public class GenomeErrorFreeTest {
             return segments;
         }
         
-        private int[][] swapPath(int[][] path, int first, int second){
-            int[] temp = Arrays.copyOf(path[first], path[first].length);
+        private Integer[][] swapPath(Integer[][] path, int first, int second){
+            Integer[] temp = Arrays.copyOf(path[first], path[first].length);
             path[second] = Arrays.copyOf(path[first], path[first].length);
             path[first] = Arrays.copyOf(temp, temp.length);
             return path;
