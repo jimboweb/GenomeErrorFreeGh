@@ -87,7 +87,16 @@ public class GenomeErrorFreeTest {
             System.out.println(i + " " +input.path[i][0] + " " + input.path[i][1] + " " + input.input.get(i));
         }
         GenomeErrorFree instance = new GenomeErrorFree();
-        OverlapGraph graph = new OverlapGraph(input.input);
+        ArrayList<String> inputStrings = new ArrayList<>();
+        Integer[][] expectedPath = new Integer[input.input.size()][2];
+        for(int i=0;i<input.input.size();i++){
+            InputNode n = input.input.get(i);
+            inputStrings.add(n.str);
+            expectedPath[i][0] = n.overlaps;
+            expectedPath[i][1] = n.overlapPoint;
+            
+        }
+        OverlapGraph graph = new OverlapGraph(inputStrings);
         //Well this isn't so greate because I am not just testing a single function 
         //but as far as I know findAllOverlaps always works
         //so I'm not going to worry about it
@@ -95,9 +104,9 @@ public class GenomeErrorFreeTest {
         Integer[][] path = instance.greedyHamiltonianPath(graph);
         for(int i=1;i<path.length;i++){
             String errorString = "Path diverges at index " + i + 
-                    " expected: " + input.path[i][0] + ", " + input.path[i][1] + "\n" +
+                    " expected: " + expectedPath[i][0] + ", " + expectedPath[i][1] + "\n" +
                     " but got " + path[i][0] + ", " + path[i][1];
-            assertArrayEquals(errorString, input.path, path);
+            assertArrayEquals(errorString, expectedPath[i], path[i]);
             System.out.println("Path matches at index " + i +
                     " values: " + path[i][0] + ", " + path[i][1]);
         }
@@ -220,17 +229,15 @@ public class GenomeErrorFreeTest {
      * path is the string and where they overlap
      */
     private class ReturnGenomeInputAndPath{
-        ArrayList<String> input;
+        ArrayList<InputNode> input;
         Integer[][] path;
         
         private ReturnGenomeInputAndPath(int pathSize){
             input = new ArrayList<>();
-            path = new Integer[pathSize][2];
-        }
+         }
         
         public ReturnGenomeInputAndPath(String unbrokenString, int numberOfSegments, int strLen, int maxOlPoint){
             input = new ArrayList<>();
-            path = new Integer[numberOfSegments][2];
             createStringSegments(unbrokenString, numberOfSegments, strLen, maxOlPoint);
             mixUpArrayListAndPath();
         }
@@ -243,27 +250,26 @@ public class GenomeErrorFreeTest {
          * @param maxOlPoint the maximum point of overlap
          */
         private void createStringSegments(String unbrokenString, int numberOfSegments, int strLen, int maxOlPoint){
-             Random rnd = new Random();
-            String[] segments = new String[numberOfSegments];
+            Random rnd = new Random();
             path = new Integer[numberOfSegments][2];
             String multString = unbrokenString;
-            CircularString cString = new CircularString(unbrokenString);
             ArrayList<String> rtrn;
             int lastStrBegin = 0;
-            String nextString = "";
+            String nextString;
             for(int i=0;i<numberOfSegments;i++){
                 nextString = multString.substring(lastStrBegin, lastStrBegin+strLen);
                 multString = multString.substring(lastStrBegin);
                 //First item i path will have overlap of -1.
                 //because I don't know where it's going to overlap. 
-                path[i][0] = i-1;
-                path[i][1] = lastStrBegin;
+                InputNode thisNode = input.get(i);
+                thisNode.overlaps = i-1;
+                thisNode.overlapPoint = lastStrBegin;
+                thisNode.overlappedBy = i+1;
                 lastStrBegin =  rnd.nextInt(maxOlPoint);
+                thisNode.str = nextString;
                 if((lastStrBegin+200)>multString.length())
                     multString += unbrokenString;
-                segments[i] = nextString;
             }
-            input = new ArrayList<>(Arrays.asList(segments));
   
         }
         
@@ -282,10 +288,24 @@ public class GenomeErrorFreeTest {
         
            
         
-        private ArrayList<String> swapSegments(ArrayList<String> segments, int first, int second){
-            String temp = segments.get(second);
-            segments.set(second, segments.get(first));
-            segments.set(first, temp);
+        private ArrayList<InputNode> swapSegments(ArrayList<InputNode> segments, int first, int second){
+            InputNode firstNode = segments.get(second).copy();
+            InputNode secondNode = segments.get(first).copy();
+            //TODO: set overlaps and overlapped by for both
+            if(firstNode.overlaps!=-1){
+                InputNode firstNodeOverlaps = segments.get(firstNode.overlaps);
+                firstNodeOverlaps.overlappedBy = second;
+            }
+            if(secondNode.overlaps!=-1){
+                InputNode secondNodeOverlaps = segments.get(secondNode.overlaps);
+                secondNodeOverlaps.overlappedBy = first;
+            }
+            InputNode firstNodeOverlappedBy = segments.get(firstNode.overlappedBy);
+            firstNodeOverlappedBy.overlaps = second;
+            InputNode secondNodeOverlappedBy = segments.get(secondNode.overlappedBy);
+            secondNodeOverlappedBy.overlaps = first;
+            segments.set(second, firstNode);
+            segments.set(first, secondNode);
             return segments;
         }
         
@@ -311,4 +331,21 @@ public class GenomeErrorFreeTest {
         
     }
     
+    private class InputNode{
+        String str;
+        Integer overlaps;
+        Integer overlapPoint;
+        Integer overlappedBy;
+        
+        public InputNode(String str, int overlaps, int overlapPoint, int overlappedBy){
+            this.str = str;
+            this.overlaps = overlaps;
+            this.overlapPoint = overlapPoint;
+            this.overlappedBy = overlappedBy;
+        }
+        
+        public InputNode copy(){
+            return new InputNode(this.str,this.overlaps,this.overlapPoint,this.overlappedBy);
+        }
+    }
 }
