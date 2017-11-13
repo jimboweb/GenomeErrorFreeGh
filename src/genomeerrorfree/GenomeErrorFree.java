@@ -225,7 +225,9 @@ public class GenomeErrorFree {
             rtrn[nextStringSeg.index]=findNextPath(nextStringSeg, usedNodes);
             if (rtrn[nextStringSeg.index] == null)
                 //then there was no further path available
-                return null;
+                //return null;
+                System.out.println("Incomplete path");
+                return rtrn; //debug while I'm running test
         }
         return rtrn;
     }

@@ -77,12 +77,15 @@ public class GenomeErrorFreeTest {
         fail("The test case is a prototype.");
     }
 
-    
+    //TODO: right now I think the mix up function isn't working 
+    //right. The overlaps it's giving aren't the right overlaps. 
     @Test
     public void testGreedyHamiltonianPath(){
         String originalString = createUnbrokenString(1000, false);
         ReturnGenomeInputAndPath input = new ReturnGenomeInputAndPath(originalString,200,30,10);
-        //TODO: print out all original strings and overlap points
+        for(int i=0;i<input.input.size();i++){
+            System.out.println(i + " " +input.path[i][0] + " " + input.path[i][1] + " " + input.input.get(i));
+        }
         GenomeErrorFree instance = new GenomeErrorFree();
         OverlapGraph graph = new OverlapGraph(input.input);
         //Well this isn't so greate because I am not just testing a single function 
@@ -94,7 +97,7 @@ public class GenomeErrorFreeTest {
             String errorString = "Path diverges at index " + i + 
                     " expected: " + input.path[i][0] + ", " + input.path[i][1] + "\n" +
                     " but got " + path[i][0] + ", " + path[i][1];
-            assertArrayEquals(errorString ,path, input.path);
+            assertArrayEquals(errorString, input.path, path);
             System.out.println("Path matches at index " + i +
                     " values: " + path[i][0] + ", " + path[i][1]);
         }
