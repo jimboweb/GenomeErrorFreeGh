@@ -289,15 +289,26 @@ public class GenomeErrorFreeTest {
             return segments;
         }
         
-        //TODO: if this is going to work I'm going to have 
-        //to go through and change all the overlaps that match this index
+        //TODO: need to change the overlap path here
+        //need to make a copy of the index. 
+        //The mixed up thing will always be the item 
+        //after the new path. But it might have been moved.
+        //the index will show where it is now. 
         private Integer[][] swapPath(Integer[][] path, int first, int second){
+            Integer[][] newPath = new Integer[path.length][2];
+            int[] indexReference = new int[path.length];
             Integer[] temp = Arrays.copyOf(path[first], path[first].length);
             path[second] = Arrays.copyOf(path[first], path[first].length);
             path[first] = Arrays.copyOf(temp, temp.length);
-            
+            //TODO: set the new index of the moved thing
+            //and also the moved thing
+            //find the location of what was the next in path
+            //and change its overlap to match the new overlap
+            //need to do this twice, once for each thing that
+            //was swapped
             return path;
         }
+        
     }
     
 }
