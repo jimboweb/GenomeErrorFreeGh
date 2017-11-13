@@ -93,7 +93,7 @@ public class GenomeErrorFreeTest {
         //so I'm not going to worry about it
         graph = instance.findAllOverlaps(graph);
         Integer[][] path = instance.greedyHamiltonianPath(graph);
-        for(int i=0;i<path.length;i++){
+        for(int i=1;i<path.length;i++){
             String errorString = "Path diverges at index " + i + 
                     " expected: " + input.path[i][0] + ", " + input.path[i][1] + "\n" +
                     " but got " + path[i][0] + ", " + path[i][1];
@@ -117,7 +117,11 @@ public class GenomeErrorFreeTest {
         }
         return unbrokenString;
     }
-    
+    /**
+     * @deprecated 
+     * @param input
+     * @return 
+     */
     private ArrayList<String> mixUpStringSegments(ArrayList<String> input){
         for(int i=0;i<input.size();i++){
             input = swapSegments(input,i,rnd.nextInt(input.size()));
@@ -127,8 +131,15 @@ public class GenomeErrorFreeTest {
         
     }
     
-     
-   private ArrayList<String> createStringSegments(String unbrokenString, int numberOfSegments, int strLen, int maxOlPoint){
+    /**
+     * @deprecated 
+     * @param unbrokenString
+     * @param numberOfSegments
+     * @param strLen
+     * @param maxOlPoint
+     * @return 
+     */
+    private ArrayList<String> createStringSegments(String unbrokenString, int numberOfSegments, int strLen, int maxOlPoint){
         Random rnd = new Random();
         String[] segments = new String[numberOfSegments];
         
@@ -243,7 +254,9 @@ public class GenomeErrorFreeTest {
             for(int i=0;i<numberOfSegments;i++){
                 nextString = multString.substring(lastStrBegin, lastStrBegin+strLen);
                 multString = multString.substring(lastStrBegin);
-                path[i][0] = i;
+                //First item i path will have overlap of -1.
+                //because I don't know where it's going to overlap. 
+                path[i][0] = i-1;
                 path[i][1] = lastStrBegin;
                 lastStrBegin =  rnd.nextInt(maxOlPoint);
                 if((lastStrBegin+200)>multString.length())
@@ -254,6 +267,9 @@ public class GenomeErrorFreeTest {
   
         }
         
+        //TODO: duh this is not going to work
+        //because it's not going to change the
+        //overlap numbers. 
         private void mixUpArrayListAndPath(){
             for(int i=0;i<input.size();i++){
                 int swapWith = rnd.nextInt(input.size());
@@ -262,6 +278,7 @@ public class GenomeErrorFreeTest {
             }
 
         }
+        
         
            
         
@@ -272,10 +289,13 @@ public class GenomeErrorFreeTest {
             return segments;
         }
         
+        //TODO: if this is going to work I'm going to have 
+        //to go through and change all the overlaps that match this index
         private Integer[][] swapPath(Integer[][] path, int first, int second){
             Integer[] temp = Arrays.copyOf(path[first], path[first].length);
             path[second] = Arrays.copyOf(path[first], path[first].length);
             path[first] = Arrays.copyOf(temp, temp.length);
+            
             return path;
         }
     }
