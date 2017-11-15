@@ -11,6 +11,8 @@ import java.util.Random;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import genomeerrorfree.OverlapGraph;
+import genomeerrorfree.CircularString;
+
 
 /**
  *
@@ -36,7 +38,8 @@ public class GenomeErrorFreeTest {
             int maxOlPoint = 50;
             System.out.println("returnGenome");
             String unbrokenString = createUnbrokenString(0, true);
-            ArrayList<String> input = createStringSegments(unbrokenString, numberOfSegments, strLen, maxOlPoint);
+            ReturnGenomeInputAndPath giap = new ReturnGenomeInputAndPath(unbrokenString, numberOfSegments, strLen, maxOlPoint);
+            ArrayList<String> input = giap.inputAsStringList();
             GenomeErrorFree instance = new GenomeErrorFree();
             CircularString expResult = new CircularString(unbrokenString);
             String result = instance.returnGenome(input);
@@ -64,7 +67,7 @@ public class GenomeErrorFreeTest {
             assertTrue(cStr1.contains(testContainsStr));
         }
     }
-    
+
     /**
      * Test of main method, of class GenomeErrorFree.
      */
@@ -83,9 +86,7 @@ public class GenomeErrorFreeTest {
     public void testGreedyHamiltonianPath(){
         String originalString = createUnbrokenString(1000, false);
         ReturnGenomeInputAndPath input = new ReturnGenomeInputAndPath(originalString,200,30,10);
-        for(int i=0;i<input.input.size();i++){
-            System.out.println(i + " " +input.path[i][0] + " " + input.path[i][1] + " " + input.input.get(i));
-        }
+        
         GenomeErrorFree instance = new GenomeErrorFree();
         ArrayList<String> inputStrings = new ArrayList<>();
         Integer[][] expectedPath = new Integer[input.input.size()][2];
@@ -140,38 +141,6 @@ public class GenomeErrorFreeTest {
         
     }
     
-    /**
-     * @deprecated 
-     * @param unbrokenString
-     * @param numberOfSegments
-     * @param strLen
-     * @param maxOlPoint
-     * @return 
-     */
-    private ArrayList<String> createStringSegments(String unbrokenString, int numberOfSegments, int strLen, int maxOlPoint){
-        Random rnd = new Random();
-        String[] segments = new String[numberOfSegments];
-        
-        String multString = unbrokenString;
-        CircularString cString = new CircularString(unbrokenString);
-        ArrayList<String> rtrn;
-        //rtrn.add(cString.subString(0, cString.length()));
-        int lastStrBegin = 0;
-        String nextString = "";
-        for(int i=0;i<numberOfSegments;i++){
-            nextString = multString.substring(lastStrBegin, lastStrBegin+strLen);
-            multString = multString.substring(lastStrBegin);
-            lastStrBegin =  rnd.nextInt(maxOlPoint);
-            if((lastStrBegin+200)>multString.length())
-                multString += unbrokenString;
-            segments[i] = nextString;
-        }
-        boolean returnIsGood = testReturnString(segments, unbrokenString);
-        System.out.println("All segments in string: " + returnIsGood);
-        rtrn = new ArrayList<>(Arrays.asList(segments));
-        rtrn = mixUpStringSegments(rtrn);
-        return rtrn;
-    }
    
    private boolean testReturnString(String[] rtrn, String unbrokenString){
        CircularString cUnbr = new CircularString(unbrokenString);
@@ -230,7 +199,6 @@ public class GenomeErrorFreeTest {
      */
     private class ReturnGenomeInputAndPath{
         ArrayList<InputNode> input;
-        Integer[][] path;
         
         private ReturnGenomeInputAndPath(int pathSize){
             input = new ArrayList<>();
@@ -242,6 +210,14 @@ public class GenomeErrorFreeTest {
             mixUpArrayListAndPath();
         }
         
+        public ArrayList<String> inputAsStringList(){
+            ArrayList<String> rtrn = new ArrayList<>();
+            for(InputNode n:input){
+                rtrn.add(n.str);
+            }
+            return rtrn;
+        }
+        
         /**
          * This will create the string segments unsorted, so the path should be {0, ol}, {1, ol}, {2, ol}...etc
          * @param unbrokenString the original string
@@ -251,7 +227,6 @@ public class GenomeErrorFreeTest {
          */
         private void createStringSegments(String unbrokenString, int numberOfSegments, int strLen, int maxOlPoint){
             Random rnd = new Random();
-            path = new Integer[numberOfSegments][2];
             String multString = unbrokenString;
             ArrayList<String> rtrn;
             int lastStrBegin = 0;
@@ -273,14 +248,10 @@ public class GenomeErrorFreeTest {
   
         }
         
-        //TODO: duh this is not going to work
-        //because it's not going to change the
-        //overlap numbers. 
         private void mixUpArrayListAndPath(){
             for(int i=0;i<input.size();i++){
                 int swapWith = rnd.nextInt(input.size());
                 input = swapSegments(input,i, swapWith);
-                path = swapPath(path,i,swapWith);
             }
 
         }
@@ -309,26 +280,6 @@ public class GenomeErrorFreeTest {
             return segments;
         }
         
-        //TODO: need to change the overlap path here
-        //need to make a copy of the index. 
-        //The mixed up thing will always be the item 
-        //after the new path. But it might have been moved.
-        //the index will show where it is now. 
-        private Integer[][] swapPath(Integer[][] path, int first, int second){
-            Integer[][] newPath = new Integer[path.length][2];
-            int[] indexReference = new int[path.length];
-            Integer[] temp = Arrays.copyOf(path[first], path[first].length);
-            path[second] = Arrays.copyOf(path[first], path[first].length);
-            path[first] = Arrays.copyOf(temp, temp.length);
-            //TODO: set the new index of the moved thing
-            //and also the moved thing
-            //find the location of what was the next in path
-            //and change its overlap to match the new overlap
-            //need to do this twice, once for each thing that
-            //was swapped. Probably should be a different function
-            //that does this. 
-            return path;
-        }
         
     }
     
