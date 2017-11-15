@@ -6,10 +6,11 @@
 package genomeerrorfree;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 import org.junit.Test;
 import static org.junit.Assert.*;
-
+import genomeerrorfree.OverlapGraph;
 
 /**
  *
@@ -29,14 +30,19 @@ public class GenomeErrorFreeTest {
      */
     @Test
     public void testReturnGenome() {
-        System.out.println("returnGenome");
-        String unbrokenString = createUnbrokenString(10);
-        ArrayList<String> input = createStringSegments(unbrokenString, 3, 3);
-        GenomeErrorFree instance = new GenomeErrorFree();
-        CircularString expResult = new CircularString(unbrokenString);
-        String result = instance.returnGenome(input);
-        CircularString cResult = new CircularString(result);
-        assertEquals(expResult, cResult);
+        for(int i=0;i<10;i++){
+            int numberOfSegments = 1618;
+            int strLen = 100;
+            int maxOlPoint = 50;
+            System.out.println("returnGenome");
+            String unbrokenString = createUnbrokenString(0, true);
+            ArrayList<String> input = createStringSegments(unbrokenString, numberOfSegments, strLen, maxOlPoint);
+            GenomeErrorFree instance = new GenomeErrorFree();
+            CircularString expResult = new CircularString(unbrokenString);
+            String result = instance.returnGenome(input);
+            CircularString cResult = new CircularString(result);
+            assertEquals("Failed test number " + i + " got string " + result, expResult, result);
+        }
     }
 
 
@@ -51,6 +57,12 @@ public class GenomeErrorFreeTest {
         String subStrExp = ")(kjs";
         String subStrTest = cStr1.subString(20, 3);
         assertEquals(subStrExp, subStrTest);
+        for(int i=0;i<1000;i++){
+            int start = rnd.nextInt(str1.length());
+            int end = rnd.nextInt(str1.length());
+            String testContainsStr = cStr1.subString(start, start+end);
+            assertTrue(cStr1.contains(testContainsStr));
+        }
     }
     
     /**
@@ -65,126 +77,121 @@ public class GenomeErrorFreeTest {
         fail("The test case is a prototype.");
     }
 
-    
-    //not tested yet
+    //TODO: right now I think the mix up function isn't working 
+    //right. The overlaps it's giving aren't the right overlaps. 
     @Test
-    public void testFindOverlaps(){
-        String str1 = "";
-        String str2 = "";
-        Random rnd = new Random();
-        int trials = 20;
-        int strLen = 5;
-        for(int i=0;i<trials;i++){
-            for(int j=0;j<strLen;j++){
-                str1 += randChar();
-            }
-            int str2Start = rnd.nextInt((str1.length()+2));
-            if(str2Start<str1.length()){
-                str2 += str1.substring(str2Start);
-            }
-            for(int j=str2.length();j<strLen;j++){
-                str2 += randChar();
-            }
-            GenomeString gstr1 = new GenomeString(str1);
-            GenomeString gstr2 = new GenomeString(str2);
-            gef.findOverlaps(gstr1, gstr2, 0);
-            boolean foundMatch = false;
-            for(int[] ol:gstr2.overlaps){
-                if(matchOverlaps(gstr1.str, gstr2.str, ol[1])){
-                    foundMatch = true;
-                    System.out.println("Found match between " + str1 + " and " + str2 + ": " + str1.substring(ol[1]));
-
-                }
-            }
-            String failString = "No match found between " + str1 + " and " + str2 +"\n";
-            failString += "gstr1 string:" + gstr1.str + "\n";
-            failString += "gstr2 string: " + gstr2.str + "\n";
-            for(int[]ol:gstr2.overlaps){
-                failString += "gstr2 overlap:" + ol[0] + ", " + ol[1] + "\n";
-            }
-            assertTrue(failString, foundMatch==(str2Start<str1.length()));
+    public void testGreedyHamiltonianPath(){
+        String originalString = createUnbrokenString(1000, false);
+        ReturnGenomeInputAndPath input = new ReturnGenomeInputAndPath(originalString,200,30,10);
+        for(int i=0;i<input.input.size();i++){
+            System.out.println(i + " " +input.path[i][0] + " " + input.path[i][1] + " " + input.input.get(i));
+        }
+        GenomeErrorFree instance = new GenomeErrorFree();
+        ArrayList<String> inputStrings = new ArrayList<>();
+        Integer[][] expectedPath = new Integer[input.input.size()][2];
+        for(int i=0;i<input.input.size();i++){
+            InputNode n = input.input.get(i);
+            inputStrings.add(n.str);
+            expectedPath[i][0] = n.overlaps;
+            expectedPath[i][1] = n.overlapPoint;
+            
+        }
+        OverlapGraph graph = new OverlapGraph(inputStrings);
+        //Well this isn't so greate because I am not just testing a single function 
+        //but as far as I know findAllOverlaps always works
+        //so I'm not going to worry about it
+        graph = instance.findAllOverlaps(graph);
+        Integer[][] path = instance.greedyHamiltonianPath(graph);
+        for(int i=1;i<path.length;i++){
+            String errorString = "Path diverges at index " + i + 
+                    " expected: " + expectedPath[i][0] + ", " + expectedPath[i][1] + "\n" +
+                    " but got " + path[i][0] + ", " + path[i][1];
+            assertArrayEquals(errorString, expectedPath[i], path[i]);
+            System.out.println("Path matches at index " + i +
+                    " values: " + path[i][0] + ", " + path[i][1]);
         }
     }
-    /**
+    
+        /**
      * Creates unbroken string to get genome strings from
      * @return string of ATCGG... etc. of unbrokenStrLen length
      */
-    private String createUnbrokenString(int unbrokenStrLen){
+    private String createUnbrokenString(int unbrokenStrLen, boolean actualGenome){
+        if(actualGenome)
+            return "gagttttatcgcttccatgacgcagaagttaacactttcggatatttctgatgagtcgaaaaattatcttgataaagcaggaattactactgcttgtttacgaattaaatcgaagtggactgctggcggaaaatgagaaaattcgacctatccttgcgcagctcgagaagctcttactttgcgacctttcgccatcaactaacgattctgtcaaaaactgacgcgttggatgaggagaagtggcttaatatgcttggcacgttcgtcaaggactggtttagatatgagtcacattttgttcatggtagagattctcttgttgacattttaaaagagcgtggattactatctgagtccgatgctgttcaaccactaataggtaagaaatcatgagtcaagttactgaacaatccgtacgtttccagaccgctttggcctctattaagctcattcaggcttctgccgttttggatttaaccgaagatgatttcgattttctgacgagtaacaaagtttggattgctactgaccgctctcgtgctcgtcgctgcgttgaggcttgcgtttatggtacgctggactttgtgggataccctcgctttcctgctcctgttgagtttattgctgccgtcattgcttattatgttcatcccgtcaacattcaaacggcctgtctcatcatggaaggcgctgaatttacggaaaacattattaatggcgtcgagcgtccggttaaagccgctgaattgttcgcgtttaccttgcgtgtacgcgcaggaaacactgacgttcttactgacgcagaagaaaacgtgcgtcaaaaattacgtgcggaaggagtgatgtaatgtctaaaggtaaaaaacgttctggcgctcgccctggtcgtccgcagccgttgcgaggtactaaaggcaagcgtaaaggcgctcgtctttggtatgtaggtggtcaacaattttaattgcaggggcttcggccccttacttgaggataaattatgtctaatattcaaactggcgccgagcgtatgccgcatgacctttcccatcttggcttccttgctggtcagattggtcgtcttattaccatttcaactactccggttatcgctggcgactccttcgagatggacgccgttggcgctctccgtctttctccattgcgtcgtggccttgctattgactctactgtagacatttttactttttatgtccctcatcgtcacgtttatggtgaacagtggattaagttcatgaaggatggtgttaatgccactcctctcccgactgttaacactactggttatattgaccatgccgcttttcttggcacgattaaccctgataccaataaaatccctaagcatttgtttcagggttatttgaatatctataacaactattttaaagcgccgtggatgcctgaccgtaccgaggctaaccctaatgagcttaatcaagatgatgctcgttatggtttccgttgctgccatctcaaaaacatttggactgctccgcttcctcctgagactgagctttctcgccaaatgacgacttctaccacatctattgacattatgggtctgcaagctgcttatgctaatttgcatactgaccaagaacgtgattacttcatgcagcgttaccatgatgttatttcttcatttggaggtaaaacctcttatgacgctgacaaccgtcctttacttgtcatgcgctctaatctctgggcatctggctatgatgttgatggaactgaccaaacgtcgttaggccagttttctggtcgtgttcaacagacctataaacattctgtgccgcgtttctttgttcctgagcatggcactatgtttactcttgcgcttgttcgttttccgcctactgcgactaaagagattcagtaccttaacgctaaaggtgctttgacttataccgatattgctggcgaccctgttttgtatggcaacttgccgccgcgtgaaatttctatgaaggatgttttccgttctggtgattcgtctaagaagtttaagattgctgagggtcagtggtatcgttatgcgccttcgtatgtttctcctgcttatcaccttcttgaaggcttcccattcattcaggaaccgccttctggtgatttgcaagaacgcgtacttattcgccaccatgattatgaccagtgtttccagtccgttcagttgttgcagtggaatagtcaggttaaatttaatgtgaccgtttatcgcaatctgccgaccactcgcgattcaatcatgacttcgtgataaaagattgagtgtgaggttataacgccgaagcggtaaaaattttaatttttgccgctgaggggttgaccaagcgaagcgcggtaggttttctgcttaggagtttaatcatgtttcagacttttatttctcgccataattcaaactttttttctgataagctggttctcacttctgttactccagcttcttcggcacctgttttacagacacctaaagctacatcgtcaacgttatattttgatagtttgacggttaatgctggtaatggtggttttcttcattgcattcagatggatacatctgtcaacgccgctaatcaggttgtttctgttggtgctgatattgcttttgatgccgaccctaaattttttgcctgtttggttcgctttgagtcttcttcggttccgactaccctcccgactgcctatgatgtttatcctttgaatggtcgccatgatggtggttattataccgtcaaggactgtgtgactattgacgtccttccccgtacgccgggcaataacgtttatgttggtttcatggtttggtctaactttaccgctactaaatgccgcggattggtttcgctgaatcaggttattaaagagattatttgtctccagccacttaagtgaggtgatttatgtttggtgctattgctggcggtattgcttctgctcttgctggtggcgccatgtctaaattgtttggaggcggtcaaaaagccgcctccggtggcattcaaggtgatgtgcttgctaccgataacaatactgtaggcatgggtgatgctggtattaaatctgccattcaaggctctaatgttcctaaccctgatgaggccgcccctagttttgtttctggtgctatggctaaagctggtaaaggacttcttgaaggtacgttgcaggctggcacttctgccgtttctgataagttgcttgatttggttggacttggtggcaagtctgccgctgataaaggaaaggatactcgtgattatcttgctgctgcatttcctgagcttaatgcttgggagcgtgctggtgctgatgcttcctctgctggtatggttgacgccggatttgagaatcaaaaagagcttactaaaatgcaactggacaatcagaaagagattgccgagatgcaaaatgagactcaaaaagagattgctggcattcagtcggcgacttcacgccagaatacgaaagaccaggtatatgcacaaaatgagatgcttgcttatcaacagaaggagtctactgctcgcgttgcgtctattatggaaaacaccaatctttccaagcaacagcaggtttccgagattatgcgccaaatgcttactcaagctcaaacggctggtcagtattttaccaatgaccaaatcaaagaaatgactcgcaaggttagtgctgaggttgacttagttcatcagcaaacgcagaatcagcggtatggctcttctcatattggcgctactgcaaaggatatttctaatgtcgtcactgatgctgcttctggtgtggttgatatttttcatggtattgataaagctgttgccgatacttggaacaatttctggaaagacggtaaagctgatggtattggctctaatttgtctaggaaataaccgtcaggattgacaccctcccaattgtatgttttcatgcctccaaatcttggaggcttttttatggttcgttcttattacccttctgaatgtcacgctgattattttgactttgagcgtatcgaggctcttaaacctgctattgaggcttgtggcatttctactctttctcaatccccaatgcttggcttccataagcagatggataaccgcatcaagctcttggaagagattctgtcttttcgtatgcagggcgttgagttcgataatggtgatatgtatgttgacggccataaggctgcttctgacgttcgtgatgagtttgtatctgttactgagaagttaatggatgaattggcacaatgctacaatgtgctcccccaacttgatattaataacactatagaccaccgccccgaaggggacgaaaaatggtttttagagaacgagaagacggttacgcagttttgccgcaagctggctgctgaacgccctcttaaggatattcgcgatgagtataattaccccaaaaagaaaggtattaaggatgagtgttcaagattgctggaggcctccactatgaaatcgcgtagaggctttgctattcagcgtttgatgaatgcaatgcgacaggctcatgctgatggttggtttatcgtttttgacactctcacgttggctgacgaccgattagaggcgttttatgataatcccaatgctttgcgtgactattttcgtgatattggtcgtatggttcttgctgccgagggtcgcaaggctaatgattcacacgccgactgctatcagtatttttgtgtgcctgagtatggtacagctaatggccgtcttcatttccatgcggtgcactttatgcggacacttcctacaggtagcgttgaccctaattttggtcgtcgggtacgcaatcgccgccagttaaatagcttgcaaaatacgtggccttatggttacagtatgcccatcgcagttcgctacacgcaggacgctttttcacgttctggttggttgtggcctgttgatgctaaaggtgagccgcttaaagctaccagttatatggctgttggtttctatgtggctaaatacgttaacaaaaagtcagatatggaccttgctgctaaaggtctaggagctaaagaatggaacaactcactaaaaaccaagctgtcgctacttcccaagaagctgttcagaatcagaatgagccgcaacttcgggatgaaaatgctcacaatgacaaatctgtccacggagtgcttaatccaacttaccaagctgggttacgacgcgacgccgttcaaccagatattgaagcagaacgcaaaaagagagatgagattgaggctgggaaaagttactgtagccgacgttttggcggcgcaacctgtgacgacaaatctgctcaaatttatgcgcgcttcgataaaaatgattggcgtatccaacctgca";
+           
         String unbrokenString = "";
         for(int i=0;i<unbrokenStrLen;i++){
             unbrokenString+=randChar();
         }
         return unbrokenString;
     }
-    
-    //TODO: this never adds the last character of the string. More importantly, 
-    //this whole program doesn't take into account the fact that the string is 
-    //circular. 
-   private ArrayList<String> createStringSegments(String unbrokenString, int numberOfSegments, int strLen){
-        Random rnd = new Random();
-        CircularString cString = new CircularString(unbrokenString);
-        ArrayList<String> rtrn = new ArrayList<>();
-        //rtrn.add(cString.subString(0, cString.length()));
-        int lastStrBegin = 0;
-        while(lastStrBegin<cString.length()){
-            rtrn.add(cString.subString(lastStrBegin, lastStrBegin+strLen));
-            lastStrBegin=lastStrBegin+rnd.nextInt(strLen-1)+1;
-        }
-//        for(int i=rtrn.size();i<numberOfSegments;i++){
-//            lastStrBegin = rnd.nextInt(cString.length());
-//            rtrn.add(cString.subString(lastStrBegin, lastStrBegin+strLen));
-//        }
-        return rtrn;
-    }
     /**
      * @deprecated 
-     * @param unbrokenString the unbroken string we're getting the letters from
-     * @param numStrings the number of strings being returned
-     * @param strLen the length of each string (fixed for now)
-     * @param expectedStrings is a copy of the return except with all the overlaps filled in,
-     *                        should match the result of test
-     * @return ArrayList of randomly sampled strings
-     * TODO: Make sure that string is fully covered
-     * Do this with a boolean array for each character
-     * But don't need this yet
+     * @param input
+     * @return 
      */
-    private ArrayList<GenomeString> createGenomeStrings(String unbrokenString, int numStrings, int strLen, ArrayList<GenomeString> expectedStrings){
-        ArrayList<GenomeString> rtrn = new ArrayList<>();
-        //polsArr is an array where each index of the string
-        //represents all the strings that that position is part of
-        //and where they are
-        ArrayList<PositionOverlap>[] polsArr = new ArrayList[unbrokenString.length()];
-        for(int i=0;i<polsArr.length;i++){
-            polsArr[i]=new ArrayList<>();
+    private ArrayList<String> mixUpStringSegments(ArrayList<String> input){
+        for(int i=0;i<input.size();i++){
+            input = swapSegments(input,i,rnd.nextInt(input.size()));
+
         }
-        //for each string you're going to create
-        for(int i=0;i<numStrings;i++){
-            int startIndex = rnd.nextInt(unbrokenString.length()-strLen);
-            GenomeString g =new GenomeString(
-                    unbrokenString.substring(
-                            startIndex, startIndex+strLen));
-            rtrn.add(g);
-            GenomeString gCopy = new GenomeString(g.str, startIndex);
-            expectedStrings.add(gCopy);
-            for(int j=0;j<g.str.length();j++){
-                int currentLoc = startIndex+j;
-                polsArr[startIndex+j].add(new PositionOverlap(i, j));
-            }
+        return input;   
+        
+    }
+    
+    /**
+     * @deprecated 
+     * @param unbrokenString
+     * @param numberOfSegments
+     * @param strLen
+     * @param maxOlPoint
+     * @return 
+     */
+    private ArrayList<String> createStringSegments(String unbrokenString, int numberOfSegments, int strLen, int maxOlPoint){
+        Random rnd = new Random();
+        String[] segments = new String[numberOfSegments];
+        
+        String multString = unbrokenString;
+        CircularString cString = new CircularString(unbrokenString);
+        ArrayList<String> rtrn;
+        //rtrn.add(cString.subString(0, cString.length()));
+        int lastStrBegin = 0;
+        String nextString = "";
+        for(int i=0;i<numberOfSegments;i++){
+            nextString = multString.substring(lastStrBegin, lastStrBegin+strLen);
+            multString = multString.substring(lastStrBegin);
+            lastStrBegin =  rnd.nextInt(maxOlPoint);
+            if((lastStrBegin+200)>multString.length())
+                multString += unbrokenString;
+            segments[i] = nextString;
         }
-        for(int i=0;i<expectedStrings.size();i++){
-            GenomeString exStr = expectedStrings.get(i);
-            int strPos = exStr.location;
-            ArrayList<PositionOverlap> pols = polsArr[strPos];
-            for(PositionOverlap pol:pols){
-                int[] ols = new int[2];
-                ols[0]=pol.gStr;
-                ols[1]=pol.loc;
-                if(!(ols[0]==0 && ols[1]==0))
-                    exStr.overlaps.add(ols);
-            }
-        }
+        boolean returnIsGood = testReturnString(segments, unbrokenString);
+        System.out.println("All segments in string: " + returnIsGood);
+        rtrn = new ArrayList<>(Arrays.asList(segments));
+        rtrn = mixUpStringSegments(rtrn);
         return rtrn;
     }
+   
+   private boolean testReturnString(String[] rtrn, String unbrokenString){
+       CircularString cUnbr = new CircularString(unbrokenString);
+       for(int i=0;i<rtrn.length;i++){
+           String s = rtrn[i];
+           System.out.println(s);
+           if(!cUnbr.contains(s)){
+               return false;
+           }
+       }
+       
+       return true;
+   }
+   
+   private ArrayList<String> swapSegments(ArrayList<String> segments, int first, int second){
+       String temp = segments.get(second);
+       segments.set(second, segments.get(first));
+       segments.set(first, temp);
+       return segments;
+   }
     
     private char randChar(){
         return letters[rnd.nextInt(letters.length)];
@@ -200,17 +207,6 @@ public class GenomeErrorFreeTest {
     /**
      * Test of findAllOverlaps method, of class GenomeErrorFree.
      */
-    @Test
-    public void testFindAllOverlaps() {
-        System.out.println("findAllOverlaps");
-        ArrayList<GenomeString> gs = null;
-        GenomeErrorFree instance = new GenomeErrorFree();
-        ArrayList<GenomeString> expResult = new ArrayList<>();
-        String unbrokenString = createUnbrokenString(20);
-        gs = createGenomeStrings(unbrokenString, 20, 5, expResult);
-        ArrayList<GenomeString> result = instance.findAllOverlaps(gs);
-        assertEquals(expResult, result);
-    }
     
     /**
      * This is just a way to mark one string a particular
@@ -224,6 +220,133 @@ public class GenomeErrorFreeTest {
         public PositionOverlap(int gStr, int loc){
             this.gStr = gStr;
             this.loc = loc;
+        }
+    }
+    
+    /**
+     * This allows me to save the correct input and path 
+     * input is the actual arraylist of input strings
+     * path is the string and where they overlap
+     */
+    private class ReturnGenomeInputAndPath{
+        ArrayList<InputNode> input;
+        Integer[][] path;
+        
+        private ReturnGenomeInputAndPath(int pathSize){
+            input = new ArrayList<>();
+         }
+        
+        public ReturnGenomeInputAndPath(String unbrokenString, int numberOfSegments, int strLen, int maxOlPoint){
+            input = new ArrayList<>();
+            createStringSegments(unbrokenString, numberOfSegments, strLen, maxOlPoint);
+            mixUpArrayListAndPath();
+        }
+        
+        /**
+         * This will create the string segments unsorted, so the path should be {0, ol}, {1, ol}, {2, ol}...etc
+         * @param unbrokenString the original string
+         * @param numberOfSegments number of segments
+         * @param strLen length of a segment
+         * @param maxOlPoint the maximum point of overlap
+         */
+        private void createStringSegments(String unbrokenString, int numberOfSegments, int strLen, int maxOlPoint){
+            Random rnd = new Random();
+            path = new Integer[numberOfSegments][2];
+            String multString = unbrokenString;
+            ArrayList<String> rtrn;
+            int lastStrBegin = 0;
+            String nextString;
+            for(int i=0;i<numberOfSegments;i++){
+                nextString = multString.substring(lastStrBegin, lastStrBegin+strLen);
+                multString = multString.substring(lastStrBegin);
+                //First item i path will have overlap of -1.
+                //because I don't know where it's going to overlap. 
+                InputNode thisNode = input.get(i);
+                thisNode.overlaps = i-1;
+                thisNode.overlapPoint = lastStrBegin;
+                thisNode.overlappedBy = i+1;
+                lastStrBegin =  rnd.nextInt(maxOlPoint);
+                thisNode.str = nextString;
+                if((lastStrBegin+200)>multString.length())
+                    multString += unbrokenString;
+            }
+  
+        }
+        
+        //TODO: duh this is not going to work
+        //because it's not going to change the
+        //overlap numbers. 
+        private void mixUpArrayListAndPath(){
+            for(int i=0;i<input.size();i++){
+                int swapWith = rnd.nextInt(input.size());
+                input = swapSegments(input,i, swapWith);
+                path = swapPath(path,i,swapWith);
+            }
+
+        }
+        
+        
+           
+        
+        private ArrayList<InputNode> swapSegments(ArrayList<InputNode> segments, int first, int second){
+            InputNode firstNode = segments.get(second).copy();
+            InputNode secondNode = segments.get(first).copy();
+            //TODO: set overlaps and overlapped by for both
+            if(firstNode.overlaps!=-1){
+                InputNode firstNodeOverlaps = segments.get(firstNode.overlaps);
+                firstNodeOverlaps.overlappedBy = second;
+            }
+            if(secondNode.overlaps!=-1){
+                InputNode secondNodeOverlaps = segments.get(secondNode.overlaps);
+                secondNodeOverlaps.overlappedBy = first;
+            }
+            InputNode firstNodeOverlappedBy = segments.get(firstNode.overlappedBy);
+            firstNodeOverlappedBy.overlaps = second;
+            InputNode secondNodeOverlappedBy = segments.get(secondNode.overlappedBy);
+            secondNodeOverlappedBy.overlaps = first;
+            segments.set(second, firstNode);
+            segments.set(first, secondNode);
+            return segments;
+        }
+        
+        //TODO: need to change the overlap path here
+        //need to make a copy of the index. 
+        //The mixed up thing will always be the item 
+        //after the new path. But it might have been moved.
+        //the index will show where it is now. 
+        private Integer[][] swapPath(Integer[][] path, int first, int second){
+            Integer[][] newPath = new Integer[path.length][2];
+            int[] indexReference = new int[path.length];
+            Integer[] temp = Arrays.copyOf(path[first], path[first].length);
+            path[second] = Arrays.copyOf(path[first], path[first].length);
+            path[first] = Arrays.copyOf(temp, temp.length);
+            //TODO: set the new index of the moved thing
+            //and also the moved thing
+            //find the location of what was the next in path
+            //and change its overlap to match the new overlap
+            //need to do this twice, once for each thing that
+            //was swapped. Probably should be a different function
+            //that does this. 
+            return path;
+        }
+        
+    }
+    
+    private class InputNode{
+        String str;
+        Integer overlaps;
+        Integer overlapPoint;
+        Integer overlappedBy;
+        
+        public InputNode(String str, int overlaps, int overlapPoint, int overlappedBy){
+            this.str = str;
+            this.overlaps = overlaps;
+            this.overlapPoint = overlapPoint;
+            this.overlappedBy = overlappedBy;
+        }
+        
+        public InputNode copy(){
+            return new InputNode(this.str,this.overlaps,this.overlapPoint,this.overlappedBy);
         }
     }
 }

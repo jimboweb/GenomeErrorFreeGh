@@ -11,9 +11,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Collections;
-import java.util.Stack;
+import java.util.PriorityQueue;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,7 +24,7 @@ import java.util.logging.Logger;
 public class GenomeErrorFree {
     boolean findOverlapsIsNaive = true;
     boolean findAllOverlapsIsNaive = true;
-    private final int numberOfInputs = 5; //will be 1618
+    private final int numberOfInputs = 1618; //will be 1618
     /**
      * @param args the command line arguments
      */
@@ -38,7 +37,8 @@ public class GenomeErrorFree {
 
         }, "1", 1<<26).start();
     }
-    
+    //TODO: insert the code to get the input and run the 
+    //returnGenome method
     public GenomeErrorFree(){
         
     }
@@ -46,6 +46,9 @@ public class GenomeErrorFree {
     private void run(){
         ArrayList<String> input = getInput();
         String genome = returnGenome(input);
+//        for(int i=0;i<100000;i++){//debug
+//            genome+="A";//debug
+//        }//debug
         System.out.println(genome);
     }
     
@@ -72,13 +75,11 @@ public class GenomeErrorFree {
      */
     public String returnGenome(ArrayList<String> input){
         
-        ArrayList<GenomeString> genomeStrings = new ArrayList<>();
-        for(String s:input){
-            genomeStrings.add(new GenomeString(s));
-        }
-        genomeStrings = findAllOverlaps(genomeStrings);
-        Stack<Overlap> overlaps = getOverlapsByLength(genomeStrings);
+        OverlapGraph gr = new OverlapGraph(input);
+        gr = findAllOverlaps(gr);
+        return assembleString(gr).toString();
         
+<<<<<<< HEAD
         ArrayList<AssembledString> assembledStrings = new ArrayList<>();
         while(!overlaps.empty()){
             Overlap nextOverlap = overlaps.pop();
@@ -125,86 +126,188 @@ public class GenomeErrorFree {
         //if we don't find the genome string
         
         return "Genome not found";
+=======
+>>>>>>> OverlapGraph
     }
     
     /**
      * Find all points where the strings overlap
-     * @param gs the genome strings
+     * @param gr the overlap graph
      * @return the genome strings with the overlaps in each one
      */
-    public ArrayList<GenomeString> findAllOverlaps(ArrayList<GenomeString> gs){
+    public OverlapGraph findAllOverlaps(OverlapGraph gr){
         if(findAllOverlapsIsNaive){
-            for(int i=0;i<gs.size();i++){
-                GenomeString str1 = gs.get(i);
-                for(GenomeString str2:gs){
-                    findOverlaps(str1, str2, i);
+            for(int i=0;i<gr.stringSegments.length;i++){
+                OverlapGraph.StringSegment potentialOverlappedString = gr.stringSegments[i];
+                for(int j=0;j<gr.stringSegments.length;j++){
+                    if(j!=i){
+                        OverlapGraph.StringSegment potentialOverlappingString = gr.stringSegments[j];
+                        potentialOverlappedString = findOverlaps(potentialOverlappingString, potentialOverlappedString, j);
+                    }
                 }
             }
         }
         
-        return gs;
+        return gr;
     }
     
     /**
      * Find out if two strings overlap at one or more points
-     * @param str1 the string that might overlap
-     * @param str2 the string that might be overlapped
+     * @param potentialOverlappingString the string that might overlap
+     * @param potentialOverlappedString the string that might be overlapped
      * @param str1Pos the index of string 1
+     * @return StringSegment with the overlaps added
      */
-    public void findOverlaps(GenomeString str1, GenomeString str2, int str1Pos){
+    public OverlapGraph.StringSegment findOverlaps(OverlapGraph.StringSegment potentialOverlappingString, OverlapGraph.StringSegment potentialOverlappedString, int str1Pos){
+        
         if(findOverlapsIsNaive){
-            int stopPoint = Math.max(0, str1.str.length()-str2.str.length());
-            for(int i=str2.str.length()-1;i>stopPoint;i--){
-                if(matchOverlaps(str1.str, str2.str, i)){
-                    int[] nextOl = new int[2];
-                    nextOl[0] = str1Pos;
-                    nextOl[1] = i;
-                    str2.overlaps.add(nextOl);
+            int stopPoint = Math.max(0, potentialOverlappingString.str.length()-potentialOverlappedString.str.length());
+            for(int i=potentialOverlappedString.str.length()-1;i>stopPoint;i--){
+                if(matchOverlaps(potentialOverlappingString.str, potentialOverlappedString.str, i)){
+                    int overlapPoint = i;
+                    potentialOverlappedString = potentialOverlappedString.addOverlap(str1Pos, overlapPoint);
                 }
             }
-            return;
         }
-//        TODO: efficient method here
-//        return;
+        return potentialOverlappedString;
     }
-    // returned overlap stack will contain:
-    // - the reference of the genome that's overlapping
-    // - the reference of the genome that's overlapped
-    // - where they overlap
-    Stack<Overlap> getOverlapsByLength(ArrayList<GenomeString> gs){
-        Stack<Overlap> obl = new Stack<>();
-        ArrayList<Integer[]> olRef = new ArrayList<>();
-        for(int i=0;i<gs.size();i++){
-            GenomeString overlappingGenomeString = gs.get(i);
-            for(int j=0;j<overlappingGenomeString.overlaps.size();j++){
-                int[] overlapReferences = overlappingGenomeString.overlaps.get(j);              
-                GenomeString overlappedGenomeString = gs.get(overlapReferences[0]);
-                Overlap nextOverlap = new Overlap(overlapReferences[0], i, overlapReferences[1], overlappedGenomeString.str.length() - overlapReferences[1]);
-                obl.add(nextOverlap);
-            }
-        }
-        Collections.sort(obl);
-        return obl;
-    }
-    /**
+    
+    
+        /**
      * Determines if potentialOverlappingString overlaps potentialOverLappedString
      * @param potentialOverlappingString the string that is overlapping (starts in middle potentialOverlappedString)
      * @param potentialOverlappedString the string that's being overlapped (potentialOverlappingString starts in middle)
      * @param overlap the point where potentialOverlappingString would match potentialOverlappedString
-     * @return true if they overlap, false if they don't
+     * @return true if they overlap, false if they don't 
      */
     protected static boolean matchOverlaps(String potentialOverlappingString, String potentialOverlappedString, int overlap){
         if(overlap<0)
             return false;
-        int overlapLength = Math.min(potentialOverlappedString.length() - overlap, potentialOverlappingString.length());
-        //int polgstrlen = potentialOverlappingString.length();
-        String potentialOverlappingStringSub = potentialOverlappingString.substring(0, overlapLength);
-        String potentialOverlappedStringSub = potentialOverlappedString.substring( overlap );
-                
+        int overlapLength = potentialOverlappedString.length()-overlap;
+        String potentialOverlappingStringSub = "";
+        //debug try
+        try{
+        potentialOverlappingStringSub = potentialOverlappingString.substring(0, overlapLength);
+        } catch (IndexOutOfBoundsException e){
+            System.out.println(e);
+        }
+        String potentialOverlappedStringSub = "";//debug
+        try{//debug
+            potentialOverlappedStringSub = potentialOverlappedStringSub = potentialOverlappedString.substring( overlap );
+        } catch (StringIndexOutOfBoundsException e){//debug
+            System.out.println(e);//debug
+        }     //debug
+        
+        boolean rtrn = potentialOverlappingStringSub.equals(potentialOverlappedStringSub);//debug
         return  (potentialOverlappingStringSub.equals(potentialOverlappedStringSub));
     }
     
     /**
+     * Create the circular string from the overlap graph
+     * @param gr the overlap graph
+     * @return the circular string
+     */
+    private CircularString assembleString(OverlapGraph gr){
+        CircularString rtrn = new CircularString("");
+        Integer[][] path = greedyHamiltonianPath(gr);
+        if(path==null)
+            return new CircularString("string not found");
+        int nextNodeNumber = 0;
+
+        int currentOverlap = 0;
+        int overlap = 0;
+        boolean endOfPath = false;
+        boolean started = false;
+        do{
+            
+            if(nextNodeNumber==0 && started){
+                String rtrnStr = rtrn.toString();
+                int wrapLength = gr.stringSegments[0].str.length()-overlap;
+                String croppedRtrnStr = rtrnStr.substring(0, rtrnStr.length()-wrapLength);
+                rtrn = new CircularString(croppedRtrnStr);
+//                rtrn = new CircularString(combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn.toString(), currentOverlap));
+                endOfPath = true;
+
+            }
+            else
+            {
+                rtrn = new CircularString(combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn.toString(), currentOverlap));
+            }
+            overlap = path[nextNodeNumber][1];
+            currentOverlap += overlap;
+            nextNodeNumber = path[nextNodeNumber][0];
+            started = true;            
+        } while (!endOfPath);
+        
+        return rtrn;
+    }
+
+    //TODO: Problem is here. I'm getting almost to the end, or to
+    //then end, but there are a few extras that aren't getting covered
+    //are these dupes? 
+    /**
+     * traces through the overlap graph getting the largest 
+     * overlap and connecting it to the next largest overlap
+     * and so on until the end
+     * @param input The overlap graph
+     * @return Integer[][] of form {next string, overlap length}
+     */
+    public Integer[][] greedyHamiltonianPath(OverlapGraph input){
+        Integer[][] rtrn = new Integer[input.stringSegments.length][2];
+        boolean[] usedNodes = new boolean[input.stringSegments.length];
+        int nodeNumber = 0;
+        for(OverlapGraph.StringSegment nodePaths:input.stringSegments){
+            Collections.sort(
+                    nodePaths.suffixOverlaps, 
+                    (OverlapGraph.SuffixOverlap o1, OverlapGraph.SuffixOverlap o2) 
+                            -> ((Integer)o1.overlapPoint).compareTo(o2.overlapPoint)
+            );
+        }
+        
+        PriorityQueue pq = new PriorityQueue<>(
+            (OverlapGraph.StringSegment o1, OverlapGraph.StringSegment o2) 
+                    -> ((Integer)o1.suffixOverlaps.get(0).overlapPoint)
+                            .compareTo(o2.suffixOverlaps.get(0).overlapPoint));
+        pq.addAll(Arrays.asList(input.stringSegments));
+        while(!pq.isEmpty()){
+            OverlapGraph.StringSegment nextStringSeg = (OverlapGraph.StringSegment) pq.poll();
+            rtrn[nextStringSeg.index]=findNextPath(nextStringSeg, usedNodes);
+            if (rtrn[nextStringSeg.index] == null)
+                //then there was no further path available
+                //return null;
+                System.out.println("Incomplete path");
+                return rtrn; //debug while I'm running test
+        }
+        return rtrn;
+    }
+    
+    /**
+     * Find the next path for each string
+     * @param nextStringSeg
+     * @param usedNodes
+     * @return an Integer {the next node, the length of the overlap}
+     */
+    private Integer[] findNextPath(OverlapGraph.StringSegment nextStringSeg, boolean[] usedNodes){
+            Integer nextNodeNumber;
+            int olLength;
+            int iterator = 0;
+            do{
+                if(iterator>=nextStringSeg.suffixOverlaps.size())
+                    //that means that there are no available strings that 
+                    //overlap with this
+                    return null;
+                OverlapGraph.SuffixOverlap overlap = nextStringSeg.suffixOverlaps.get(iterator);
+                nextNodeNumber = overlap.overlappingString;
+                olLength = overlap.overlapPoint;
+                iterator++;
+            } while (usedNodes[nextNodeNumber]);
+            usedNodes[nextNodeNumber] = true;
+            Integer[] addedOverlap = {nextNodeNumber, olLength};
+            return addedOverlap;
+
+    }
+    
+        /**
      * Combines overlapping strings into a single string
      * @param overlappingString the string that overlaps (starts in the middle of the other one)
      * @param overlappedString the string that's overlapped (the other one starts in the middle)
@@ -212,7 +315,16 @@ public class GenomeErrorFree {
      * @return the string combining the two at the overlap point
      */
     protected static String combineOverlaps(String overlappingString, String overlappedString, int olPoint){
+<<<<<<< HEAD
         
+=======
+        if("".equals(overlappedString)){
+            return overlappingString;
+        }
+        if("".equals(overlappingString)){
+            return overlappedString;
+        }
+>>>>>>> OverlapGraph
         if(!matchOverlaps(overlappingString,overlappedString,olPoint)){
             return overlappedString;
             //throw new IllegalArgumentException("string " + overlappingString + " and string " + overlappedString + " do not overlap at point " + olPoint + " !");
@@ -220,81 +332,25 @@ public class GenomeErrorFree {
         
         return overlappedString.substring(0, olPoint) + overlappingString;
     }
-}
-
-// GenomeString & AssembledString might be able to be combined into 
-// classes implementing interface. Or maybe not. 
-
-
-class GenomeString{
-    String str;
-    // [0] = the other GenomeString it overlaps with and 
-    // [1] = the point where it overlaps
-    ArrayList<int[]> overlaps;
-    // [0] = the other AssembledString it overlaps with and 
-    // [1] = the point where it overlaps
-    ArrayList<int[]> assembledStrings;
-    int location = -1; //location -1 means I don't know it yet
-    public GenomeString(String str){
-        this.str=str;
-        this.overlaps = new ArrayList<>();
-        this.assembledStrings = new ArrayList<>();
-    }
-    public GenomeString(String str, int location){
-        this.str = str;
-        this.location = location;
-        this.overlaps = new ArrayList<>();
-        this.assembledStrings = new ArrayList<>();
-    }
-    public AssembledString assembleGenomeStrings(GenomeString overlappingGenomeString, 
-                                                    Overlap nextOverlap,
-                                                    int genomeStringsSize,
-                                                    int asIndex){
-            // get the strings in them
-            String firstString = overlappingGenomeString.str;
-            String secondString = this.str;
-            // get the overlap point
-            int overlapPoint = nextOverlap.overlapPoint;
-            // create the assembled string
-            // assuming we didn't screw up the overlap before
-            String newAstr = combineOverlaps(firstString, secondString, overlapPoint);
-            //array of the genome string references that will be added to the assembledString
-            Integer[] genomeStringsUsed = {nextOverlap.overlappedString, nextOverlap.overlappingString};
-            // add the assembled string to arraylist
-            AssembledString rtrn = new AssembledString(newAstr, genomeStringsSize,genomeStringsUsed,asIndex);
-            rtrn.setGenomeStringUsed(nextOverlap.overlappedString);
-            rtrn.setGenomeStringUsed(nextOverlap.overlappingString);
-//            rtrn.numberOfGenomeStrings +=2;
-            return rtrn;
-    }
     
 }
 
-class AssembledString{
-    public String str;
-    public BitSet genomeStringIsUsed;
-    public int numberOfGenomeStrings;
-    public int index;
-    
-    public AssembledString(String str, int genomeStringsAvailable, int index){
-        this.str=str;
-        genomeStringIsUsed=new BitSet(genomeStringsAvailable);
-        //Arrays.fill(genomeStringIsUsed, false); //probably don't need this
-        numberOfGenomeStrings = genomeStringIsUsed.cardinality();
-        this.index=index;
-    }
-    public AssembledString(String str, int genomeStringsAvailable, Integer [] gStrsUsed, int index){
-        this.str=str;
-        genomeStringIsUsed=new BitSet(genomeStringsAvailable);
-        //Arrays.fill(genomeStringIssed, false); //probably don't need this
-        numberOfGenomeStrings = 0;
-        for(int gStrUsed:gStrsUsed){
-            setGenomeStringUsed(gStrUsed);
+
+/**
+ * an overlap graph of the strings
+ * contains an array of string segments
+ * @author jim.stewart
+ */
+class OverlapGraph{
+    StringSegment[] stringSegments;
+    public OverlapGraph(ArrayList<String> stringSegments){
+        this.stringSegments = new StringSegment[stringSegments.size()];
+        for(int i=0;i<stringSegments.size();i++){
+            this.stringSegments[i]=new StringSegment(stringSegments.get(i),i);
         }
-        this.index=index;
     }
-    
     /**
+<<<<<<< HEAD
      * Adds a string to the assembled string and marks that it's used
      * @param gs the string to add
      * @param gsRef the reference of the genome string 
@@ -310,31 +366,51 @@ class AssembledString{
                 gs.assembledStrings.add(newAsRef);                
                 this.genomeStringIsUsed.set(gsRef);
                 this.numberOfGenomeStrings = genomeStringIsUsed.cardinality();
+=======
+     * <p>a string segment in the overlap graph
+     * contains:</p>
+     * <ul>
+     * <li> a string</li>
+     * <li>the index in the graph</li>
+     * <li>a list of suffixOverlaps of strings it overlaps with</li>
+     * </ul>
+     */
+    class StringSegment{
+        public ArrayList<SuffixOverlap> suffixOverlaps;
+        final String str;
+        final int index;
+        public StringSegment(String str, int index){
+            this.str= str;
+            this.suffixOverlaps=new ArrayList<>();
+            this.index = index;
+        }
+        public StringSegment addOverlap(int overlappingString, int lengthOfOverlap){
+            suffixOverlaps.add(new SuffixOverlap(overlappingString, lengthOfOverlap));
+            return this;
+        }
+>>>>>>> OverlapGraph
     }
     
-    protected boolean checkForCompletion(int totalGenomes){
-        int gStrUsed=genomeStringIsUsed.cardinality();
-        return genomeStringIsUsed.cardinality() == totalGenomes; 
+    /**
+     * <p> describes a suffix that overlaps. Contains:</p>
+     * <ul>
+     * <li>the index of the string that overlaps containing StringSegment</li>
+     * <li>the point at which the string segment overlaps</li>
+     * </ul>
+     */
+    class SuffixOverlap{
+        int overlappingString;
+        int overlapPoint;
+        public SuffixOverlap(int overlappingString,int lengthOfOverlap){
+            this.overlappingString=overlappingString;
+            this.overlapPoint=lengthOfOverlap;
+        }
     }
     
-    protected void setGenomeStringUsed(int genomeStringNumber){
-        genomeStringIsUsed.set(genomeStringNumber);
-        numberOfGenomeStrings = genomeStringIsUsed.cardinality();
-    }
     
 }
-class Overlap implements Comparable<Overlap>{
-    public int overlappingString;
-    public int overlappedString;
-    public int overlapPoint;
-    public int overlapLength;
-    public Overlap(int overlappingString, int overlappedString, int overlapPoint, int overlapLength){
-        this.overlappingString=overlappingString;
-        this.overlappedString=overlappedString;
-        this.overlapPoint=overlapPoint;
-        this.overlapLength = overlapLength;
-    }
 
+<<<<<<< HEAD
     @Override
     public int compareTo(Overlap o) {
         Integer thisOverlapLength = this.overlapLength;
@@ -342,7 +418,19 @@ class Overlap implements Comparable<Overlap>{
         return  otherOverlapLength.compareTo(thisOverlapLength);
     }    
 }
+=======
+>>>>>>> OverlapGraph
 
+
+
+/**
+ * <p>A character sequence that represents a circular string. Contains:</p>
+ * <ul>
+ * <li>a character array</li>
+ * <li>integer length of the string</li>
+ * </ul>
+ * @author jim.stewart
+ */
 class CircularString implements CharSequence {
 
     private final char[] characters;
@@ -356,11 +444,29 @@ class CircularString implements CharSequence {
         }
     }
     
+    /**
+     * 
+     * @return as a regular string
+     */
+    @Override 
+    public String toString(){
+        return new String(characters);
+    }
+    
+    /**
+     * 
+     * @return the number of characters
+     */
     @Override
     public int length() {
         return characters.length;
     }
 
+    /**
+     * finds the character from the beginning of listed string
+     * @param index how far in
+     * @return the character at that point
+     */
     @Override
     public char charAt(int index) {
         index = index%length;
@@ -387,6 +493,18 @@ class CircularString implements CharSequence {
         return subSequence(start,end).toString();
     }
     
+    public CircularString concatenate (String str){
+        return new CircularString(characters.toString()+str);
+    }
+    
+    public boolean contains(String s){
+        int l = s.length();
+        for(int i=0;i<length;i++){
+            if(subString(i,i+l).equals(s));
+                return true;
+        }
+        return false;
+    }
     /**
      * Check for circular equality
      * 
