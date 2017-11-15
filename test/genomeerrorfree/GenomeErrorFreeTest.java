@@ -127,19 +127,6 @@ public class GenomeErrorFreeTest {
         }
         return unbrokenString;
     }
-    /**
-     * @deprecated 
-     * @param input
-     * @return 
-     */
-    private ArrayList<String> mixUpStringSegments(ArrayList<String> input){
-        for(int i=0;i<input.size();i++){
-            input = swapSegments(input,i,rnd.nextInt(input.size()));
-
-        }
-        return input;   
-        
-    }
     
    
    private boolean testReturnString(String[] rtrn, String unbrokenString){
