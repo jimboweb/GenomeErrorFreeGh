@@ -208,6 +208,8 @@ public class GenomeErrorFree {
         boolean[] usedNodes = new boolean[input.stringSegments.length];
         int nodeNumber = 0;
         for(OverlapGraph.StringSegment nodePaths:input.stringSegments){
+            //TODO: instead of sorting the overlaps, just get the biggest ones, 
+            //which is all I need
             Collections.sort(
                     nodePaths.suffixOverlaps, 
                     (OverlapGraph.SuffixOverlap o1, OverlapGraph.SuffixOverlap o2) 
@@ -220,6 +222,7 @@ public class GenomeErrorFree {
                     -> ((Integer)o1.suffixOverlaps.get(0).overlapPoint)
                             .compareTo(o2.suffixOverlaps.get(0).overlapPoint));
         pq.addAll(Arrays.asList(input.stringSegments));
+        //TODO: create a branch every time multiple nodes have an equal overlap
         while(!pq.isEmpty()){
             OverlapGraph.StringSegment nextStringSeg = (OverlapGraph.StringSegment) pq.poll();
             rtrn[nextStringSeg.index]=findNextPath(nextStringSeg, usedNodes);
