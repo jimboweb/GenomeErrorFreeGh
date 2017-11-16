@@ -17,6 +17,13 @@ import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+
+//TODO: 
+// 1) Make overlap sorter only get largest overlaps, discard the rest (1st bookmark) 
+// 2) Build a tree of max overlap length. If two nodes have equal max overlap length,
+// add them to the tree. When a node's child is below max overlap, prune the whole 
+// branch. 
+
 /**
  *
  * @author jimstewart
@@ -193,9 +200,30 @@ public class GenomeErrorFree {
         return rtrn;
     }
 
-    //TODO: Problem is here. I'm getting almost to the end, or to
-    //then end, but there are a few extras that aren't getting covered
-    //are these dupes? 
+    /**
+     * Filters the overlaps in the string segment so that only the
+     * ones with maximum overlap length are in there. 
+     * @param segment the segment whose overlaps we're searching
+     * @return a new ArrayList of the suffix overlaps
+     */
+    public ArrayList<OverlapGraph.SuffixOverlap> filterOverlaps(OverlapGraph.StringSegment segment){
+        ArrayList<OverlapGraph.SuffixOverlap> maxOverlaps = new ArrayList<>();
+        int maxOverlap = 0;
+        for(OverlapGraph.SuffixOverlap ol:segment.suffixOverlaps){
+            int overlapLength = segment.str.length() - ol.overlapPoint;
+            if(overlapLength == maxOverlap){
+                maxOverlaps.add(ol);
+            } else if (overlapLength>maxOverlap){
+                maxOverlaps.clear();
+                maxOverlaps.add(ol);
+                maxOverlap=overlapLength;
+            }
+        }
+        return maxOverlaps;
+    }
+    
+    
+    
     /**
      * traces through the overlap graph getting the largest 
      * overlap and connecting it to the next largest overlap
@@ -207,17 +235,13 @@ public class GenomeErrorFree {
         Integer[][] rtrn = new Integer[input.stringSegments.length][2];
         boolean[] usedNodes = new boolean[input.stringSegments.length];
         int nodeNumber = 0;
-        for(OverlapGraph.StringSegment nodePaths:input.stringSegments){
-            //TODO: instead of sorting the overlaps, just get the biggest ones, 
-            //which is all I need
-            Collections.sort(
-                    nodePaths.suffixOverlaps, 
-                    (OverlapGraph.SuffixOverlap o1, OverlapGraph.SuffixOverlap o2) 
-                            -> ((Integer)o1.overlapPoint).compareTo(o2.overlapPoint)
-            );
+        for(OverlapGraph.StringSegment nodePath:input.stringSegments){
+            nodePath.suffixOverlaps = filterOverlaps(nodePath);
         }
         
         PriorityQueue pq = new PriorityQueue<>(
+            //TODO: put this in a separate comparator function
+            // in suffixOverlap
             (OverlapGraph.StringSegment o1, OverlapGraph.StringSegment o2) 
                     -> ((Integer)o1.suffixOverlaps.get(0).overlapPoint)
                             .compareTo(o2.suffixOverlaps.get(0).overlapPoint));
@@ -226,11 +250,12 @@ public class GenomeErrorFree {
         while(!pq.isEmpty()){
             OverlapGraph.StringSegment nextStringSeg = (OverlapGraph.StringSegment) pq.poll();
             rtrn[nextStringSeg.index]=findNextPath(nextStringSeg, usedNodes);
-            if (rtrn[nextStringSeg.index] == null)
+            if (rtrn[nextStringSeg.index] == null){
                 //then there was no further path available
                 //return null;
                 System.out.println("Incomplete path");
-                return rtrn; //debug while I'm running test
+                return rtrn; //DEBUG while I'm running test
+            }
         }
         return rtrn;
     }
