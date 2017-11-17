@@ -6,6 +6,8 @@
 package genomeerrorfree;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.PriorityQueue;
 import java.util.Random;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -64,6 +66,28 @@ public class GenomeErrorFreeTest {
             assertTrue(cStr1.contains(testContainsStr));
         }
     }
+        @Test
+        public void testStringSegment(){
+            ArrayList<String> l = new ArrayList<>();
+            l.add("foo");
+            l.add("bar");
+            l.add("qaz");
+            OverlapGraph og = new OverlapGraph(l);
+            og.stringSegments[0].suffixOverlaps.add(og.new SuffixOverlap(2,4));
+            og.stringSegments[1].suffixOverlaps.add(og.new SuffixOverlap(1,3));
+            og.stringSegments[2].suffixOverlaps.add(og.new SuffixOverlap(2,5));
+            PriorityQueue pq = new PriorityQueue<>();
+            pq.addAll(Arrays.asList(og.stringSegments));
+            ArrayList<OverlapGraph.StringSegment> expectedResult = new ArrayList<>();
+            expectedResult.add(og.stringSegments[1]);
+            expectedResult.add(og.stringSegments[0]);
+            expectedResult.add(og.stringSegments[2]);
+            ArrayList<OverlapGraph.StringSegment> actualResult = new ArrayList<>();
+            while(!pq.isEmpty()){
+                actualResult.add((OverlapGraph.StringSegment)pq.poll());
+            }
+            assertArrayEquals(expectedResult.toArray(), actualResult.toArray());
+        }
 
     /**
      * Test of main method, of class GenomeErrorFree.
@@ -201,6 +225,7 @@ public class GenomeErrorFreeTest {
             }
             return rtrn;
         }
+        
         
         /**
          * This will create the string segments unsorted, so the path should be {0, ol}, {1, ol}, {2, ol}...etc

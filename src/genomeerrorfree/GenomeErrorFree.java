@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.PriorityQueue;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
@@ -144,17 +143,8 @@ public class GenomeErrorFree {
         int overlapLength = potentialOverlappedString.length()-overlap;
         String potentialOverlappingStringSub = "";
         //debug try
-        try{
         potentialOverlappingStringSub = potentialOverlappingString.substring(0, overlapLength);
-        } catch (IndexOutOfBoundsException e){
-            System.out.println(e);
-        }
-        String potentialOverlappedStringSub = "";//debug
-        try{//debug
-            potentialOverlappedStringSub = potentialOverlappedStringSub = potentialOverlappedString.substring( overlap );
-        } catch (StringIndexOutOfBoundsException e){//debug
-            System.out.println(e);//debug
-        }     //debug
+        String potentialOverlappedStringSub = potentialOverlappedString.substring( overlap );
         
         boolean rtrn = potentialOverlappingStringSub.equals(potentialOverlappedStringSub);//debug
         return  (potentialOverlappingStringSub.equals(potentialOverlappedStringSub));
@@ -232,21 +222,16 @@ public class GenomeErrorFree {
      * @return Integer[][] of form {next string, overlap length}
      */
     public Integer[][] greedyHamiltonianPath(OverlapGraph input){
-        Integer[][] rtrn = new Integer[input.stringSegments.length][2];
         boolean[] usedNodes = new boolean[input.stringSegments.length];
         int nodeNumber = 0;
         for(OverlapGraph.StringSegment nodePath:input.stringSegments){
             nodePath.suffixOverlaps = filterOverlaps(nodePath);
         }
         
-        PriorityQueue pq = new PriorityQueue<>(
-            //TODO: put this in a separate comparator function
-            // in suffixOverlap
-            (OverlapGraph.StringSegment o1, OverlapGraph.StringSegment o2) 
-                    -> ((Integer)o1.suffixOverlaps.get(0).overlapPoint)
-                            .compareTo(o2.suffixOverlaps.get(0).overlapPoint));
+        PriorityQueue pq = new PriorityQueue<>();
         pq.addAll(Arrays.asList(input.stringSegments));
         //TODO: create a branch every time multiple nodes have an equal overlap
+        Integer[][] rtrn = new Integer[input.stringSegments.length][2];
         while(!pq.isEmpty()){
             OverlapGraph.StringSegment nextStringSeg = (OverlapGraph.StringSegment) pq.poll();
             rtrn[nextStringSeg.index]=findNextPath(nextStringSeg, usedNodes);
@@ -258,6 +243,42 @@ public class GenomeErrorFree {
             }
         }
         return rtrn;
+    }
+    
+    public Integer[][] drawPath(PriorityQueue pq, OverlapGraph gr, boolean[] usedNodes, int pathSize){
+        Integer[][] rtrn = new Integer[pathSize][2];
+        while(!pq.isEmpty()){
+            OverlapGraph.StringSegment currentNode = (OverlapGraph.StringSegment) pq.poll();
+            int nextNodeNumber;
+            int olLength;
+            while(currentNode.suffixOverlaps.size()!=1){
+                
+            }
+            OverlapGraph.SuffixOverlap overlap = currentNode.suffixOverlaps.get(0);
+            nextNodeNumber = overlap.overlappingString;
+            olLength = overlap.overlapPoint;
+            Integer[] addedOverlap = {nextNodeNumber,olLength};
+            rtrn[currentNode.index] = addedOverlap;
+            
+        }
+        return rtrn;
+    }
+    
+    private int compareMultipleSegments(OverlapGraph.StringSegment str, OverlapGraph og){
+//        ArrayList<OverlapGraph.StringSegment> children = new ArrayList<>();
+//        ArrayList<Integer> possibleReturns = new ArrayList<>();
+//        int maxOverlap = 0;
+//        for(int i=0;i<str.suffixOverlaps.size();i++){
+//            OverlapGraph.SuffixOverlap ol = str.suffixOverlaps.get(i);
+//            int olLength = str.str.length()-ol.overlapPoint;
+//            if (olLength>=maxOverlap){
+//                if(olLength>maxOverlap){
+//                    possibleReturns.clear();
+//                }
+//                possibleReturns.add(i);
+//            }
+//        }
+        return 0;
     }
     
     /**
@@ -333,7 +354,7 @@ class OverlapGraph{
      * <li>a list of suffixOverlaps of strings it overlaps with</li>
      * </ul>
      */
-    class StringSegment{
+    class StringSegment implements Comparable<StringSegment>{
         public ArrayList<SuffixOverlap> suffixOverlaps;
         final String str;
         final int index;
@@ -346,8 +367,15 @@ class OverlapGraph{
             suffixOverlaps.add(new SuffixOverlap(overlappingString, lengthOfOverlap));
             return this;
         }
+
+        //BUG??: right now this returns lowest-highest because that's how the 
+        //other function did it, which doesn't seem right. But other than that it
+        //works so I can flip it around when I need
+        @Override
+        public int compareTo(StringSegment o) {
+            return ((Integer)this.suffixOverlaps.get(0).overlapPoint).compareTo(o.suffixOverlaps.get(0).overlapPoint);      
+        }
     }
-    
     /**
      * <p> describes a suffix that overlaps. Contains:</p>
      * <ul>
