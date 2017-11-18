@@ -264,22 +264,6 @@ public class GenomeErrorFree {
         return rtrn;
     }
     
-    private int compareMultipleSegments(OverlapGraph.StringSegment str, OverlapGraph og){
-//        ArrayList<OverlapGraph.StringSegment> children = new ArrayList<>();
-//        ArrayList<Integer> possibleReturns = new ArrayList<>();
-//        int maxOverlap = 0;
-//        for(int i=0;i<str.suffixOverlaps.size();i++){
-//            OverlapGraph.SuffixOverlap ol = str.suffixOverlaps.get(i);
-//            int olLength = str.str.length()-ol.overlapPoint;
-//            if (olLength>=maxOverlap){
-//                if(olLength>maxOverlap){
-//                    possibleReturns.clear();
-//                }
-//                possibleReturns.add(i);
-//            }
-//        }
-        return 0;
-    }
     
     /**
      * Find the next path for each string
@@ -469,7 +453,7 @@ class CircularString implements CharSequence {
     }
     
     public CircularString concatenate (String str){
-        return new CircularString(characters.toString()+str);
+        return new CircularString(new String(characters)+str);
     }
     
     public boolean contains(String s){
@@ -545,34 +529,124 @@ class FastScanner {
 
 }
 
+/**
+ * Just a basic tree node with a value and links to parent and children
+ * @author jim.stewart
+ */
 class SimpleTreeNode  {
     int value;
     SimpleTreeNode parent;
     ArrayList<SimpleTreeNode> children;
     
+    /**
+     * Only for root node
+     * @param value the node's value
+     */
     public SimpleTreeNode(int value){
         this.value = value;
         this.parent = null;
     }
     
+    /**
+     * a node with a parent
+     * @param value node's value
+     * @param parent link to parent
+     */
     public SimpleTreeNode(int value, SimpleTreeNode parent){
         this.value = value;
         this.parent = parent;
     }
     
-    public void addNode(int value){
+    /**
+     * Add a child
+     * @param value child's value
+     */
+    public void addChildNode(int value){
         SimpleTreeNode newNode = new SimpleTreeNode(value, this);
         children.add(newNode);
     }
-   
-    public void deleteSelf(){
-        parent.children.remove(this);
+    
+    /**
+     * For all nodes at a given depth, prune branches of nodes whose value
+     * is less than the max at that level
+     * @param depth 
+     */
+    private void pruneDescendantsAtDepth(int depth){
+        ArrayList<SimpleTreeNode> descendantsAtDepth = getDescendantsAtDepth(depth);
+        ArrayList<SimpleTreeNode> nodesToPrune = getNodesToPrune(descendantsAtDepth);
+        for(SimpleTreeNode node:nodesToPrune){
+            node.pruneParents();
+        }
+     }
+    
+    /**
+     * from a list of descendant nodes, find all the ones whose value is less than the max
+     * @param descendantsAtDepth the nodes
+     * @return the nodes whose value is less than max value
+     */
+    private ArrayList<SimpleTreeNode> getNodesToPrune(ArrayList<SimpleTreeNode> descendantsAtDepth){
+        int max=0;
+        ArrayList<SimpleTreeNode> nodesToKeep = new ArrayList<>();
+        ArrayList<SimpleTreeNode> nodesToPrune = new ArrayList<>();
+        for(SimpleTreeNode desc:descendantsAtDepth){
+            if(desc.value>=max){
+                if(desc.value>max){
+                    nodesToPrune.addAll(nodesToKeep);
+                }
+                nodesToKeep.add(desc);
+            }
+        }
+        return nodesToPrune;
     }
     
-    public void pruneParents(){
+    /**
+     * gets all descendants from a node at a certain depth
+     * @param depth the depth
+     * @return all the descendants at that depth
+     */
+    private ArrayList<SimpleTreeNode> getDescendantsAtDepth(int depth){
+        int descendantDepth = 0;
+        ArrayList<SimpleTreeNode> parentNodes = new ArrayList<>();
+        ArrayList<SimpleTreeNode> childNodes = new ArrayList<>();
+        parentNodes.add(this);
+        while(descendantDepth<depth){
+            childNodes = getAllChildrenOfNodes(parentNodes);
+            if(childNodes.isEmpty())
+                return new ArrayList<>();
+            parentNodes = childNodes;
+        }
+        return children;
+        
+    }
+    
+    /**
+     * Returns all the children of a bunch of parent nodes
+     * @param nodes the parent nodes
+     * @return the children
+     */
+    private ArrayList<SimpleTreeNode> getAllChildrenOfNodes(ArrayList<SimpleTreeNode> nodes){
+        ArrayList<SimpleTreeNode> rtrn = new ArrayList<>();
+        for(SimpleTreeNode node:nodes){
+            rtrn.addAll(node.children);
+        }
+        return rtrn;
+    }
+    
+    /**
+     * prune a branch back to where it splits from a node without siblings
+     */
+    private void pruneParents(){
         if(parent.children.size()>1){
             deleteSelf();
             parent.pruneParents();
         }
     }
+    
+    /**
+     * removes this node from its parents' children
+     */
+    private void deleteSelf(){
+        parent.children.remove(this);
+    }
+  
 }
