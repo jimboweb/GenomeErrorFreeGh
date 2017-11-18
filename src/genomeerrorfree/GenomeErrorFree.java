@@ -545,3 +545,34 @@ class FastScanner {
 
 }
 
+class SimpleTreeNode  {
+    int value;
+    SimpleTreeNode parent;
+    ArrayList<SimpleTreeNode> children;
+    
+    public SimpleTreeNode(int value){
+        this.value = value;
+        this.parent = null;
+    }
+    
+    public SimpleTreeNode(int value, SimpleTreeNode parent){
+        this.value = value;
+        this.parent = parent;
+    }
+    
+    public void addNode(int value){
+        SimpleTreeNode newNode = new SimpleTreeNode(value, this);
+        children.add(newNode);
+    }
+   
+    public void deleteSelf(){
+        parent.children.remove(this);
+    }
+    
+    public void pruneParents(){
+        if(parent.children.size()>1){
+            deleteSelf();
+            parent.pruneParents();
+        }
+    }
+}
