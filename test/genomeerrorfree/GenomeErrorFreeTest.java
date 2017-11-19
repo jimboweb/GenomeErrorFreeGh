@@ -325,7 +325,8 @@ public class GenomeErrorFreeTest {
             //find the location of what was the next in path
             //and change its overlap to match the new overlap
             //need to do this twice, once for each thing that
-            //was swapped
+            //was swapped. Probably should be a different function
+            //that does this. 
             return path;
         }
         
