@@ -35,14 +35,18 @@ public class GenomeErrorFree {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        new Thread(null, new Runnable(){
-            @Override
-            public void run(){
-                new GenomeErrorFree().run();
-            }
-
-        }, "1", 1<<26).start();
+        new Thread(null, new MainTask(), "1", 1<<26).start();
     }
+    
+    static class MainTask implements Runnable {
+
+        @Override
+        public void run() {
+            new GenomeErrorFree().run();
+        }
+        
+    }
+    
     //TODO: insert the code to get the input and run the 
     //returnGenome method
     public GenomeErrorFree(){
@@ -52,9 +56,6 @@ public class GenomeErrorFree {
     private void run(){
         ArrayList<String> input = getInput();
         String genome = returnGenome(input);
-//        for(int i=0;i<100000;i++){//debug
-//            genome+="A";//debug
-//        }//debug
         System.out.println(genome);
     }
     
