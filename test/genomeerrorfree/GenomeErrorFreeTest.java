@@ -245,12 +245,8 @@ public class GenomeErrorFreeTest {
                 multString = multString.substring(lastStrBegin);
                 //First item i path will have overlap of -1.
                 //because I don't know where it's going to overlap. 
-                InputNode thisNode = input.get(i);
-                thisNode.overlaps = i-1;
-                thisNode.overlapPoint = lastStrBegin;
-                thisNode.overlappedBy = i+1;
+               input.add(new InputNode(nextString, i-1,lastStrBegin, i+1));
                 lastStrBegin =  rnd.nextInt(maxOlPoint);
-                thisNode.str = nextString;
                 if((lastStrBegin+200)>multString.length())
                     multString += unbrokenString;
             }
@@ -267,7 +263,9 @@ public class GenomeErrorFreeTest {
         
         
            
-        
+        //TODO: need to fix this so that the overlappedby works on the 
+        //last item of the list. Maybe this would be easier by absolute position
+        //rather than relative
         private ArrayList<InputNode> swapSegments(ArrayList<InputNode> segments, int first, int second){
             InputNode firstNode = segments.get(second).copy();
             InputNode secondNode = segments.get(first).copy();

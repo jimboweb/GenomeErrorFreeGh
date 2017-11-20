@@ -83,7 +83,7 @@ public class GenomeErrorFree {
      * @param input the genome strings sampled
      * @return the original genome string
      */
-    public String returnGenome(ArrayList<String> input){
+    String returnGenome(ArrayList<String> input){
         
         OverlapGraph gr = new OverlapGraph(input);
         gr = findAllOverlaps(gr);
@@ -96,7 +96,7 @@ public class GenomeErrorFree {
      * @param gr the overlap graph
      * @return the genome strings with the overlaps in each one
      */
-    public OverlapGraph findAllOverlaps(OverlapGraph gr){
+    OverlapGraph findAllOverlaps(OverlapGraph gr){
         if(findAllOverlapsIsNaive){
             for(int i=0;i<gr.stringSegments.length;i++){
                 OverlapGraph.StringSegment potentialOverlappedString = gr.stringSegments[i];
@@ -119,7 +119,7 @@ public class GenomeErrorFree {
      * @param str1Pos the index of string 1
      * @return StringSegment with the overlaps added
      */
-    public OverlapGraph.StringSegment findOverlaps(OverlapGraph.StringSegment potentialOverlappingString, OverlapGraph.StringSegment potentialOverlappedString, int str1Pos){
+    OverlapGraph.StringSegment findOverlaps(OverlapGraph.StringSegment potentialOverlappingString, OverlapGraph.StringSegment potentialOverlappedString, int str1Pos){
         
         if(findOverlapsIsNaive){
             int stopPoint = Math.max(0, potentialOverlappingString.str.length()-potentialOverlappedString.str.length());
@@ -141,7 +141,7 @@ public class GenomeErrorFree {
      * @param overlap the point where potentialOverlappingString would match potentialOverlappedString
      * @return true if they overlap, false if they don't 
      */
-    protected static boolean matchOverlaps(String potentialOverlappingString, String potentialOverlappedString, int overlap){
+    static boolean matchOverlaps(String potentialOverlappingString, String potentialOverlappedString, int overlap){
         if(overlap<0)
             return false;
         int overlapLength = potentialOverlappedString.length()-overlap;
@@ -200,7 +200,7 @@ public class GenomeErrorFree {
      * @param segment the segment whose overlaps we're searching
      * @return a new ArrayList of the suffix overlaps
      */
-    public ArrayList<OverlapGraph.SuffixOverlap> filterOverlaps(OverlapGraph.StringSegment segment){
+    ArrayList<OverlapGraph.SuffixOverlap> filterOverlaps(OverlapGraph.StringSegment segment){
         ArrayList<OverlapGraph.SuffixOverlap> maxOverlaps = new ArrayList<>();
         int maxOverlap = 0;
         for(OverlapGraph.SuffixOverlap ol:segment.suffixOverlaps){
@@ -225,7 +225,7 @@ public class GenomeErrorFree {
      * @param input The overlap graph
      * @return Integer[][] of form {next string, overlap length}
      */
-    public Integer[][] greedyHamiltonianPath(OverlapGraph input){
+    Integer[][] greedyHamiltonianPath(OverlapGraph input){
         boolean[] usedNodes = new boolean[input.stringSegments.length];
         int nodeNumber = 0;
         for(StringSegment nodePath:input.stringSegments){
@@ -234,26 +234,24 @@ public class GenomeErrorFree {
         
         PriorityQueue pq = new PriorityQueue<>();
         pq.addAll(Arrays.asList(input.stringSegments));
-        //TODO: create a branch every time multiple nodes have an equal overlap
         Integer[][] rtrn = drawPath(pq,input,usedNodes,usedNodes.length);
         return rtrn;
     }
     
-    public Integer[][] drawPath (PriorityQueue pq, OverlapGraph gr, boolean[] usedNodes, int pathSize){
+    Integer[][] drawPath (PriorityQueue pq, OverlapGraph gr, boolean[] usedNodes, int pathSize){
         Integer[][] rtrn = new Integer[pathSize][2];
         while(!pq.isEmpty()){
             StringSegment currentSegment = (StringSegment)pq.poll();
             ArrayList<SuffixOverlap> possibleOverlaps = getLargestUnusedOverlaps(currentSegment, usedNodes);
             SimpleTreeNode rootNode = new SimpleTreeNode();
-            for(SuffixOverlap ol:currentSegment.suffixOverlaps){
+            for(SuffixOverlap ol:possibleOverlaps){
                 rootNode.addChildNode(ol);
             }
             int iterator = 1;
-            rootNode.pruneChildNodesToOne(rootNode, usedNodes, iterator);
+            rootNode.pruneChildNodesToOne(rootNode, gr, usedNodes, iterator);
             SuffixOverlap nextOverlap = rootNode.children.get(0).overlapLink;
-            Integer[] nextReturn = {nextOverlap.overlappingString, nextOverlap.overlapPoint};
             usedNodes[nextOverlap.overlappingString] = true;
-            rtrn[currentSegment.index] = nextReturn;
+            rtrn[currentSegment.index] = nextOverlap.getValuesAsArray();
         }
         return rtrn;
     }
@@ -415,6 +413,10 @@ class OverlapGraph{
             return ((Integer)this.overlapPoint).compareTo(o.overlapPoint);
         }
         
+        public Integer[] getValuesAsArray(){
+            Integer[] rtrn = {overlappingString, overlapPoint};
+            return rtrn;
+        }
     }
     
     
@@ -723,7 +725,7 @@ class SimpleTreeNode  {
         }
     }
     
-    void pruneChildNodesToOne(SimpleTreeNode rootNode, boolean[] usedNodes, int iterator){
+    void pruneChildNodesToOne(SimpleTreeNode rootNode, OverlapGraph gr, boolean[] usedNodes, int iterator){
                 while (rootNode.children.size()>1){
                 rootNode.pruneDescendantsAtDepth(iterator);
                 for(SimpleTreeNode node:rootNode.getDescendantsAtDepth(iterator)){
