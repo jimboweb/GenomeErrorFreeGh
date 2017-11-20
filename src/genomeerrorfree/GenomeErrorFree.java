@@ -230,30 +230,16 @@ public class GenomeErrorFree {
         int nodeNumber = 0;
         for(StringSegment nodePath:input.stringSegments){
             Collections.sort(nodePath.suffixOverlaps);
-            
-            //This only gets the largest overlaps which might not work 
-            //if they are all used
-            //nodePath.suffixOverlaps = filterOverlaps(nodePath);
         }
         
         PriorityQueue pq = new PriorityQueue<>();
         pq.addAll(Arrays.asList(input.stringSegments));
         //TODO: create a branch every time multiple nodes have an equal overlap
-        Integer[][] rtrn = new Integer[input.stringSegments.length][2];
-        while(!pq.isEmpty()){
-            StringSegment nextStringSeg = (StringSegment) pq.poll();
-            rtrn[nextStringSeg.index]=findNextPath(nextStringSeg, usedNodes);
-            if (rtrn[nextStringSeg.index] == null){
-                //then there was no further path available
-                //return null;
-                System.out.println("Incomplete path");
-                return rtrn; //DEBUG while I'm running test
-            }
-        }
+        Integer[][] rtrn = drawPath(pq,input,usedNodes,usedNodes.length);
         return rtrn;
     }
     
-    public Integer[][] drawPath(PriorityQueue pq, OverlapGraph gr, boolean[] usedNodes, int pathSize){
+    public Integer[][] drawPath (PriorityQueue pq, OverlapGraph gr, boolean[] usedNodes, int pathSize){
         Integer[][] rtrn = new Integer[pathSize][2];
         while(!pq.isEmpty()){
             StringSegment currentSegment = (StringSegment)pq.poll();
@@ -262,19 +248,11 @@ public class GenomeErrorFree {
             for(SuffixOverlap ol:currentSegment.suffixOverlaps){
                 rootNode.addChildNode(ol);
             }
-            
-//            StringSegment currentNode = (StringSegment) pq.poll();
-//            int nextNodeNumber;
-//            int olLength;
-//            while(currentNode.suffixOverlaps.size()!=1){
-//                
-//            }
-//            SuffixOverlap overlap = currentNode.suffixOverlaps.get(0);
-//            nextNodeNumber = overlap.overlappingString;
-//            olLength = overlap.overlapPoint;
-//            Integer[] addedOverlap = {nextNodeNumber,olLength};
-//            rtrn[currentNode.index] = addedOverlap;
-//            
+            int iterator = 1;
+            rootNode.pruneChildNodesToOne(rootNode, usedNodes, iterator);
+            SuffixOverlap nextOverlap = rootNode.children.get(0).overlapLink;
+            Integer[] nextReturn = {nextOverlap.overlappingString, nextOverlap.overlapPoint};
+            rtrn[currentSegment.index] = nextReturn;
         }
         return rtrn;
     }
@@ -649,7 +627,7 @@ class SimpleTreeNode  {
      * is less than the max at that level
      * @param depth 
      */
-    private void pruneDescendantsAtDepth(int depth){
+    void pruneDescendantsAtDepth(int depth){
         ArrayList<SimpleTreeNode> descendantsAtDepth = getDescendantsAtDepth(depth);
         ArrayList<SimpleTreeNode> nodesToPrune = getNodesToPrune(descendantsAtDepth);
         for(SimpleTreeNode node:nodesToPrune){
@@ -682,7 +660,7 @@ class SimpleTreeNode  {
      * @param depth the depth
      * @return all the descendants at that depth
      */
-    private ArrayList<SimpleTreeNode> getDescendantsAtDepth(int depth){
+    public ArrayList<SimpleTreeNode> getDescendantsAtDepth(int depth){
         int descendantDepth = 0;
         ArrayList<SimpleTreeNode> parentNodes = new ArrayList<>();
         ArrayList<SimpleTreeNode> childNodes = new ArrayList<>();
@@ -702,7 +680,7 @@ class SimpleTreeNode  {
      * @param nodes the parent nodes
      * @return the children
      */
-    private ArrayList<SimpleTreeNode> getAllChildrenOfNodes(ArrayList<SimpleTreeNode> nodes){
+    public ArrayList<SimpleTreeNode> getAllChildrenOfNodes(ArrayList<SimpleTreeNode> nodes){
         ArrayList<SimpleTreeNode> rtrn = new ArrayList<>();
         for(SimpleTreeNode node:nodes){
             rtrn.addAll(node.children);
@@ -727,7 +705,7 @@ class SimpleTreeNode  {
         parent.children.remove(this);
     }
     
-    private void addChildrenAtDepth(int depth, ArrayList<ArrayList<Integer>> children){
+    void addChildrenAtDepth(int depth, ArrayList<ArrayList<SuffixOverlap>> children){
         ArrayList<SimpleTreeNode> descendants = getDescendantsAtDepth(depth);
         if(descendants.size()!=children.size()){
             throw new IndexOutOfBoundsException("IndexOutOfBounds exception in addChildrenAtDepth. \n "
@@ -742,6 +720,22 @@ class SimpleTreeNode  {
             SimpleTreeNode descendant = descendants.get(i);
             descendant.addAllChildNodes(children.get(i));
         }
+    }
+    
+    void pruneChildNodesToOne(SimpleTreeNode rootNode, boolean[] usedNodes, int iterator){
+                while (rootNode.children.size()>1){
+                rootNode.pruneDescendantsAtDepth(iterator);
+                for(SimpleTreeNode node:rootNode.getDescendantsAtDepth(iterator)){
+                    ArrayList<SuffixOverlap> addOverlaps = gr.stringSegments[node.overlapLink.overlappingString].suffixOverlaps;
+                    for(SuffixOverlap addOverlap:addOverlaps){
+                        if(usedNodes[addOverlap.overlappingString]){
+                            addOverlaps.remove(addOverlap);
+                        }
+                    }
+                    node.addAllChildNodes(addOverlaps);
+                }
+            }
+
     }
   
 }
