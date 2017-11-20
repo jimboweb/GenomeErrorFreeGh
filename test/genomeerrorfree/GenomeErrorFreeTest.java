@@ -315,12 +315,14 @@ public class GenomeErrorFreeTest {
     class StringSegTest {
         String str;
         int index;
+        int absLocation;
         ArrayList<StringSegTest> overlappedBy;
         ArrayList<StringSegTest> overlaps;
         
-        public StringSegTest(String str, int index){
+        public StringSegTest(String str, int index, int absLocation){
             this.str = str;
             this.index = index;
+            this.absLocation = absLocation;
         }
         
         public void addOverlappedBy(StringSegTest sst){
