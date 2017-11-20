@@ -252,6 +252,7 @@ public class GenomeErrorFree {
             rootNode.pruneChildNodesToOne(rootNode, usedNodes, iterator);
             SuffixOverlap nextOverlap = rootNode.children.get(0).overlapLink;
             Integer[] nextReturn = {nextOverlap.overlappingString, nextOverlap.overlapPoint};
+            usedNodes[nextOverlap.overlappingString] = true;
             rtrn[currentSegment.index] = nextReturn;
         }
         return rtrn;
