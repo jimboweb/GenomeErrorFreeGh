@@ -6,11 +6,14 @@
 package genomeerrorfree;
 
 import static genomeerrorfree.GenomeErrorFree.combineOverlaps;
+import genomeerrorfree.OverlapGraph.StringSegment;
+import genomeerrorfree.OverlapGraph.SuffixOverlap;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.PriorityQueue;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
@@ -225,8 +228,12 @@ public class GenomeErrorFree {
     public Integer[][] greedyHamiltonianPath(OverlapGraph input){
         boolean[] usedNodes = new boolean[input.stringSegments.length];
         int nodeNumber = 0;
-        for(OverlapGraph.StringSegment nodePath:input.stringSegments){
-            nodePath.suffixOverlaps = filterOverlaps(nodePath);
+        for(StringSegment nodePath:input.stringSegments){
+            Collections.sort(nodePath.suffixOverlaps);
+            
+            //This only gets the largest overlaps which might not work 
+            //if they are all used
+            //nodePath.suffixOverlaps = filterOverlaps(nodePath);
         }
         
         PriorityQueue pq = new PriorityQueue<>();
@@ -234,7 +241,7 @@ public class GenomeErrorFree {
         //TODO: create a branch every time multiple nodes have an equal overlap
         Integer[][] rtrn = new Integer[input.stringSegments.length][2];
         while(!pq.isEmpty()){
-            OverlapGraph.StringSegment nextStringSeg = (OverlapGraph.StringSegment) pq.poll();
+            StringSegment nextStringSeg = (StringSegment) pq.poll();
             rtrn[nextStringSeg.index]=findNextPath(nextStringSeg, usedNodes);
             if (rtrn[nextStringSeg.index] == null){
                 //then there was no further path available
@@ -249,22 +256,60 @@ public class GenomeErrorFree {
     public Integer[][] drawPath(PriorityQueue pq, OverlapGraph gr, boolean[] usedNodes, int pathSize){
         Integer[][] rtrn = new Integer[pathSize][2];
         while(!pq.isEmpty()){
-            OverlapGraph.StringSegment currentNode = (OverlapGraph.StringSegment) pq.poll();
-            int nextNodeNumber;
-            int olLength;
-            while(currentNode.suffixOverlaps.size()!=1){
-                
+            StringSegment currentSegment = (StringSegment)pq.poll();
+            ArrayList<SuffixOverlap> possibleOverlaps = getLargestUnusedOverlaps(currentSegment, usedNodes);
+            SimpleTreeNode rootNode = new SimpleTreeNode();
+            for(SuffixOverlap ol:currentSegment.suffixOverlaps){
+                rootNode.addChildNode(ol);
             }
-            OverlapGraph.SuffixOverlap overlap = currentNode.suffixOverlaps.get(0);
-            nextNodeNumber = overlap.overlappingString;
-            olLength = overlap.overlapPoint;
-            Integer[] addedOverlap = {nextNodeNumber,olLength};
-            rtrn[currentNode.index] = addedOverlap;
             
+//            StringSegment currentNode = (StringSegment) pq.poll();
+//            int nextNodeNumber;
+//            int olLength;
+//            while(currentNode.suffixOverlaps.size()!=1){
+//                
+//            }
+//            SuffixOverlap overlap = currentNode.suffixOverlaps.get(0);
+//            nextNodeNumber = overlap.overlappingString;
+//            olLength = overlap.overlapPoint;
+//            Integer[] addedOverlap = {nextNodeNumber,olLength};
+//            rtrn[currentNode.index] = addedOverlap;
+//            
         }
         return rtrn;
     }
     
+    /**
+     * <p>Finds the longest unused overlaps.
+     *  <ol>
+     *      <li>continues until we've found an overlap that isn't used yet.</li>
+     *      <li>Assumes the overlaps are sorted greatest length to least so 
+     *      the first one it gets will be the biggest. </li>
+     *      <li>Sets max overlap to first overlap length then continues and adds 
+     *      all overlaps with equal length.</li>
+     *  </ol>
+     * </p>
+     * @param seg segment to look in
+     * @param nodeIsUsed nodes that have already been used
+     * @return 
+     */
+    ArrayList<SuffixOverlap> getLargestUnusedOverlaps(StringSegment seg, boolean[] nodeIsUsed){
+        ArrayList<SuffixOverlap> rtrn = new ArrayList<>();
+        int maxOverlap = -1;
+        for(SuffixOverlap ol:seg.suffixOverlaps){
+            if(maxOverlap ==-1 && !nodeIsUsed[ol.overlappingString]){
+                maxOverlap = ol.getOverlapLength();
+                rtrn.add(ol);
+            } else {
+                if(ol.getOverlapLength()==maxOverlap){
+                    rtrn.add(ol);
+                } else {
+                    break;
+                }
+            }
+        }
+        return rtrn;
+    }
     
     /**
      * Find the next path for each string
@@ -327,7 +372,7 @@ class OverlapGraph{
     public OverlapGraph(ArrayList<String> stringSegments){
         this.stringSegments = new StringSegment[stringSegments.size()];
         for(int i=0;i<stringSegments.size();i++){
-            this.stringSegments[i]=new StringSegment(stringSegments.get(i),i);
+            this.stringSegments[i]=new StringSegment(this,stringSegments.get(i),i);
         }
     }
     /**
@@ -340,16 +385,18 @@ class OverlapGraph{
      * </ul>
      */
     class StringSegment implements Comparable<StringSegment>{
+        private OverlapGraph parent;
         public ArrayList<SuffixOverlap> suffixOverlaps;
         final String str;
         final int index;
-        public StringSegment(String str, int index){
+        public StringSegment(OverlapGraph parent, String str, int index){
             this.str= str;
             this.suffixOverlaps=new ArrayList<>();
             this.index = index;
+            this.parent = parent;
         }
         public StringSegment addOverlap(int overlappingString, int lengthOfOverlap){
-            suffixOverlaps.add(new SuffixOverlap(overlappingString, lengthOfOverlap));
+            suffixOverlaps.add(new SuffixOverlap(this, overlappingString, lengthOfOverlap));
             return this;
         }
 
@@ -368,13 +415,27 @@ class OverlapGraph{
      * <li>the point at which the string segment overlaps</li>
      * </ul>
      */
-    class SuffixOverlap{
+    class SuffixOverlap implements Comparable<SuffixOverlap> {
+        StringSegment parent;
         int overlappingString;
         int overlapPoint;
-        public SuffixOverlap(int overlappingString,int lengthOfOverlap){
+        public SuffixOverlap(StringSegment parent, int overlappingString,int lengthOfOverlap){
             this.overlappingString=overlappingString;
             this.overlapPoint=lengthOfOverlap;
+            this.parent=parent;
         }
+        
+        public int getOverlapLength(){
+            StringSegment seg = parent.parent.stringSegments[this.overlappingString];
+            int segLength = seg.str.length();
+            return segLength-this.overlapPoint;
+        }
+
+        @Override
+        public int compareTo(SuffixOverlap o) {
+            return ((Integer)this.overlapPoint).compareTo(o.overlapPoint);
+        }
+        
     }
     
     
@@ -538,14 +599,23 @@ class SimpleTreeNode  {
     int value;
     SimpleTreeNode parent;
     ArrayList<SimpleTreeNode> children;
+    SuffixOverlap overlapLink;
+
+
+    public SimpleTreeNode(){
+        this.value = -1;
+        this.parent = null;
+        this.overlapLink = null;
+    }
     
     /**
      * Only for root node
      * @param value the node's value
      */
-    public SimpleTreeNode(int value){
-        this.value = value;
+    public SimpleTreeNode(SuffixOverlap overlapLink){
+        this.value = overlapLink.getOverlapLength();
         this.parent = null;
+        this.overlapLink = overlapLink;
     }
     
     /**
@@ -553,18 +623,25 @@ class SimpleTreeNode  {
      * @param value node's value
      * @param parent link to parent
      */
-    public SimpleTreeNode(int value, SimpleTreeNode parent){
-        this.value = value;
+    public SimpleTreeNode(SuffixOverlap overlapLink, SimpleTreeNode parent){
+        this.value = overlapLink.getOverlapLength();
         this.parent = parent;
+        this.overlapLink = overlapLink;
     }
     
     /**
      * Add a child
      * @param value child's value
      */
-    public void addChildNode(int value){
-        SimpleTreeNode newNode = new SimpleTreeNode(value, this);
+    public void addChildNode(SuffixOverlap overlapLink){
+        SimpleTreeNode newNode = new SimpleTreeNode(overlapLink, this);
         children.add(newNode);
+    }
+    
+    public void addAllChildNodes(ArrayList<SuffixOverlap> overlaps){
+        for(SuffixOverlap ol:overlaps){
+            addChildNode(ol);
+        }
     }
     
     /**
@@ -644,10 +721,27 @@ class SimpleTreeNode  {
     }
     
     /**
-     * removes this node from its parents' children
+     * removes this node from its parent's children
      */
     private void deleteSelf(){
         parent.children.remove(this);
+    }
+    
+    private void addChildrenAtDepth(int depth, ArrayList<ArrayList<Integer>> children){
+        ArrayList<SimpleTreeNode> descendants = getDescendantsAtDepth(depth);
+        if(descendants.size()!=children.size()){
+            throw new IndexOutOfBoundsException("IndexOutOfBounds exception in addChildrenAtDepth. \n "
+                    + "Child groups not equal to number of descendants. \n" + 
+                    "Number of children = " +
+                        children.size() + "\n "
+                    + "Number of descendants = " + 
+                    descendants.size()
+                    );
+        }
+        for(int i=0;i<descendants.size();i++){
+            SimpleTreeNode descendant = descendants.get(i);
+            descendant.addAllChildNodes(children.get(i));
+        }
     }
   
 }

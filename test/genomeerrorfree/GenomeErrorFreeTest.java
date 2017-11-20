@@ -73,9 +73,9 @@ public class GenomeErrorFreeTest {
             l.add("bar");
             l.add("qaz");
             OverlapGraph og = new OverlapGraph(l);
-            og.stringSegments[0].suffixOverlaps.add(og.new SuffixOverlap(2,4));
-            og.stringSegments[1].suffixOverlaps.add(og.new SuffixOverlap(1,3));
-            og.stringSegments[2].suffixOverlaps.add(og.new SuffixOverlap(2,5));
+            og.stringSegments[0].suffixOverlaps.add(og.new SuffixOverlap(og.stringSegments[0],2,4));
+            og.stringSegments[1].suffixOverlaps.add(og.new SuffixOverlap(og.stringSegments[1], 1,3));
+            og.stringSegments[2].suffixOverlaps.add(og.new SuffixOverlap(og.stringSegments[2], 2,5));
             PriorityQueue pq = new PriorityQueue<>();
             pq.addAll(Arrays.asList(og.stringSegments));
             ArrayList<OverlapGraph.StringSegment> expectedResult = new ArrayList<>();
