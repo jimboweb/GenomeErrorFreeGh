@@ -226,6 +226,10 @@ public class GenomeErrorFreeTest {
             return rtrn;
         }
         
+        // TODO: change this by giving everything absolute locations rather than relative
+        // links to other files. Then I can go ahead and put in whatever overlaps I need.
+        // also should maybe do file links rather than indexes so I don't have to keep 
+        // track of what index goes with what
         
         /**
          * This will create the string segments unsorted, so the path should be {0, ol}, {1, ol}, {2, ol}...etc
@@ -306,5 +310,66 @@ public class GenomeErrorFreeTest {
         public InputNode copy(){
             return new InputNode(this.str,this.overlaps,this.overlapPoint,this.overlappedBy);
         }
+    }
+    
+    class StringSegTest {
+        String str;
+        int index;
+        ArrayList<StringSegTest> overlappedBy;
+        ArrayList<StringSegTest> overlaps;
+        
+        public StringSegTest(String str, int index){
+            this.str = str;
+            this.index = index;
+        }
+        
+        public void addOverlappedBy(StringSegTest sst){
+            overlappedBy.add(sst);
+        }
+        
+        public StringSegTest getOverlappedBy(int index){
+            return overlappedBy.get(index);
+        }
+        
+        public int getOverlappedByIndex(int index){
+            return overlappedBy.get(index).index;
+        }
+        
+        public ArrayList<Integer> getOverlappedByIndexList(){
+            ArrayList<Integer> rtrn = new ArrayList<>();
+            for(StringSegTest olby:overlappedBy){
+                rtrn.add(olby.index);
+            }
+            return rtrn;
+        }
+        
+        public ArrayList<StringSegTest> getOverlappedByList(){
+            return overlappedBy;
+        }
+        
+        public void addOverlaps(StringSegTest sst){
+            overlaps.add(sst);
+        }
+        
+        public StringSegTest getOverlaps(int index){
+            return overlaps.get(index);
+        }
+
+        public int getOverlapsIndex(int index){
+            return overlaps.get(index).index;
+        }
+        
+        public ArrayList<StringSegTest> getOverlapsList(){
+            return overlaps;
+        }
+        
+        public ArrayList<Integer> getOverlapsIndexList(){
+            ArrayList<Integer> rtrn = new ArrayList<>();
+            for(StringSegTest ol:overlaps){
+                rtrn.add(ol.index);
+            }
+            return rtrn;
+        }
+        
     }
 }
