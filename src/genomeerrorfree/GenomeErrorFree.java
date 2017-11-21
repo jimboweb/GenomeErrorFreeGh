@@ -726,18 +726,23 @@ class SimpleTreeNode  {
     }
     
     void pruneChildNodesToOne(SimpleTreeNode rootNode, OverlapGraph gr, boolean[] usedNodes, int iterator){
-                while (rootNode.children.size()>1){
-                rootNode.pruneDescendantsAtDepth(iterator);
-                for(SimpleTreeNode node:rootNode.getDescendantsAtDepth(iterator)){
-                    ArrayList<SuffixOverlap> addOverlaps = gr.stringSegments[node.overlapLink.overlappingString].suffixOverlaps;
-                    for(SuffixOverlap addOverlap:addOverlaps){
-                        if(usedNodes[addOverlap.overlappingString]){
-                            addOverlaps.remove(addOverlap);
-                        }
+        int numberOfChildrenAdded = -1;
+        while (rootNode.children.size()>1){
+            if(numberOfChildrenAdded==0)
+                throw new RuntimeException("Can't prune to one");
+            numberOfChildrenAdded=0;
+            rootNode.pruneDescendantsAtDepth(iterator);
+            for(SimpleTreeNode node:rootNode.getDescendantsAtDepth(iterator)){
+                ArrayList<SuffixOverlap> addOverlaps = gr.stringSegments[node.overlapLink.overlappingString].suffixOverlaps;
+                for(SuffixOverlap addOverlap:addOverlaps){
+                    if(usedNodes[addOverlap.overlappingString]){
+                        addOverlaps.remove(addOverlap);
                     }
-                    node.addAllChildNodes(addOverlaps);
                 }
+                node.addAllChildNodes(addOverlaps);
+                numberOfChildrenAdded=addOverlaps.size();
             }
+        }
 
     }
   
