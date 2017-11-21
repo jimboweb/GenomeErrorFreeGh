@@ -5,6 +5,8 @@
  */
 package genomeerrorfree;
 
+import genomeerrorfree.OverlapGraph.StringSegment;
+import genomeerrorfree.OverlapGraph.SuffixOverlap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.PriorityQueue;
@@ -149,6 +151,14 @@ public class GenomeErrorFreeTest {
         return unbrokenString;
     }
     
+    private void testPruneChildNodesToOne(){
+        OverlapGraph og = new OverlapGraph(new ArrayList<>());
+        SuffixOverlap mainOverlap = og.new SuffixOverlap(null, 0, 0);
+        SimpleTreeNode rootNode = new SimpleTreeNode(mainOverlap);
+        //TODO: make three levels of overlap graphs with different string
+        //segments. Maybe just create an overlap graph from an actual string
+        //instead of trying to mock it. 
+    }
    
    private boolean testReturnString(String[] rtrn, String unbrokenString){
        CircularString cUnbr = new CircularString(unbrokenString);
