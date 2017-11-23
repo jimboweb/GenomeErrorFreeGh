@@ -322,24 +322,24 @@ public class GenomeErrorFreeTest {
         }
     }
     
-    class StringSegTest {
+    class TestStringSeg {
         String str;
         int index;
         int absLocation;
-        ArrayList<StringSegTest> overlappedBy;
-        ArrayList<StringSegTest> overlaps;
+        ArrayList<TestStringSeg> overlappedBy;
+        ArrayList<TestStringSeg> overlaps;
         
-        public StringSegTest(String str, int index, int absLocation){
+        public TestStringSeg(String str, int index, int absLocation){
             this.str = str;
             this.index = index;
             this.absLocation = absLocation;
         }
         
-        public void addOverlappedBy(StringSegTest sst){
+        public void addOverlappedBy(TestStringSeg sst){
             overlappedBy.add(sst);
         }
         
-        public StringSegTest getOverlappedBy(int index){
+        public TestStringSeg getOverlappedBy(int index){
             return overlappedBy.get(index);
         }
         
@@ -349,21 +349,21 @@ public class GenomeErrorFreeTest {
         
         public ArrayList<Integer> getOverlappedByIndexList(){
             ArrayList<Integer> rtrn = new ArrayList<>();
-            for(StringSegTest olby:overlappedBy){
+            for(TestStringSeg olby:overlappedBy){
                 rtrn.add(olby.index);
             }
             return rtrn;
         }
         
-        public ArrayList<StringSegTest> getOverlappedByList(){
+        public ArrayList<TestStringSeg> getOverlappedByList(){
             return overlappedBy;
         }
         
-        public void addOverlaps(StringSegTest sst){
+        public void addOverlaps(TestStringSeg sst){
             overlaps.add(sst);
         }
         
-        public StringSegTest getOverlaps(int index){
+        public TestStringSeg getOverlaps(int index){
             return overlaps.get(index);
         }
 
@@ -371,13 +371,13 @@ public class GenomeErrorFreeTest {
             return overlaps.get(index).index;
         }
         
-        public ArrayList<StringSegTest> getOverlapsList(){
+        public ArrayList<TestStringSeg> getOverlapsList(){
             return overlaps;
         }
         
         public ArrayList<Integer> getOverlapsIndexList(){
             ArrayList<Integer> rtrn = new ArrayList<>();
-            for(StringSegTest ol:overlaps){
+            for(TestStringSeg ol:overlaps){
                 rtrn.add(ol.index);
             }
             return rtrn;
