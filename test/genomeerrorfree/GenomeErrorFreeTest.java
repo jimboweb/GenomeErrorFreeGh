@@ -5,12 +5,17 @@
  */
 package genomeerrorfree;
 
+import genomeerrorfree.GenomeErrorFreeTest.TestStringSeg;
 import genomeerrorfree.OverlapGraph.StringSegment;
 import genomeerrorfree.OverlapGraph.SuffixOverlap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -99,12 +104,9 @@ public class GenomeErrorFreeTest {
         System.out.println("main");
         String[] args = null;
         GenomeErrorFree.main(args);
-        // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
 
-    //TODO: right now I think the mix up function isn't working 
-    //right. The overlaps it's giving aren't the right overlaps. 
     @Test
     public void testGreedyHamiltonianPath(){
         String originalString = createUnbrokenString(1000, false);
@@ -113,11 +115,12 @@ public class GenomeErrorFreeTest {
         GenomeErrorFree instance = new GenomeErrorFree();
         ArrayList<String> inputStrings = new ArrayList<>();
         Integer[][] expectedPath = new Integer[input.input.size()][2];
+        //TODO: have to add overlap point to TestStringSeg
         for(int i=0;i<input.input.size();i++){
-            InputNode n = input.input.get(i);
-            inputStrings.add(n.str);
-            expectedPath[i][0] = n.overlaps;
-            expectedPath[i][1] = n.overlapPoint;
+//            InputNode n = input.input.get(i);
+//            inputStrings.add(n.str);
+//            expectedPath[i][0] = n.overlaps; //this will be .overlaps.get(0)
+//            expectedPath[i][1] = n.overlapPoint;
             
         }
         OverlapGraph graph = new OverlapGraph(inputStrings);
@@ -216,7 +219,7 @@ public class GenomeErrorFreeTest {
      * path is the string and where they overlap
      */
     private class ReturnGenomeInputAndPath{
-        ArrayList<InputNode> input;
+        ArrayList<TestStringSeg> input;
         
         private ReturnGenomeInputAndPath(int pathSize){
             input = new ArrayList<>();
@@ -230,7 +233,7 @@ public class GenomeErrorFreeTest {
         
         public ArrayList<String> inputAsStringList(){
             ArrayList<String> rtrn = new ArrayList<>();
-            for(InputNode n:input){
+            for(TestStringSeg n:input){
                 rtrn.add(n.str);
             }
             return rtrn;
@@ -254,23 +257,49 @@ public class GenomeErrorFreeTest {
             ArrayList<String> rtrn;
             int lastStrBegin = 0;
             String nextString;
+            int absLocation = 0;
+            ArrayList<TestStringSeg> stringsToOverlap = new ArrayList<>();
             for(int i=0;i<numberOfSegments;i++){
                 nextString = multString.substring(lastStrBegin, lastStrBegin+strLen);
                 multString = multString.substring(lastStrBegin);
                 //First item i path will have overlap of -1.
                 //because I don't know where it's going to overlap. 
-               input.add(new InputNode(nextString, i-1,lastStrBegin, i+1));
+                TestStringSeg nextStringSeg = new TestStringSeg(nextString, lastStrBegin, absLocation);
+                input.add(nextStringSeg);
+                
+                stringsToOverlap=addOverlaps(stringsToOverlap,nextStringSeg,strLen,absLocation);
                 lastStrBegin =  rnd.nextInt(maxOlPoint);
+                absLocation+= lastStrBegin;
                 if((lastStrBegin+200)>multString.length())
                     multString += unbrokenString;
             }
-  
+            
+        }
+        
+        /**
+         * adds the overlaps to all the string segments
+         * @param stringsToOverlap a collection with all the string segments that could overlap
+         * @param nextStringSeg the next string segment that can overlap
+         * @param strLen the string length
+         * @param absLocation the absolute location
+         * @return new 
+         */
+        private ArrayList<TestStringSeg> addOverlaps(ArrayList<TestStringSeg> stringsToOverlap, TestStringSeg nextStringSeg, int strLen, int absLocation){
+                stringsToOverlap.add(nextStringSeg);
+                ArrayList<TestStringSeg> newStringsToOverlap = new ArrayList<>();
+                Collections.copy(stringsToOverlap, newStringsToOverlap);
+                Stream<TestStringSeg> stringsStream = stringsToOverlap.stream();
+                Stream<TestStringSeg> newStringsStream = stringsStream
+                        .filter(tStrSeg->tStrSeg.absLocation+strLen>absLocation);
+                newStringsToOverlap = (ArrayList<TestStringSeg>)newStringsStream.collect(Collectors.toList());
+                stringsToOverlap=newStringsToOverlap;
+                return stringsToOverlap;
         }
         
         private void mixUpArrayListAndPath(){
             for(int i=0;i<input.size();i++){
                 int swapWith = rnd.nextInt(input.size());
-                input = swapSegments(input,i, swapWith);
+                //input = swapSegments(input,i, swapWith);
             }
 
         }
@@ -325,7 +354,7 @@ public class GenomeErrorFreeTest {
     class TestStringSeg {
         String str;
         int index;
-        int absLocation;
+        final int absLocation;
         ArrayList<TestStringSeg> overlappedBy;
         ArrayList<TestStringSeg> overlaps;
         
