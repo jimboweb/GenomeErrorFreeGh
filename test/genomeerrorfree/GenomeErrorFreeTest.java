@@ -276,6 +276,13 @@ public class GenomeErrorFreeTest {
             
         }
         
+        private ArrayList<TestStringSeg> circularOverlaps(String unbrokenString, ArrayList<TestStringSeg> stringsToOverlap, TestStringSeg nextStringSeg, int strLen, int absLocation){
+            ArrayList<TestStringSeg> rtrn = new ArrayList<>();
+            //TODO: if nextStringSegment within strLen of unbrokenString, 
+            //find all the overlaps at the beginning and add them at both ends
+            return rtrn;
+        }
+        
         /**
          * adds the overlaps to all the string segments
          * @param stringsToOverlap a collection with all the string segments that could overlap
