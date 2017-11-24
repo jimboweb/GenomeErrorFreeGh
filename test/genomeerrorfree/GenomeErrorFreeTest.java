@@ -114,9 +114,8 @@ public class GenomeErrorFreeTest {
         ArrayList<String> inputStrings = new ArrayList<>();
         Integer[][] expectedPath = createExpectedPath(input, inputStrings);
         OverlapGraph graph = new OverlapGraph(inputStrings);
-        //Well this isn't so greate because I am not just testing a single function 
-        //but as far as I know findAllOverlaps always works
-        //so I'm not going to worry about it
+        //TODO: get the graph overlaps from the overlaps in 
+        //TestStringSegments instead of from findAllOverlaps method
         graph = instance.findAllOverlaps(graph);
         Integer[][] path = instance.greedyHamiltonianPath(graph);
         for(int i=1;i<path.length;i++){
