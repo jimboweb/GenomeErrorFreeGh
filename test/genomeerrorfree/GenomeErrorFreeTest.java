@@ -6,12 +6,10 @@
 package genomeerrorfree;
 
 import genomeerrorfree.GenomeErrorFreeTest.TestStringSeg;
-import genomeerrorfree.OverlapGraph.StringSegment;
 import genomeerrorfree.OverlapGraph.SuffixOverlap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -114,15 +112,7 @@ public class GenomeErrorFreeTest {
         
         GenomeErrorFree instance = new GenomeErrorFree();
         ArrayList<String> inputStrings = new ArrayList<>();
-        Integer[][] expectedPath = new Integer[input.input.size()][2];
-        //TODO: have to add overlap point to TestStringSeg
-        for(int i=0;i<input.input.size();i++){
-//            InputNode n = input.input.get(i);
-//            inputStrings.add(n.str);
-//            expectedPath[i][0] = n.overlaps; //this will be .overlaps.get(0)
-//            expectedPath[i][1] = n.overlapPoint;
-            
-        }
+        Integer[][] expectedPath = createExpectedPath(input, inputStrings);
         OverlapGraph graph = new OverlapGraph(inputStrings);
         //Well this isn't so greate because I am not just testing a single function 
         //but as far as I know findAllOverlaps always works
@@ -137,6 +127,18 @@ public class GenomeErrorFreeTest {
             System.out.println("Path matches at index " + i +
                     " values: " + path[i][0] + ", " + path[i][1]);
         }
+    }
+    
+    private Integer[][] createExpectedPath(ReturnGenomeInputAndPath input,ArrayList<String> inputStrings){
+        Integer[][] expectedPath = new Integer[input.input.size()][2];
+        for(int i=0;i<input.input.size();i++){
+            TestStringSeg n = input.input.get(i);
+            inputStrings.add(n.str);
+            expectedPath[i][0] = n.getOverlappedByIndex(0); 
+            expectedPath[i][1] = n.getOverlappedByOlPoint(0);
+            
+        }
+        return expectedPath;
     }
     
         /**
@@ -266,7 +268,6 @@ public class GenomeErrorFreeTest {
                 //because I don't know where it's going to overlap. 
                 TestStringSeg nextStringSeg = new TestStringSeg(nextString, lastStrBegin, absLocation);
                 input.add(nextStringSeg);
-                
                 stringsToOverlap=addOverlaps(stringsToOverlap,nextStringSeg,strLen,absLocation);
                 lastStrBegin =  rnd.nextInt(maxOlPoint);
                 absLocation+= lastStrBegin;
@@ -293,13 +294,17 @@ public class GenomeErrorFreeTest {
                         .filter(tStrSeg->tStrSeg.absLocation+strLen>absLocation);
                 newStringsToOverlap = (ArrayList<TestStringSeg>)newStringsStream.collect(Collectors.toList());
                 stringsToOverlap=newStringsToOverlap;
+                for(TestStringSeg sto:stringsToOverlap){
+                    nextStringSeg.addOverlaps(sto, nextStringSeg.absLocation-sto.absLocation);
+                    sto.addOverlappedBy(nextStringSeg, nextStringSeg.absLocation-sto.absLocation);
+                }
                 return stringsToOverlap;
         }
         
         private void mixUpArrayListAndPath(){
             for(int i=0;i<input.size();i++){
                 int swapWith = rnd.nextInt(input.size());
-                //input = swapSegments(input,i, swapWith);
+                input = swapSegments(input,i, swapWith);
             }
 
         }
@@ -309,30 +314,22 @@ public class GenomeErrorFreeTest {
         //TODO: need to fix this so that the overlappedby works on the 
         //last item of the list. Maybe this would be easier by absolute position
         //rather than relative
-        private ArrayList<InputNode> swapSegments(ArrayList<InputNode> segments, int first, int second){
-            InputNode firstNode = segments.get(second).copy();
-            InputNode secondNode = segments.get(first).copy();
+        private ArrayList<TestStringSeg> swapSegments(ArrayList<TestStringSeg> segments, int first, int second){
+            TestStringSeg firstNode = segments.get(first).copy();
             //TODO: set overlaps and overlapped by for both
-            if(firstNode.overlaps!=-1){
-                InputNode firstNodeOverlaps = segments.get(firstNode.overlaps);
-                firstNodeOverlaps.overlappedBy = second;
-            }
-            if(secondNode.overlaps!=-1){
-                InputNode secondNodeOverlaps = segments.get(secondNode.overlaps);
-                secondNodeOverlaps.overlappedBy = first;
-            }
-            InputNode firstNodeOverlappedBy = segments.get(firstNode.overlappedBy);
-            firstNodeOverlappedBy.overlaps = second;
-            InputNode secondNodeOverlappedBy = segments.get(secondNode.overlappedBy);
-            secondNodeOverlappedBy.overlaps = first;
+            segments.set(first, segments.get(second));
             segments.set(second, firstNode);
-            segments.set(first, secondNode);
             return segments;
         }
         
         
     }
     
+    /**
+     * @deprecated 
+     * The older input node that only kept one overlap and one
+     * overlappedBy
+     */
     private class InputNode{
         String str;
         Integer overlaps;
@@ -351,12 +348,24 @@ public class GenomeErrorFreeTest {
         }
     }
     
+    /**
+     * A test of the string segment
+     * This should have really just been a subclass
+     * but I just don't want to fix it
+     */
     class TestStringSeg {
         String str;
         int index;
         final int absLocation;
         ArrayList<TestOverlap> overlappedBy;
         ArrayList<TestOverlap> overlaps;
+        
+        public TestStringSeg copy(){
+            TestStringSeg rtrn = new TestStringSeg(str,index,absLocation);
+            rtrn.overlappedBy=overlappedBy;
+            rtrn.overlaps=overlaps;
+            return rtrn;
+        }
         
         public TestStringSeg(String str, int index, int absLocation){
             this.str = str;
@@ -374,6 +383,10 @@ public class GenomeErrorFreeTest {
         
         public int getOverlappedByIndex(int index){
             return overlappedBy.get(index).stringSeg.index;
+        }
+        
+        public int getOverlappedByOlPoint(int index){
+            return overlappedBy.get(index).overlapPoint;
         }
         
         public ArrayList<Integer> getOverlappedByIndexList(){
@@ -414,6 +427,9 @@ public class GenomeErrorFreeTest {
         
     }
     
+    /**
+     * Just a class to keep the overlaps in the TestStringSegment
+     */
     class TestOverlap {
         public TestOverlap(boolean suffix, TestStringSeg stringSeg, int overlapPoint){
             this.suffix = suffix;
