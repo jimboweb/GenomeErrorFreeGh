@@ -355,8 +355,8 @@ public class GenomeErrorFreeTest {
         String str;
         int index;
         final int absLocation;
-        ArrayList<TestStringSeg> overlappedBy;
-        ArrayList<TestStringSeg> overlaps;
+        ArrayList<TestOverlap> overlappedBy;
+        ArrayList<TestOverlap> overlaps;
         
         public TestStringSeg(String str, int index, int absLocation){
             this.str = str;
@@ -364,53 +364,64 @@ public class GenomeErrorFreeTest {
             this.absLocation = absLocation;
         }
         
-        public void addOverlappedBy(TestStringSeg sst){
-            overlappedBy.add(sst);
+        public void addOverlappedBy(TestStringSeg sst, int overlapPoint){
+            overlappedBy.add(new TestOverlap(false, sst, overlapPoint));
         }
         
-        public TestStringSeg getOverlappedBy(int index){
+        public TestOverlap getOverlappedBy(int index){
             return overlappedBy.get(index);
         }
         
         public int getOverlappedByIndex(int index){
-            return overlappedBy.get(index).index;
+            return overlappedBy.get(index).stringSeg.index;
         }
         
         public ArrayList<Integer> getOverlappedByIndexList(){
             ArrayList<Integer> rtrn = new ArrayList<>();
-            for(TestStringSeg olby:overlappedBy){
-                rtrn.add(olby.index);
+            for(TestOverlap olby:overlappedBy){
+                rtrn.add(olby.stringSeg.index);
             }
             return rtrn;
         }
         
-        public ArrayList<TestStringSeg> getOverlappedByList(){
+        public ArrayList<TestOverlap> getOverlappedByList(){
             return overlappedBy;
         }
         
-        public void addOverlaps(TestStringSeg sst){
-            overlaps.add(sst);
+        public void addOverlaps(TestStringSeg sst, int overlapPoint){
+            overlaps.add(new TestOverlap(true, sst, overlapPoint));
         }
         
-        public TestStringSeg getOverlaps(int index){
+        public TestOverlap getOverlaps(int index){
             return overlaps.get(index);
         }
 
         public int getOverlapsIndex(int index){
-            return overlaps.get(index).index;
+            return overlaps.get(index).stringSeg.index;
         }
         
-        public ArrayList<TestStringSeg> getOverlapsList(){
+        public ArrayList<TestOverlap> getOverlapsList(){
             return overlaps;
         }
         
         public ArrayList<Integer> getOverlapsIndexList(){
             ArrayList<Integer> rtrn = new ArrayList<>();
-            for(TestStringSeg ol:overlaps){
-                rtrn.add(ol.index);
+            for(TestOverlap ol:overlaps){
+                rtrn.add(ol.stringSeg.index);
             }
             return rtrn;
         }
         
+    }
+    
+    class TestOverlap {
+        public TestOverlap(boolean suffix, TestStringSeg stringSeg, int overlapPoint){
+            this.suffix = suffix;
+            this.stringSeg = stringSeg;
+            this.overlapPoint = overlapPoint;
+        }
+        boolean suffix;
+        TestStringSeg stringSeg;
+        int overlapPoint;
     }
 }
