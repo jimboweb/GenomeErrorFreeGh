@@ -247,8 +247,7 @@ public class GenomeErrorFree {
             for(SuffixOverlap ol:possibleOverlaps){
                 rootNode.addChildNode(ol);
             }
-            int iterator = 1;
-            rootNode.pruneChildNodesToOne(rootNode, gr, usedNodes, iterator);
+            rootNode.pruneChildNodesToOne(rootNode, gr, usedNodes);
             SuffixOverlap nextOverlap = rootNode.children.get(0).overlapLink;
             usedNodes[nextOverlap.overlappingString] = true;
             rtrn[currentSegment.index] = nextOverlap.getValuesAsArray();
@@ -274,14 +273,20 @@ public class GenomeErrorFree {
         ArrayList<SuffixOverlap> rtrn = new ArrayList<>();
         int maxOverlap = -1;
         for(SuffixOverlap ol:seg.suffixOverlaps){
-            if(maxOverlap ==-1 && !nodeIsUsed[ol.overlappingString]){
-                maxOverlap = ol.getOverlapLength();
-                rtrn.add(ol);
-            } else {
-                if(ol.getOverlapLength()==maxOverlap){
+            if(!nodeIsUsed[ol.overlappingString]){
+                if(maxOverlap ==-1){
+                    maxOverlap = ol.getOverlapLength();
                     rtrn.add(ol);
                 } else {
-                    break;
+                    int overlapLength = ol.getOverlapLength();
+                    if(overlapLength>=maxOverlap){
+                        if(overlapLength>maxOverlap)
+                            throw new IllegalArgumentException("overlaps not in order");
+                        maxOverlap = ol.getOverlapLength();
+                        rtrn.add(ol);
+                    } else {
+                        break;
+                    }
                 }
             }
         }
@@ -663,6 +668,7 @@ class SimpleTreeNode  {
     
     /**
      * gets all descendants from a node at a certain depth
+     * BUG: this isn't returning any descendants sometimes
      * @param depth the depth
      * @return all the descendants at that depth
      */
@@ -677,7 +683,7 @@ class SimpleTreeNode  {
                 return new ArrayList<>();
             parentNodes = childNodes;
         }
-        return children;
+        return childNodes;
         
     }
     
@@ -728,7 +734,8 @@ class SimpleTreeNode  {
         }
     }
     
-    void pruneChildNodesToOne(SimpleTreeNode rootNode, OverlapGraph gr, boolean[] usedNodes, int iterator){
+    void pruneChildNodesToOne(SimpleTreeNode rootNode, OverlapGraph gr, boolean[] usedNodes){
+        int iterator = 1;
         int numberOfChildrenAdded = -1;
         while (rootNode.children.size()>1){
             if(numberOfChildrenAdded==0)
