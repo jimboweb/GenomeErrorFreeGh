@@ -587,6 +587,7 @@ class SimpleTreeNode  {
         this.value = -1;
         this.parent = null;
         this.overlapLink = null;
+        this.children=new ArrayList<>();
     }
     
     /**
@@ -597,6 +598,7 @@ class SimpleTreeNode  {
         this.value = overlapLink.getOverlapLength();
         this.parent = null;
         this.overlapLink = overlapLink;
+        this.children=new ArrayList<>();
     }
     
     /**
@@ -608,6 +610,7 @@ class SimpleTreeNode  {
         this.value = overlapLink.getOverlapLength();
         this.parent = parent;
         this.overlapLink = overlapLink;
+        this.children=new ArrayList<>();
     }
     
     /**

@@ -105,6 +105,9 @@ public class GenomeErrorFreeTest {
         fail("The test case is a prototype.");
     }
 
+    /**
+     * tests the greedyHamiltonianPath method
+     */
     @Test
     public void testGreedyHamiltonianPath(){
         String originalString = createUnbrokenString(1000, false);
@@ -240,10 +243,6 @@ public class GenomeErrorFreeTest {
             return rtrn;
         }
         
-        // TODO: change this by giving everything absolute locations rather than relative
-        // links to other files. Then I can go ahead and put in whatever overlaps I need.
-        // also should maybe do file links rather than indexes so I don't have to keep 
-        // track of what index goes with what
         
         /**
          * This will create the string segments unsorted, so the path should be {0, ol}, {1, ol}, {2, ol}...etc
@@ -263,11 +262,10 @@ public class GenomeErrorFreeTest {
             for(int i=0;i<numberOfSegments;i++){
                 nextString = multString.substring(lastStrBegin, lastStrBegin+strLen);
                 multString = multString.substring(lastStrBegin);
-                //First item i path will have overlap of -1.
-                //because I don't know where it's going to overlap. 
-                TestStringSeg nextStringSeg = new TestStringSeg(nextString, lastStrBegin, absLocation);
+                 TestStringSeg nextStringSeg = new TestStringSeg(nextString, lastStrBegin, absLocation);
                 input.add(nextStringSeg);
-                stringsToOverlap=addOverlaps(stringsToOverlap,nextStringSeg,strLen,absLocation);
+                stringsToOverlap = addOverlaps(stringsToOverlap,nextStringSeg,strLen,absLocation);
+                stringsToOverlap = findCircularOverlaps(unbrokenString, input, stringsToOverlap, nextStringSeg, strLen, absLocation);
                 lastStrBegin =  rnd.nextInt(maxOlPoint);
                 absLocation+= lastStrBegin;
                 if((lastStrBegin+200)>multString.length())
@@ -276,11 +274,20 @@ public class GenomeErrorFreeTest {
             
         }
         
-        private ArrayList<TestStringSeg> circularOverlaps(String unbrokenString, ArrayList<TestStringSeg> stringsToOverlap, TestStringSeg nextStringSeg, int strLen, int absLocation){
-            ArrayList<TestStringSeg> rtrn = new ArrayList<>();
-            //TODO: if nextStringSegment within strLen of unbrokenString, 
-            //find all the overlaps at the beginning and add them at both ends
-            return rtrn;
+        private ArrayList<TestStringSeg> findCircularOverlaps(String unbrokenString, ArrayList<TestStringSeg> input, ArrayList<TestStringSeg> stringsToOverlap, TestStringSeg nextStringSeg, int strLen, int absLocation){
+            if(nextStringSeg.absLocation>unbrokenString.length()-strLen){
+                int lengthOfCircularOverlap = unbrokenString.length()%strLen;
+                for(TestStringSeg seg:input){
+                    if(seg.absLocation>lengthOfCircularOverlap){
+                        break;
+                    }
+                    int startOlPoint = unbrokenString.length()-absLocation;
+                    int olPoint = startOlPoint + seg.absLocation;
+                    nextStringSeg.addOverlaps(seg, olPoint);
+                    seg.addOverlappedBy(nextStringSeg, olPoint);
+                }
+            }
+            return stringsToOverlap;
         }
         
         /**
@@ -301,8 +308,9 @@ public class GenomeErrorFreeTest {
                 newStringsToOverlap = (ArrayList<TestStringSeg>)newStringsStream.collect(Collectors.toList());
                 stringsToOverlap=newStringsToOverlap;
                 for(TestStringSeg sto:stringsToOverlap){
-                    nextStringSeg.addOverlaps(sto, nextStringSeg.absLocation-sto.absLocation);
-                    sto.addOverlappedBy(nextStringSeg, nextStringSeg.absLocation-sto.absLocation);
+                    int olPoint = nextStringSeg.absLocation-sto.absLocation;
+                    nextStringSeg.addOverlaps(sto, olPoint);
+                    sto.addOverlappedBy(nextStringSeg, olPoint);
                 }
                 return stringsToOverlap;
         }
@@ -317,12 +325,8 @@ public class GenomeErrorFreeTest {
         
         
            
-        //TODO: need to fix this so that the overlappedby works on the 
-        //last item of the list. Maybe this would be easier by absolute position
-        //rather than relative
         private ArrayList<TestStringSeg> swapSegments(ArrayList<TestStringSeg> segments, int first, int second){
             TestStringSeg firstNode = segments.get(first).copy();
-            //TODO: set overlaps and overlapped by for both
             segments.set(first, segments.get(second));
             segments.set(second, firstNode);
             return segments;
@@ -377,6 +381,8 @@ public class GenomeErrorFreeTest {
             this.str = str;
             this.index = index;
             this.absLocation = absLocation;
+            this.overlappedBy=new ArrayList<>();
+            this.overlaps = new ArrayList<>();
         }
         
         public void addOverlappedBy(TestStringSeg sst, int overlapPoint){
