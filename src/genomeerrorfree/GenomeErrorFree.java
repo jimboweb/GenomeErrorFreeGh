@@ -250,6 +250,7 @@ public class GenomeErrorFree {
      *      <li>makes that the next item on path after item in pq</li>
      *  </ol>
      * </p>
+     * BUG: drawing a path but not the right one. taking the wrong node at some point.
      * @param pq
      * @param gr
      * @param usedNodes
@@ -272,6 +273,7 @@ public class GenomeErrorFree {
         }
         return rtrn;
     }
+    
     
     /**
      * <p>Finds the longest unused overlaps.
@@ -660,7 +662,6 @@ class SimpleTreeNode  {
     
     /**
      * gets all descendants from a node at a certain depth
-     * BUG: this isn't returning any descendants sometimes
      * @param depth the depth
      * @return all the descendants at that depth
      */
@@ -727,6 +728,10 @@ class SimpleTreeNode  {
         }
     }
     
+    //TODO: I think my pruning strategy isn't right here. 
+    //I think I'm pruning any node that has a parent whose child is
+    //less than max for that level. What I neeed to do is prune
+    //only node where ALL the children are less than max for that level.
     /**
      * <p>
      *  prunes the node connected to Overlaps of StringSegment down to one. Beginning from
