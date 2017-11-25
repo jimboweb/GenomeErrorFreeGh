@@ -747,6 +747,7 @@ class SimpleTreeNode  {
                 throw new RuntimeException("Can't prune to one");
             numberOfChildrenAdded=0;
             rootNode.pruneDescendantsAtDepth(iterator);
+            ArrayList<ArrayList<SuffixOverlap>> allOverlapsToAdd = new ArrayList<>();
             for(SimpleTreeNode node:rootNode.getDescendantsAtDepth(iterator)){
                 ArrayList<SuffixOverlap> addOverlaps = gr.stringSegments[node.overlapLink.overlappingString].suffixOverlaps;
                 for(SuffixOverlap addOverlap:addOverlaps){
@@ -754,9 +755,10 @@ class SimpleTreeNode  {
                         addOverlaps.remove(addOverlap);
                     }
                 }
-                node.addAllChildNodes(addOverlaps);
+                allOverlapsToAdd.add(addOverlaps);
                 numberOfChildrenAdded+=addOverlaps.size();
             }
+            rootNode.addChildrenAtDepth(iterator, allOverlapsToAdd);
             iterator++;
         }
 
