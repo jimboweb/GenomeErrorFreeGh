@@ -219,8 +219,8 @@ public class GenomeErrorFree {
     
     
     /**
-     * traces through the overlap graph getting the largest 
-     * overlap and connecting it to the next largest overlap
+     * <p>traces through the overlap graph getting the largest 
+     * overlap and connecting it to the next largest overlap</p>
      * and so on until the end
      * @param input The overlap graph
      * @return Integer[][] of form {next string, overlap length}
@@ -238,6 +238,22 @@ public class GenomeErrorFree {
         return rtrn;
     }
     
+    /**
+     * <p>draws the actual path.</p> 
+     * <p>for each item of priority queue:
+     *  <ol>
+     *      <li>gets largest overlaps</li>
+     *      <li>creates node tree of them</li>
+     *      <li>prunes from smaller branches until only one is left</li>
+     *      <li>makes that the next item on path after item in pq</li>
+     *  </ol>
+     * </p>
+     * @param pq
+     * @param gr
+     * @param usedNodes
+     * @param pathSize
+     * @return 
+     */
     Integer[][] drawPath (PriorityQueue pq, OverlapGraph gr, boolean[] usedNodes, int pathSize){
         Integer[][] rtrn = new Integer[pathSize][2];
         while(!pq.isEmpty()){
@@ -734,6 +750,21 @@ class SimpleTreeNode  {
         }
     }
     
+    /**
+     * <p>
+     *  prunes the node connected to Overlaps of StringSegment down to one. Beginning from
+     * one level below and proceeding down while the rootNode has more than one child:
+     *  <ol>
+     *      <li>runs pruneDescentantsAtDepth at that level</li>
+     *      <li>goes through remaining descendants</li>
+     *      <li>gets the suffix overlaps for each corresponding string segment</li>
+     *      <li>adds new nodes for those if they're not used</li>
+     *  </ol>
+     * </p>
+     * @param rootNode
+     * @param gr
+     * @param usedNodes 
+     */
     void pruneChildNodesToOne(SimpleTreeNode rootNode, OverlapGraph gr, boolean[] usedNodes){
         int iterator = 1;
         int numberOfChildrenAdded = -1;
@@ -750,8 +781,9 @@ class SimpleTreeNode  {
                     }
                 }
                 node.addAllChildNodes(addOverlaps);
-                numberOfChildrenAdded=addOverlaps.size();
+                numberOfChildrenAdded+=addOverlaps.size();
             }
+            iterator++;
         }
 
     }
