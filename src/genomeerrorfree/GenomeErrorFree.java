@@ -308,33 +308,7 @@ public class GenomeErrorFree {
         }
         return rtrn;
     }
-    
-    /**
-     * Find the next path for each string
-     * @param nextStringSeg
-     * @param usedNodes
-     * @return an Integer {the next node, the length of the overlap}
-     */
-    private Integer[] findNextPath(OverlapGraph.StringSegment nextStringSeg, boolean[] usedNodes){
-            Integer nextNodeNumber;
-            int olLength;
-            int iterator = 0;
-            do{
-                if(iterator>=nextStringSeg.suffixOverlaps.size())
-                    //that means that there are no available strings that 
-                    //overlap with this
-                    return null;
-                OverlapGraph.SuffixOverlap overlap = nextStringSeg.suffixOverlaps.get(iterator);
-                nextNodeNumber = overlap.overlappingString;
-                olLength = overlap.overlapPoint;
-                iterator++;
-            } while (usedNodes[nextNodeNumber]);
-            usedNodes[nextNodeNumber] = true;
-            Integer[] addedOverlap = {nextNodeNumber, olLength};
-            return addedOverlap;
-
-    }
-    
+        
         /**
      * Combines overlapping strings into a single string
      * @param overlappingString the string that overlaps (starts in the middle of the other one)
