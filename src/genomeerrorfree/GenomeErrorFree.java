@@ -18,6 +18,8 @@ import java.util.PriorityQueue;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 //TODO: 
@@ -751,11 +753,17 @@ class SimpleTreeNode  {
             ArrayList<ArrayList<SuffixOverlap>> allOverlapsToAdd = new ArrayList<>();
             for(SimpleTreeNode node:rootNode.getDescendantsAtDepth(iterator)){
                 ArrayList<SuffixOverlap> addOverlaps = gr.stringSegments[node.overlapLink.overlappingString].suffixOverlaps;
-                for(SuffixOverlap addOverlap:addOverlaps){
-                    if(usedNodes[addOverlap.overlappingString]){
-                        addOverlaps.remove(addOverlap);
-                    }
-                }
+                addOverlaps = (ArrayList<SuffixOverlap>)addOverlaps.stream()
+                        .filter(ol -> !usedNodes[ol.overlappingString])
+                        .collect(Collectors.toList());
+                //below is the old-fashioned non-stream way which may be faster
+//                ArrayList<SuffixOverlap> addOverlapsCopy = new ArrayList<>();
+//                Collections.copy(addOverlaps, addOverlapsCopy);
+//                for(SuffixOverlap addOverlap:addOverlapsCopy){
+//                    if(usedNodes[addOverlap.overlappingString]){
+//                        addOverlaps.remove(addOverlap);
+//                    }
+//                }
                 allOverlapsToAdd.add(addOverlaps);
                 numberOfChildrenAdded+=addOverlaps.size();
             }
