@@ -672,6 +672,7 @@ class SimpleTreeNode  {
             if(childNodes.isEmpty())
                 return new ArrayList<>();
             parentNodes = childNodes;
+            descendantDepth++;
         }
         return childNodes;
         
@@ -694,7 +695,7 @@ class SimpleTreeNode  {
      * prune a branch back to where it splits from a node without siblings
      */
     private void pruneParents(){
-        if(parent.children.size()>1){
+        if(parent!=null && parent.children.size()>1){
             deleteSelf();
             parent.pruneParents();
         }
