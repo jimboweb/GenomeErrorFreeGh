@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
@@ -22,11 +23,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
-//TODO: 
-// 1) Make overlap sorter only get largest overlaps, discard the rest (1st bookmark) 
-// 2) Build a tree of max overlap length. If two nodes have equal max overlap length,
-// add them to the tree. When a node's child is below max overlap, prune the whole 
-// branch. 
 
 /**
  *
@@ -52,8 +48,6 @@ public class GenomeErrorFree {
         
     }
     
-    //TODO: insert the code to get the input and run the 
-    //returnGenome method
     public GenomeErrorFree(){
         
     }
@@ -194,31 +188,7 @@ public class GenomeErrorFree {
         } while (!endOfPath);
         
         return rtrn;
-    }
-
-    /**
-     * Filters the overlaps in the string segment so that only the
-     * ones with maximum overlap length are in there. 
-     * @param segment the segment whose overlaps we're searching
-     * @return a new ArrayList of the suffix overlaps
-     */
-    ArrayList<OverlapGraph.SuffixOverlap> filterOverlaps(OverlapGraph.StringSegment segment){
-        ArrayList<OverlapGraph.SuffixOverlap> maxOverlaps = new ArrayList<>();
-        int maxOverlap = 0;
-        for(OverlapGraph.SuffixOverlap ol:segment.suffixOverlaps){
-            int overlapLength = segment.str.length() - ol.overlapPoint;
-            if(overlapLength == maxOverlap){
-                maxOverlaps.add(ol);
-            } else if (overlapLength>maxOverlap){
-                maxOverlaps.clear();
-                maxOverlaps.add(ol);
-                maxOverlap=overlapLength;
-            }
-        }
-        return maxOverlaps;
-    }
-    
-    
+    }        
     
     /**
      * <p>traces through the overlap graph getting the largest 
@@ -636,7 +606,7 @@ class SimpleTreeNode  {
         ArrayList<SimpleTreeNode> descendantsAtDepth = getDescendantsAtDepth(depth);
         ArrayList<SimpleTreeNode> nodesToPrune = getNodesToPrune(descendantsAtDepth);
         for(SimpleTreeNode node:nodesToPrune){
-            node.pruneParents();
+            node.pruneBranch();
         }
      }
     
@@ -697,10 +667,17 @@ class SimpleTreeNode  {
     /**
      * prune a branch back to where it splits from a node without siblings
      */
-    private void pruneParents(){
-        if(parent!=null && parent.children.size()>1){
-            deleteSelf();
-            parent.pruneParents();
+    private void pruneBranch(){
+        deleteSelf();
+        if(parent==null)
+            return;
+        List<SimpleTreeNode> siblings = parent.children;
+        SimpleTreeNode grandparent = parent.parent;
+        if(grandparent==null)
+            return;
+        List<SimpleTreeNode> uncles = grandparent.children;
+        if(siblings.isEmpty() && uncles.size()>1){
+            parent.pruneBranch();
         }
     }
     

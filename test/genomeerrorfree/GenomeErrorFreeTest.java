@@ -117,14 +117,9 @@ public class GenomeErrorFreeTest {
         ArrayList<String> inputStrings = new ArrayList<>();
         Integer[][] expectedPath = createExpectedPath(input, inputStrings);
         OverlapGraph graph = new OverlapGraph(inputStrings);
-        //TODO: get the graph overlaps from the overlaps in 
-        //TestStringSegments instead of from findAllOverlaps method
         graph = instance.findAllOverlaps(graph);
         Integer[][] path = instance.greedyHamiltonianPath(graph);
-        //TODO: arrayEquals isn't right here. the path is circular so I
-        //almost certainly won't start in the right place, so I need
-        //to start where element 0 is and follow through to compare the path
-        for(int i=1;i<path.length;i++){
+        for(int i=0;i<path.length;i++){
             String errorString = "Path diverges at index " + i + 
                     " expected: " + expectedPath[i][0] + ", " + expectedPath[i][1] + "\n" +
                     " but got " + path[i][0] + ", " + path[i][1];
