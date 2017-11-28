@@ -298,17 +298,18 @@ public class GenomeErrorFreeTest {
          */
         private ArrayList<TestStringSeg> addOverlaps(ArrayList<TestStringSeg> stringsToOverlap, TestStringSeg nextStringSeg, int strLen, int absLocation){
                 stringsToOverlap.add(nextStringSeg);
-                ArrayList<TestStringSeg> newStringsToOverlap = new ArrayList<>();
-                Collections.copy(stringsToOverlap, newStringsToOverlap);
+                ArrayList<TestStringSeg> newStringsToOverlap;
                 Stream<TestStringSeg> stringsStream = stringsToOverlap.stream();
                 Stream<TestStringSeg> newStringsStream = stringsStream
                         .filter(tStrSeg->tStrSeg.absLocation+strLen>absLocation);
                 newStringsToOverlap = (ArrayList<TestStringSeg>)newStringsStream.collect(Collectors.toList());
                 stringsToOverlap=newStringsToOverlap;
                 for(TestStringSeg sto:stringsToOverlap){
-                    int olPoint = nextStringSeg.absLocation-sto.absLocation;
-                    nextStringSeg.addOverlaps(sto, olPoint);
-                    sto.addOverlappedBy(nextStringSeg, olPoint);
+                    if(sto!=nextStringSeg){
+                        int olPoint = nextStringSeg.absLocation-sto.absLocation;
+                        nextStringSeg.addOverlaps(sto, olPoint);
+                        sto.addOverlappedBy(nextStringSeg, olPoint);
+                    }
                 }
                 return stringsToOverlap;
         }
@@ -333,28 +334,6 @@ public class GenomeErrorFreeTest {
         
     }
     
-    /**
-     * @deprecated 
-     * The older input node that only kept one overlap and one
-     * overlappedBy
-     */
-    private class InputNode{
-        String str;
-        Integer overlaps;
-        Integer overlapPoint;
-        Integer overlappedBy;
-        
-        public InputNode(String str, int overlaps, int overlapPoint, int overlappedBy){
-            this.str = str;
-            this.overlaps = overlaps;
-            this.overlapPoint = overlapPoint;
-            this.overlappedBy = overlappedBy;
-        }
-        
-        public InputNode copy(){
-            return new InputNode(this.str,this.overlaps,this.overlapPoint,this.overlappedBy);
-        }
-    }
     
     /**
      * A test of the string segment
