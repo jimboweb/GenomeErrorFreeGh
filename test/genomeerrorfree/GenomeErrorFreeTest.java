@@ -260,7 +260,7 @@ public class GenomeErrorFreeTest {
             for(int i=0;i<numberOfSegments;i++){
                 nextString = multString.substring(lastStrBegin, lastStrBegin+strLen);
                 multString = multString.substring(lastStrBegin);
-                 TestStringSeg nextStringSeg = new TestStringSeg(nextString, lastStrBegin, absLocation);
+                 TestStringSeg nextStringSeg = new TestStringSeg(nextString, i, absLocation);
                 input.add(nextStringSeg);
                 stringsToOverlap = addOverlaps(stringsToOverlap,nextStringSeg,strLen,absLocation);
                 stringsToOverlap = findCircularOverlaps(unbrokenString, input, stringsToOverlap, nextStringSeg, strLen, absLocation);
