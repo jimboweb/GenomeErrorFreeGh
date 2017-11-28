@@ -298,8 +298,8 @@ public class GenomeErrorFree {
             return overlappedString;
         }
         if(!matchOverlaps(overlappingString,overlappedString,olPoint)){
-            return overlappedString;
-            //throw new IllegalArgumentException("string " + overlappingString + " and string " + overlappedString + " do not overlap at point " + olPoint + " !");
+            //return overlappedString;
+            throw new IllegalArgumentException("string " + overlappingString + " and string " + overlappedString + " do not overlap at point " + olPoint + " !");
         }
         
         return overlappedString.substring(0, olPoint) + overlappingString;
@@ -738,14 +738,6 @@ class SimpleTreeNode  {
                 addOverlaps = (ArrayList<SuffixOverlap>)addOverlaps.stream()
                         .filter(ol -> !usedNodes[ol.overlappingString])
                         .collect(Collectors.toList());
-                //below is the old-fashioned non-stream way which may be faster
-//                ArrayList<SuffixOverlap> addOverlapsCopy = new ArrayList<>();
-//                Collections.copy(addOverlaps, addOverlapsCopy);
-//                for(SuffixOverlap addOverlap:addOverlapsCopy){
-//                    if(usedNodes[addOverlap.overlappingString]){
-//                        addOverlaps.remove(addOverlap);
-//                    }
-//                }
                 allOverlapsToAdd.add(addOverlaps);
                 numberOfChildrenAdded+=addOverlaps.size();
             }
@@ -754,5 +746,5 @@ class SimpleTreeNode  {
         }
 
     }
-  
+    
 }
