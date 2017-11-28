@@ -10,6 +10,7 @@ import genomeerrorfree.OverlapGraph.SuffixOverlap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -129,6 +130,9 @@ public class GenomeErrorFreeTest {
         }
     }
     
+    //TODO:
+    //BUG: the last segment is not marked as overlapped by anything.
+    //have to add the segments at wherever it is in the string to overlap it. 
     private Integer[][] createExpectedPath(ReturnGenomeInputAndPath input,ArrayList<String> inputStrings){
         Integer[][] expectedPath = new Integer[input.input.size()][2];
         for(int i=0;i<input.input.size();i++){
@@ -285,7 +289,26 @@ public class GenomeErrorFreeTest {
                     seg.addOverlappedBy(nextStringSeg, olPoint);
                 }
             }
+            
             return stringsToOverlap;
+        }
+        
+        private ArrayList<TestStringSeg> findCircularOverlapsOfLast(String unbrokenString, ArrayList<TestStringSeg> input, TestStringSeg lastStringSeg, int strLen){
+            ArrayList<TestStringSeg> rtrn = new ArrayList<>();
+            int endOfLastStringSeg = lastStringSeg.absLocation+lastStringSeg.str.length();
+            int index = input.size()-1;
+            boolean cont=true;
+            do{
+                TestStringSeg thisStringSeg = input.get(index);
+                int endOfThisStringSeg = thisStringSeg.absLocation+thisStringSeg.str.length();
+                if(endOfLastStringSeg>endOfLastStringSeg){
+                    cont = true;
+                    //TODO: loop through all the string segments at that point and add overlaps
+                } else {
+                    cont = false;
+                }
+            }while(cont);
+            return rtrn;
         }
         
         /**
