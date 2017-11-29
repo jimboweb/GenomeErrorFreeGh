@@ -204,21 +204,7 @@ public class GenomeErrorFreeTest {
      * Test of findAllOverlaps method, of class GenomeErrorFree.
      */
     
-    /**
-     * This is just a way to mark one string a particular
-     * position overlaps with
-     * gstr is the index of the string it overlaps wtih
-     * loc is the location in that string
-     */
-    private class PositionOverlap{
-        public int gStr;
-        public int loc;
-        public PositionOverlap(int gStr, int loc){
-            this.gStr = gStr;
-            this.loc = loc;
-        }
-    }
-    
+     
     /**
      * This allows me to save the correct input and path 
      * input is the actual arraylist of input strings
@@ -264,7 +250,7 @@ public class GenomeErrorFreeTest {
             for(int i=0;i<numberOfSegments;i++){
                 nextString = multString.substring(lastStrBegin, lastStrBegin+strLen);
                 multString = multString.substring(lastStrBegin);
-                 TestStringSeg nextStringSeg = new TestStringSeg(nextString, i, absLocation);
+                TestStringSeg nextStringSeg = new TestStringSeg(nextString, i, absLocation);
                 input.add(nextStringSeg);
                 stringsToOverlap = addOverlaps(stringsToOverlap,nextStringSeg,strLen,absLocation);
                 stringsToOverlap = findCircularOverlaps(unbrokenString, input, stringsToOverlap, nextStringSeg, strLen, absLocation);
@@ -275,6 +261,7 @@ public class GenomeErrorFreeTest {
             }
             
         }
+        
         
         private ArrayList<TestStringSeg> findCircularOverlaps(String unbrokenString, ArrayList<TestStringSeg> input, ArrayList<TestStringSeg> stringsToOverlap, TestStringSeg nextStringSeg, int strLen, int absLocation){
             if(nextStringSeg.absLocation>unbrokenString.length()-strLen){
@@ -310,7 +297,15 @@ public class GenomeErrorFreeTest {
         } 
         
         private TestStringSeg assignOverlap(TestStringSeg seg, TestStringSeg lastStringSeg){
-            //assign overlaps before or after
+            if(seg.absLocation<lastStringSeg.absLocation){
+                int olPoint = lastStringSeg.absLocation - seg.absLocation;
+                seg.addOverlappedBy(lastStringSeg, olPoint);
+                lastStringSeg.addOverlaps(seg, olPoint);
+            } else if (seg.absLocation>lastStringSeg.absLocation){
+                int olPoint = seg.absLocation - lastStringSeg.absLocation;
+                lastStringSeg.addOverlappedBy(seg, olPoint);
+                seg.addOverlaps(lastStringSeg, olPoint);
+            }
             return seg;
         }
         
