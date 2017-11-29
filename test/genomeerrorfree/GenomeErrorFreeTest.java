@@ -294,21 +294,25 @@ public class GenomeErrorFreeTest {
         }
         
         private ArrayList<TestStringSeg> findCircularOverlapsOfLast(String unbrokenString, ArrayList<TestStringSeg> input, TestStringSeg lastStringSeg, int strLen){
-            ArrayList<TestStringSeg> rtrn = new ArrayList<>();
-            int endOfLastStringSeg = lastStringSeg.absLocation+lastStringSeg.str.length();
-            int index = input.size()-1;
-            ArrayList<TestStringSeg> overlappingSegs = 
+            ArrayList<TestStringSeg> rtrn = 
                     (ArrayList<TestStringSeg>)input
                     .stream()
-                    .filter(seg->seg.absLocation+seg.str.length()>lastStringSeg.absLocation 
-                            && seg.absLocation<endOfLastStringSeg)
+                    .filter(seg->stringOverlapsLast(seg, lastStringSeg))
+                    .map(seg->assignOverlap(seg,lastStringSeg))
                     .collect(Collectors.toList());
-            boolean cont=true;
-            for(TestStringSeg seg:overlappingSegs){
-                //find overlaps one direction or the other
-            }
             return rtrn;
-            }
+        }
+        
+        private boolean stringOverlapsLast(TestStringSeg seg, TestStringSeg lastStringSeg){
+            int endOfLastStringSeg = lastStringSeg.absLocation+lastStringSeg.str.length();
+            return seg.absLocation+seg.str.length()>lastStringSeg.absLocation 
+                            && seg.absLocation<endOfLastStringSeg;
+        } 
+        
+        private TestStringSeg assignOverlap(TestStringSeg seg, TestStringSeg lastStringSeg){
+            //assign overlaps before or after
+            return seg;
+        }
         
         /**
          * adds the overlaps to all the string segments
