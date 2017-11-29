@@ -297,19 +297,18 @@ public class GenomeErrorFreeTest {
             ArrayList<TestStringSeg> rtrn = new ArrayList<>();
             int endOfLastStringSeg = lastStringSeg.absLocation+lastStringSeg.str.length();
             int index = input.size()-1;
+            ArrayList<TestStringSeg> overlappingSegs = 
+                    (ArrayList<TestStringSeg>)input
+                    .stream()
+                    .filter(seg->seg.absLocation+seg.str.length()>lastStringSeg.absLocation 
+                            && seg.absLocation<endOfLastStringSeg)
+                    .collect(Collectors.toList());
             boolean cont=true;
-            do{
-                TestStringSeg thisStringSeg = input.get(index);
-                int endOfThisStringSeg = thisStringSeg.absLocation+thisStringSeg.str.length();
-                if(endOfLastStringSeg>endOfLastStringSeg){
-                    cont = true;
-                    //TODO: loop through all the string segments at that point and add overlaps
-                } else {
-                    cont = false;
-                }
-            }while(cont);
+            for(TestStringSeg seg:overlappingSegs){
+                //find overlaps one direction or the other
+            }
             return rtrn;
-        }
+            }
         
         /**
          * adds the overlaps to all the string segments
