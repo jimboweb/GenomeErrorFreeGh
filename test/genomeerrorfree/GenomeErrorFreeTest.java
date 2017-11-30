@@ -204,7 +204,7 @@ public class GenomeErrorFreeTest {
      * Test of findAllOverlaps method, of class GenomeErrorFree.
      */
     
-     
+    
     /**
      * This allows me to save the correct input and path 
      * input is the actual arraylist of input strings
@@ -253,7 +253,11 @@ public class GenomeErrorFreeTest {
                 TestStringSeg nextStringSeg = new TestStringSeg(nextString, i, absLocation);
                 input.add(nextStringSeg);
                 stringsToOverlap = addOverlaps(stringsToOverlap,nextStringSeg,strLen,absLocation);
-                stringsToOverlap = findCircularOverlaps(unbrokenString, input, stringsToOverlap, nextStringSeg, strLen, absLocation);
+                stringsToOverlap = findCircularOverlaps(
+                        unbrokenString, input, stringsToOverlap, nextStringSeg, strLen, absLocation
+                );
+                input = findCircularOverlapsOfLast(unbrokenString, input, nextStringSeg, strLen);
+                        
                 lastStrBegin =  rnd.nextInt(maxOlPoint);
                 absLocation+= lastStrBegin;
                 if((lastStrBegin+200)>multString.length())

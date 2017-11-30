@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="9">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="10">
         <file>
             <url>test/genomeerrorfree/GenomeErrorFreeTest.java</url>
             <bookmark id="6">
@@ -13,14 +13,14 @@
                 <line>241</line>
                 <key/>
             </bookmark>
-            <bookmark id="9">
+            <bookmark id="10">
                 <name/>
-                <line>278</line>
+                <line>286</line>
                 <key/>
             </bookmark>
             <bookmark id="7">
                 <name/>
-                <line>319</line>
+                <line>323</line>
                 <key/>
             </bookmark>
         </file>
