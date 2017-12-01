@@ -9,12 +9,9 @@ import genomeerrorfree.GenomeErrorFreeTest.TestStringSeg;
 import genomeerrorfree.OverlapGraph.SuffixOverlap;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -259,7 +256,7 @@ public class GenomeErrorFreeTest {
             }
 
             
-            
+            int x=0;
         }
         
         //TODO: BUG: doesn't get the wraparound still. I think I need to do
