@@ -109,7 +109,7 @@ public class GenomeErrorFreeTest {
     @Test
     public void testGreedyHamiltonianPath(){
         String originalString = createUnbrokenString(1000, false);
-        ReturnGenomeInputAndPath input = new ReturnGenomeInputAndPath(originalString,200,30,10);
+        ReturnGenomeInputAndPath input = new ReturnGenomeInputAndPath(originalString,400,30,10);
         
         GenomeErrorFree instance = new GenomeErrorFree();
         ArrayList<String> inputStrings = new ArrayList<>();
@@ -247,12 +247,12 @@ public class GenomeErrorFreeTest {
                 input.add(nextStringSeg);
                         
                 lastStrBegin =  rnd.nextInt(maxOlPoint);
-                absLocation+= lastStrBegin;
+                absLocation = (absLocation + lastStrBegin)%unbrokenString.length();
                 if((lastStrBegin+200)>multString.length())
                     multString += unbrokenString;
             }
             for(TestStringSeg seg:input){
-                findAllOverlaps(seg, input, strLen);
+                findAllOverlaps(seg, input, strLen, unbrokenString.length());
             }
 
             
@@ -268,10 +268,10 @@ public class GenomeErrorFreeTest {
          * @param input all the segments
          * @param strLen the length of the strings
          */
-        private void findAllOverlaps(TestStringSeg seg, ArrayList<TestStringSeg> input, int strLen){
+        private void findAllOverlaps(TestStringSeg seg, ArrayList<TestStringSeg> input, int strLen, int unbrStrLen){
             ArrayList<TestStringSeg> possibleOverlaps = (ArrayList<TestStringSeg>)input
                     .stream()
-                    .filter(olSeg->Math.abs((olSeg.absLocation + strLen - seg.absLocation) % strLen)<strLen)
+                    .filter(olSeg->Math.abs((olSeg.absLocation + unbrStrLen - seg.absLocation) % unbrStrLen)<strLen)
                     .collect(Collectors.toList());
             possibleOverlaps.stream().forEach((olSeg) -> {
                 assignOverlap(seg, olSeg);
