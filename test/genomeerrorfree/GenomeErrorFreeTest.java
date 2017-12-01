@@ -130,9 +130,6 @@ public class GenomeErrorFreeTest {
         }
     }
     
-    //TODO:
-    //BUG: the last segment is not marked as overlapped by anything.
-    //have to add the segments at wherever it is in the string to overlap it. 
     private Integer[][] createExpectedPath(ReturnGenomeInputAndPath input,ArrayList<String> inputStrings){
         Integer[][] expectedPath = new Integer[input.input.size()][2];
         for(int i=0;i<input.input.size();i++){
@@ -265,7 +262,9 @@ public class GenomeErrorFreeTest {
             
         }
         
-        //TODO: BUG: missing some overlaps
+        //TODO: BUG: doesn't get the wraparound still. I think I need to do
+        //something with modulus.
+        // formula is (a + strLen - b)%strLen
         /**
          * general function to assign all overlaps using absolute location
          * @param seg the segment to find overlaps for
@@ -275,7 +274,7 @@ public class GenomeErrorFreeTest {
         private void findAllOverlaps(TestStringSeg seg, ArrayList<TestStringSeg> input, int strLen){
             ArrayList<TestStringSeg> possibleOverlaps = (ArrayList<TestStringSeg>)input
                     .stream()
-                    .filter(olSeg->Math.abs(olSeg.absLocation-seg.absLocation)<strLen)
+                    .filter(olSeg->Math.abs((olSeg.absLocation + strLen - seg.absLocation) % strLen)<strLen)
                     .collect(Collectors.toList());
             possibleOverlaps.stream().forEach((olSeg) -> {
                 assignOverlap(seg, olSeg);
@@ -299,32 +298,6 @@ public class GenomeErrorFreeTest {
                 seg.addOverlaps(overlappingStringSeg, olPoint);
             }
             
-        }
-        
-        /**
-         * adds the overlaps to all the string segments
-         * @param stringsToOverlap a collection with all the string segments that could overlap
-         * @param nextStringSeg the next string segment that can overlap
-         * @param strLen the string length
-         * @param absLocation the absolute location
-         * @return new 
-         */
-        private ArrayList<TestStringSeg> addOverlaps(ArrayList<TestStringSeg> stringsToOverlap, TestStringSeg nextStringSeg, int strLen, int absLocation){
-                stringsToOverlap.add(nextStringSeg);
-                ArrayList<TestStringSeg> newStringsToOverlap;
-                Stream<TestStringSeg> stringsStream = stringsToOverlap.stream();
-                Stream<TestStringSeg> newStringsStream = stringsStream
-                        .filter(tStrSeg->tStrSeg.absLocation+strLen>absLocation);
-                newStringsToOverlap = (ArrayList<TestStringSeg>)newStringsStream.collect(Collectors.toList());
-                stringsToOverlap=newStringsToOverlap;
-                for(TestStringSeg sto:stringsToOverlap){
-                    if(sto!=nextStringSeg){
-                        int olPoint = nextStringSeg.absLocation-sto.absLocation;
-                        nextStringSeg.addOverlaps(sto, olPoint);
-                        sto.addOverlappedBy(nextStringSeg, olPoint);
-                    }
-                }
-                return stringsToOverlap;
         }
         
         private void mixUpArrayListAndPath(){
