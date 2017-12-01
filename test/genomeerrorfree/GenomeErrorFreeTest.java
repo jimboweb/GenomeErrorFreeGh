@@ -252,65 +252,45 @@ public class GenomeErrorFreeTest {
                 multString = multString.substring(lastStrBegin);
                 TestStringSeg nextStringSeg = new TestStringSeg(nextString, i, absLocation);
                 input.add(nextStringSeg);
-                stringsToOverlap = addOverlaps(stringsToOverlap,nextStringSeg,strLen,absLocation);
-                stringsToOverlap = findCircularOverlaps(
-                        unbrokenString, input, stringsToOverlap, nextStringSeg, strLen, absLocation
-                );
-                input = findCircularOverlapsOfLast(unbrokenString, input, nextStringSeg, strLen);
                         
                 lastStrBegin =  rnd.nextInt(maxOlPoint);
                 absLocation+= lastStrBegin;
                 if((lastStrBegin+200)>multString.length())
                     multString += unbrokenString;
             }
+            for(TestStringSeg seg:input){
+                findAllOverlaps(seg, input, strLen);
+            }
+
+            
             
         }
         
         
-        private ArrayList<TestStringSeg> findCircularOverlaps(String unbrokenString, ArrayList<TestStringSeg> input, ArrayList<TestStringSeg> stringsToOverlap, TestStringSeg nextStringSeg, int strLen, int absLocation){
-            if(nextStringSeg.absLocation>unbrokenString.length()-strLen){
-                int lengthOfCircularOverlap = unbrokenString.length()%strLen;
-                for(TestStringSeg seg:input){
-                    if(seg.absLocation>lengthOfCircularOverlap){
-                        break;
-                    }
-                    int startOlPoint = unbrokenString.length()-absLocation;
-                    int olPoint = startOlPoint + seg.absLocation;
-                    nextStringSeg.addOverlaps(seg, olPoint);
-                    seg.addOverlappedBy(nextStringSeg, olPoint);
-                }
+        private void findAllOverlaps(TestStringSeg seg, ArrayList<TestStringSeg> input, int strLen){
+            ArrayList<TestStringSeg> possibleOverlaps = (ArrayList<TestStringSeg>)input.stream().filter(olSeg->Math.abs(olSeg.absLocation-seg.absLocation)<strLen);
+            possibleOverlaps.stream().forEach((olSeg) -> {
+                assignOverlap(seg, olSeg);
+            });
+        }
+        
+        /**
+         * assigns overlap only at end
+         * @param seg the segment to overlap
+         * @param overlappingStringSeg the last string segment
+         * @return 
+         */
+        private void assignOverlap(TestStringSeg seg, TestStringSeg overlappingStringSeg){
+            if(seg.absLocation<overlappingStringSeg.absLocation){
+                int olPoint = overlappingStringSeg.absLocation - seg.absLocation;
+                seg.addOverlappedBy(overlappingStringSeg, olPoint);
+                overlappingStringSeg.addOverlaps(seg, olPoint);
+            } else if (seg.absLocation>overlappingStringSeg.absLocation){
+                int olPoint = seg.absLocation - overlappingStringSeg.absLocation;
+                overlappingStringSeg.addOverlappedBy(seg, olPoint);
+                seg.addOverlaps(overlappingStringSeg, olPoint);
             }
             
-            return stringsToOverlap;
-        }
-        
-        private ArrayList<TestStringSeg> findCircularOverlapsOfLast(String unbrokenString, ArrayList<TestStringSeg> input, TestStringSeg lastStringSeg, int strLen){
-            ArrayList<TestStringSeg> rtrn = 
-                    (ArrayList<TestStringSeg>)input
-                    .stream()
-                    .filter(seg->stringOverlapsLast(seg, lastStringSeg))
-                    .map(seg->assignOverlap(seg,lastStringSeg))
-                    .collect(Collectors.toList());
-            return rtrn;
-        }
-        
-        private boolean stringOverlapsLast(TestStringSeg seg, TestStringSeg lastStringSeg){
-            int endOfLastStringSeg = lastStringSeg.absLocation+lastStringSeg.str.length();
-            return seg.absLocation+seg.str.length()>lastStringSeg.absLocation 
-                            && seg.absLocation<endOfLastStringSeg;
-        } 
-        
-        private TestStringSeg assignOverlap(TestStringSeg seg, TestStringSeg lastStringSeg){
-            if(seg.absLocation<lastStringSeg.absLocation){
-                int olPoint = lastStringSeg.absLocation - seg.absLocation;
-                seg.addOverlappedBy(lastStringSeg, olPoint);
-                lastStringSeg.addOverlaps(seg, olPoint);
-            } else if (seg.absLocation>lastStringSeg.absLocation){
-                int olPoint = seg.absLocation - lastStringSeg.absLocation;
-                lastStringSeg.addOverlappedBy(seg, olPoint);
-                seg.addOverlaps(lastStringSeg, olPoint);
-            }
-            return seg;
         }
         
         /**
