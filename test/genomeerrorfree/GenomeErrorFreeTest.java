@@ -246,7 +246,6 @@ public class GenomeErrorFreeTest {
             int lastStrBegin = 0;
             String nextString;
             int absLocation = 0;
-            ArrayList<TestStringSeg> stringsToOverlap = new ArrayList<>();
             for(int i=0;i<numberOfSegments;i++){
                 nextString = multString.substring(lastStrBegin, lastStrBegin+strLen);
                 multString = multString.substring(lastStrBegin);
@@ -266,9 +265,18 @@ public class GenomeErrorFreeTest {
             
         }
         
-        
+        //TODO: BUG: missing some overlaps
+        /**
+         * general function to assign all overlaps using absolute location
+         * @param seg the segment to find overlaps for
+         * @param input all the segments
+         * @param strLen the length of the strings
+         */
         private void findAllOverlaps(TestStringSeg seg, ArrayList<TestStringSeg> input, int strLen){
-            ArrayList<TestStringSeg> possibleOverlaps = (ArrayList<TestStringSeg>)input.stream().filter(olSeg->Math.abs(olSeg.absLocation-seg.absLocation)<strLen);
+            ArrayList<TestStringSeg> possibleOverlaps = (ArrayList<TestStringSeg>)input
+                    .stream()
+                    .filter(olSeg->Math.abs(olSeg.absLocation-seg.absLocation)<strLen)
+                    .collect(Collectors.toList());
             possibleOverlaps.stream().forEach((olSeg) -> {
                 assignOverlap(seg, olSeg);
             });
