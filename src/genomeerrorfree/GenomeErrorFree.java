@@ -87,6 +87,7 @@ public class GenomeErrorFree {
     }
     
     //TODO: BUG: this is finding the right overlaps but getting the wrong overlap point
+    //go to test method
     /**
      * Find all points where the strings overlap
      * @param gr the overlap graph
@@ -711,10 +712,6 @@ class SimpleTreeNode  {
         }
     }
     
-    //TODO: I think my pruning strategy isn't right here. 
-    //I think I'm pruning any node that has a parent whose child is
-    //less than max for that level. What I neeed to do is prune
-    //only node where ALL the children are less than max for that level.
     /**
      * <p>
      *  prunes the node connected to Overlaps of StringSegment down to one. Beginning from

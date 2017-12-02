@@ -6,6 +6,7 @@
 package genomeerrorfree;
 
 import genomeerrorfree.GenomeErrorFreeTest.TestStringSeg;
+import genomeerrorfree.OverlapGraph.StringSegment;
 import genomeerrorfree.OverlapGraph.SuffixOverlap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -160,9 +161,6 @@ public class GenomeErrorFreeTest {
         OverlapGraph og = new OverlapGraph(new ArrayList<>());
         SuffixOverlap mainOverlap = og.new SuffixOverlap(null, 0, 0);
         SimpleTreeNode rootNode = new SimpleTreeNode(mainOverlap);
-        //TODO: make three levels of overlap graphs with different string
-        //segments. Maybe just create an overlap graph from an actual string
-        //instead of trying to mock it. 
     }
    
    private boolean testReturnString(String[] rtrn, String unbrokenString){
@@ -260,9 +258,6 @@ public class GenomeErrorFreeTest {
             int x=0;
         }
         
-        //TODO: BUG: doesn't get the wraparound still. I think I need to do
-        //something with modulus.
-        // formula is (a + strLen - b)%strLen
         /**
          * general function to assign all overlaps using absolute location
          * @param seg the segment to find overlaps for
@@ -416,5 +411,122 @@ public class GenomeErrorFreeTest {
         boolean suffix;
         TestStringSeg stringSeg;
         int overlapPoint;
+    }
+
+    /**
+     * Test of findAllOverlaps method, of class GenomeErrorFree.
+     */
+    @Test
+    public void testFindAllOverlaps() {
+        System.out.println("findAllOverlaps");
+        OverlapGraph gr = null;
+        GenomeErrorFree instance = new GenomeErrorFree();
+        OverlapGraph expResult = null;
+        OverlapGraph result = instance.findAllOverlaps(gr);
+        assertEquals(expResult, result);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+    
+    //TODO: finish test method and find out what's wrong with findOverlaps
+    /**
+     * Test of findOverlaps method, of class GenomeErrorFree.
+     */
+    @Test
+    public void testFindOverlaps() {
+        System.out.println("findOverlaps");
+        int strLen = rnd.nextInt(30)+2;
+        int olPoint = rnd.nextInt(strLen);
+        StringSegment[] segs = mockOverlappingStringSegments(strLen, olPoint);
+        StringSegment potentialOverlappedString = segs[0];
+        StringSegment potentialOverlappingString = segs[1];
+        int str1Pos = 0;
+        GenomeErrorFree instance = new GenomeErrorFree();
+        OverlapGraph.StringSegment expResult = null;
+        OverlapGraph.StringSegment result = instance.findOverlaps(potentialOverlappingString, potentialOverlappedString, str1Pos);
+        //TODO: create expResult
+        assertEquals(expResult, result);
+     }
+
+    private StringSegment[] mockOverlappingStringSegments(int segLength, int olPoint){
+        StringSegment[] stringSegments = new StringSegment[2];
+        String str1 = "";
+        
+        for(int i=0;i<segLength;i++){
+            str1+= randChar();
+        }
+        String str2 = str1.substring(olPoint);
+        for(int i=str2.length();i<segLength;i++){
+            str2+=randChar();
+        }
+        OverlapGraph mockOverlapGraph = new OverlapGraph(new ArrayList<>());
+        stringSegments[0] = mockOverlapGraph.new StringSegment(mockOverlapGraph, str1, rnd.nextInt(10));
+        stringSegments[1] = mockOverlapGraph.new StringSegment(mockOverlapGraph, str2, rnd.nextInt(10)+10);
+        return stringSegments;
+    }
+    /**
+     * Test of matchOverlaps method, of class GenomeErrorFree.
+     */
+    @Test
+    public void testMatchOverlaps() {
+        System.out.println("matchOverlaps");
+        String potentialOverlappingString = "";
+        String potentialOverlappedString = "";
+        int overlap = 0;
+        boolean expResult = false;
+        boolean result = GenomeErrorFree.matchOverlaps(potentialOverlappingString, potentialOverlappedString, overlap);
+        assertEquals(expResult, result);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+
+    /**
+     * Test of drawPath method, of class GenomeErrorFree.
+     */
+    @Test
+    public void testDrawPath() {
+        System.out.println("drawPath");
+        PriorityQueue pq = null;
+        OverlapGraph gr = null;
+        boolean[] usedNodes = null;
+        int pathSize = 0;
+        GenomeErrorFree instance = new GenomeErrorFree();
+        Integer[][] expResult = null;
+        Integer[][] result = instance.drawPath(pq, gr, usedNodes, pathSize);
+        assertArrayEquals(expResult, result);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+
+    /**
+     * Test of getLargestUnusedOverlaps method, of class GenomeErrorFree.
+     */
+    @Test
+    public void testGetLargestUnusedOverlaps() {
+        System.out.println("getLargestUnusedOverlaps");
+        OverlapGraph.StringSegment seg = null;
+        boolean[] nodeIsUsed = null;
+        GenomeErrorFree instance = new GenomeErrorFree();
+        ArrayList<SuffixOverlap> expResult = null;
+        ArrayList<SuffixOverlap> result = instance.getLargestUnusedOverlaps(seg, nodeIsUsed);
+        assertEquals(expResult, result);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+
+    /**
+     * Test of combineOverlaps method, of class GenomeErrorFree.
+     */
+    @Test
+    public void testCombineOverlaps() {
+        System.out.println("combineOverlaps");
+        String overlappingString = "";
+        String overlappedString = "";
+        int olPoint = 0;
+        String expResult = "";
+        String result = GenomeErrorFree.combineOverlaps(overlappingString, overlappedString, olPoint);
+        assertEquals(expResult, result);
+        // TODO review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
     }
 }
