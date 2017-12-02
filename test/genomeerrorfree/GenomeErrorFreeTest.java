@@ -274,7 +274,7 @@ public class GenomeErrorFreeTest {
                     .filter(olSeg->Math.abs((olSeg.absLocation + unbrStrLen - seg.absLocation) % unbrStrLen)<strLen)
                     .collect(Collectors.toList());
             possibleOverlaps.stream().forEach((olSeg) -> {
-                assignOverlap(seg, olSeg);
+                assignOverlap(seg, olSeg, strLen, unbrStrLen);
             });
         }
         
@@ -284,17 +284,19 @@ public class GenomeErrorFreeTest {
          * @param overlappingStringSeg the last string segment
          * @return 
          */
-        private void assignOverlap(TestStringSeg seg, TestStringSeg overlappingStringSeg){
-            if(seg.absLocation<overlappingStringSeg.absLocation){
-                int olPoint = overlappingStringSeg.absLocation - seg.absLocation;
-                seg.addOverlappedBy(overlappingStringSeg, olPoint);
-                overlappingStringSeg.addOverlaps(seg, olPoint);
-            } else if (seg.absLocation>overlappingStringSeg.absLocation){
-                int olPoint = seg.absLocation - overlappingStringSeg.absLocation;
-                overlappingStringSeg.addOverlappedBy(seg, olPoint);
-                seg.addOverlaps(overlappingStringSeg, olPoint);
+        private void assignOverlap(TestStringSeg seg, TestStringSeg overlappingStringSeg, int strLen, int unbrStrLen){
+            TestStringSeg laterString = seg.absLocation>overlappingStringSeg.absLocation?seg:overlappingStringSeg;
+            TestStringSeg earlierString = laterString.equals(seg)?overlappingStringSeg:seg;
+            int earlierStringModLocation = earlierString.absLocation+unbrStrLen;
+            int earlierStringCircularLocation = earlierString.absLocation;
+            int laterStringLocation = laterString.absLocation;
+            if(earlierStringModLocation-laterString.absLocation<strLen){
+                earlierStringCircularLocation = earlierStringModLocation;
             }
-            
+            int olPoint = earlierStringCircularLocation - laterStringLocation;
+            seg.addOverlappedBy(earlierString, olPoint);
+            overlappingStringSeg.addOverlaps(laterString, olPoint);
+                        
         }
         
         private void mixUpArrayListAndPath(){
