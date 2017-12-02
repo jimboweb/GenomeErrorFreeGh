@@ -41,6 +41,7 @@ public class GenomeErrorFreeTest {
             System.out.println("returnGenome");
             String unbrokenString = createUnbrokenString(0, true);
             ReturnGenomeInputAndPath giap = new ReturnGenomeInputAndPath(unbrokenString, numberOfSegments, strLen, maxOlPoint);
+            giap.mixUpArrayListAndPath();
             ArrayList<String> input = giap.inputAsStringList();
             GenomeErrorFree instance = new GenomeErrorFree();
             CircularString expResult = new CircularString(unbrokenString);
@@ -114,6 +115,7 @@ public class GenomeErrorFreeTest {
         GenomeErrorFree instance = new GenomeErrorFree();
         ArrayList<String> inputStrings = new ArrayList<>();
         Integer[][] expectedPath = createExpectedPath(input, inputStrings);
+//        input.mixUpArrayListAndPath();
         OverlapGraph graph = new OverlapGraph(inputStrings);
         graph = instance.findAllOverlaps(graph);
         Integer[][] path = instance.greedyHamiltonianPath(graph);
@@ -214,7 +216,6 @@ public class GenomeErrorFreeTest {
         public ReturnGenomeInputAndPath(String unbrokenString, int numberOfSegments, int strLen, int maxOlPoint){
             input = new ArrayList<>();
             createStringSegments(unbrokenString, numberOfSegments, strLen, maxOlPoint);
-            mixUpArrayListAndPath();
         }
         
         public ArrayList<String> inputAsStringList(){
@@ -271,7 +272,9 @@ public class GenomeErrorFreeTest {
         private void findAllOverlaps(TestStringSeg seg, ArrayList<TestStringSeg> input, int strLen, int unbrStrLen){
             ArrayList<TestStringSeg> possibleOverlaps = (ArrayList<TestStringSeg>)input
                     .stream()
-                    .filter(olSeg->Math.abs((olSeg.absLocation + unbrStrLen - seg.absLocation) % unbrStrLen)<strLen)
+                    .filter(olSeg->
+                            Math.abs((olSeg.absLocation + unbrStrLen - seg.absLocation) % unbrStrLen)<strLen
+                            &&!olSeg.equals(seg))
                     .collect(Collectors.toList());
             possibleOverlaps.stream().forEach((olSeg) -> {
                 assignOverlap(seg, olSeg, strLen, unbrStrLen);
@@ -281,22 +284,22 @@ public class GenomeErrorFreeTest {
         /**
          * assigns overlap only at end
          * @param seg the segment to overlap
-         * @param overlappingStringSeg the last string segment
+         * @param olStringSeg the last string segment
          * @return 
          */
-        private void assignOverlap(TestStringSeg seg, TestStringSeg overlappingStringSeg, int strLen, int unbrStrLen){
-            TestStringSeg laterString = seg.absLocation>overlappingStringSeg.absLocation?seg:overlappingStringSeg;
-            TestStringSeg earlierString = laterString.equals(seg)?overlappingStringSeg:seg;
+        private void assignOverlap(TestStringSeg seg, TestStringSeg olStringSeg, int strLen, int unbrStrLen){
+            TestStringSeg laterString = seg.absLocation>olStringSeg.absLocation?seg:olStringSeg;
+            TestStringSeg earlierString = laterString.equals(seg)?olStringSeg:seg;
             int earlierStringModLocation = earlierString.absLocation+unbrStrLen;
             int earlierStringCircularLocation = earlierString.absLocation;
             int laterStringLocation = laterString.absLocation;
             if(earlierStringModLocation-laterString.absLocation<strLen){
                 earlierStringCircularLocation = earlierStringModLocation;
             }
-            int olPoint = earlierStringCircularLocation - laterStringLocation;
-            seg.addOverlappedBy(earlierString, olPoint);
-            overlappingStringSeg.addOverlaps(laterString, olPoint);
-                        
+            int olPoint = Math.abs(earlierStringCircularLocation - laterStringLocation);
+            laterString.addOverlaps(earlierString, olPoint);
+            earlierString.addOverlappedBy(laterString, olPoint);
+            int x=0;        
         }
         
         private void mixUpArrayListAndPath(){

@@ -20,7 +20,6 @@ import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 
@@ -87,6 +86,7 @@ public class GenomeErrorFree {
         
     }
     
+    //TODO: BUG: this is finding the right overlaps but getting the wrong overlap point
     /**
      * Find all points where the strings overlap
      * @param gr the overlap graph
@@ -175,17 +175,16 @@ public class GenomeErrorFree {
                 rtrn = new CircularString(croppedRtrnStr);
 //                rtrn = new CircularString(combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn.toString(), currentOverlap));
                 endOfPath = true;
-
             }
-            else
+            else if(nextNodeNumber!=-1)
             {
                 rtrn = new CircularString(combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn.toString(), currentOverlap));
             }
-            overlap = path[nextNodeNumber][1];
-            currentOverlap += overlap;
             nextNodeNumber = path[nextNodeNumber][0];
+            overlap = path[nextNodeNumber][1];
             started = true;            
-        } while (!endOfPath);
+            currentOverlap += overlap;
+         } while (!endOfPath);
         
         return rtrn;
     }        
@@ -229,6 +228,11 @@ public class GenomeErrorFree {
      */
     Integer[][] drawPath (PriorityQueue pq, OverlapGraph gr, boolean[] usedNodes, int pathSize){
         Integer[][] rtrn = new Integer[pathSize][2];
+        for(Integer[] node:rtrn){
+            for(Integer i:node){
+                i=-1;
+            }
+        }
         while(!pq.isEmpty()){
             StringSegment currentSegment = (StringSegment)pq.poll();
             ArrayList<SuffixOverlap> possibleOverlaps = getLargestUnusedOverlaps(currentSegment, usedNodes);
@@ -237,9 +241,11 @@ public class GenomeErrorFree {
                 rootNode.addChildNode(ol);
             }
             rootNode.pruneChildNodesToOne(rootNode, gr, usedNodes);
-            SuffixOverlap nextOverlap = rootNode.children.get(0).overlapLink;
-            usedNodes[nextOverlap.overlappingString] = true;
-            rtrn[currentSegment.index] = nextOverlap.getValuesAsArray();
+            if(rootNode.children.size()>0){
+                SuffixOverlap nextOverlap = rootNode.children.get(0).overlapLink;
+                usedNodes[nextOverlap.overlappingString] = true;
+                rtrn[currentSegment.index] = nextOverlap.getValuesAsArray();
+            }
         }
         return rtrn;
     }
