@@ -424,11 +424,11 @@ public class GenomeErrorFreeTest {
         OverlapGraph expResult = null;
         OverlapGraph result = instance.findAllOverlaps(gr);
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
+        // TODO LATER review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
     
-    //TODO: finish test method and find out what's wrong with findOverlaps
+    //TODO LATER: finish test method and find out what's wrong with findOverlaps
     /**
      * Test of findOverlaps method, of class GenomeErrorFree.
      */
@@ -479,7 +479,7 @@ public class GenomeErrorFreeTest {
         boolean expResult = false;
         boolean result = GenomeErrorFree.matchOverlaps(potentialOverlappingString, potentialOverlappedString, overlap);
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
+        // TODO LATER review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
 
@@ -497,7 +497,7 @@ public class GenomeErrorFreeTest {
         Integer[][] expResult = null;
         Integer[][] result = instance.drawPath(pq, gr, usedNodes, pathSize);
         assertArrayEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
+        // TODO LATER review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
 
@@ -513,7 +513,7 @@ public class GenomeErrorFreeTest {
         ArrayList<SuffixOverlap> expResult = null;
         ArrayList<SuffixOverlap> result = instance.getLargestUnusedOverlaps(seg, nodeIsUsed);
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
+        // TODO LATER review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
 
@@ -529,7 +529,7 @@ public class GenomeErrorFreeTest {
         String expResult = "";
         String result = GenomeErrorFree.combineOverlaps(overlappingString, overlappedString, olPoint);
         assertEquals(expResult, result);
-        // TODO review the generated test code and remove the default call to fail.
+        // TODO LATER review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
     }
 }

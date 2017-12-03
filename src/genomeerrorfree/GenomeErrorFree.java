@@ -86,8 +86,6 @@ public class GenomeErrorFree {
         
     }
     
-    //TODO: BUG: this is finding the right overlaps but getting the wrong overlap point
-    //go to test method
     /**
      * Find all points where the strings overlap
      * @param gr the overlap graph
@@ -181,7 +179,11 @@ public class GenomeErrorFree {
             {
                 rtrn = new CircularString(combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn.toString(), currentOverlap));
             }
-            overlap = path[nextNodeNumber][1];
+            try{ //debug
+                overlap = path[nextNodeNumber][1];
+            } catch(NullPointerException e){ //debug
+                System.out.println(e); //debug
+            }
             nextNodeNumber = path[nextNodeNumber][0];
             started = true;            
             currentOverlap += overlap;
@@ -220,7 +222,8 @@ public class GenomeErrorFree {
      *      <li>makes that the next item on path after item in pq</li>
      *  </ol>
      * </p>
-     * BUG: drawing a path but not the right one. taking the wrong node at some point.
+     * TODO: BUG: drawing a path but not the right one. taking the wrong node at some point.
+     * still the same problem
      * @param pq
      * @param gr
      * @param usedNodes
