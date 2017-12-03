@@ -48,7 +48,7 @@ public class GenomeErrorFreeTest {
             CircularString expResult = new CircularString(unbrokenString);
             String result = instance.returnGenome(input);
             CircularString cResult = new CircularString(result);
-            assertEquals("Failed test number " + i + " got string " + result, expResult, result);
+            assertEquals("Failed test number " + i + " got string " + result, expResult, cResult);
         }
     }
 
@@ -435,17 +435,20 @@ public class GenomeErrorFreeTest {
     @Test
     public void testFindOverlaps() {
         System.out.println("findOverlaps");
-        int strLen = rnd.nextInt(30)+2;
-        int olPoint = rnd.nextInt(strLen);
-        StringSegment[] segs = mockOverlappingStringSegments(strLen, olPoint);
-        StringSegment potentialOverlappedString = segs[0];
-        StringSegment potentialOverlappingString = segs[1];
-        int str1Pos = 0;
-        GenomeErrorFree instance = new GenomeErrorFree();
-        OverlapGraph.StringSegment expResult = null;
-        OverlapGraph.StringSegment result = instance.findOverlaps(potentialOverlappingString, potentialOverlappedString, str1Pos);
-        //TODO: create expResult
-        assertEquals(expResult, result);
+        for(int i=0;i<1000;i++){
+            int strLen = rnd.nextInt(30)+2;
+            int olPoint = rnd.nextInt(strLen);
+            StringSegment[] segs = mockOverlappingStringSegments(strLen, olPoint);
+            StringSegment potentialOverlappedString = segs[0];
+            StringSegment potentialOverlappingString = segs[1];
+            potentialOverlappedString.addOverlap(potentialOverlappingString.index, potentialOverlappingString.str.length()-olPoint);
+            int str1Pos = 0;
+            GenomeErrorFree instance = new GenomeErrorFree();
+            OverlapGraph.StringSegment expResult = potentialOverlappedString;
+            OverlapGraph.StringSegment result = instance.findOverlaps(potentialOverlappingString, potentialOverlappedString, str1Pos);
+
+            assertEquals(expResult, result);
+        }
      }
 
     private StringSegment[] mockOverlappingStringSegments(int segLength, int olPoint){

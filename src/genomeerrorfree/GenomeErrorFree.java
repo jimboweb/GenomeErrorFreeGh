@@ -181,8 +181,8 @@ public class GenomeErrorFree {
             {
                 rtrn = new CircularString(combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn.toString(), currentOverlap));
             }
-            nextNodeNumber = path[nextNodeNumber][0];
             overlap = path[nextNodeNumber][1];
+            nextNodeNumber = path[nextNodeNumber][0];
             started = true;            
             currentOverlap += overlap;
          } while (!endOfPath);
@@ -348,8 +348,8 @@ class OverlapGraph{
             this.index = index;
             this.parent = parent;
         }
-        public StringSegment addOverlap(int overlappingString, int lengthOfOverlap){
-            suffixOverlaps.add(new SuffixOverlap(this, overlappingString, lengthOfOverlap));
+        public StringSegment addOverlap(int overlappingString, int overlapPoint){
+            suffixOverlaps.add(new SuffixOverlap(this, overlappingString, overlapPoint));
             return this;
         }
 
@@ -372,9 +372,9 @@ class OverlapGraph{
         StringSegment parent;
         int overlappingString;
         int overlapPoint;
-        public SuffixOverlap(StringSegment parent, int overlappingString,int lengthOfOverlap){
+        public SuffixOverlap(StringSegment parent, int overlappingString,int overlapPoint){
             this.overlappingString=overlappingString;
-            this.overlapPoint=lengthOfOverlap;
+            this.overlapPoint=overlapPoint;
             this.parent=parent;
         }
         
