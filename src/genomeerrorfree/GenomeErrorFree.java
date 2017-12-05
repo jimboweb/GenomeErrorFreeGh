@@ -20,7 +20,6 @@ import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 
@@ -175,17 +174,20 @@ public class GenomeErrorFree {
                 rtrn = new CircularString(croppedRtrnStr);
 //                rtrn = new CircularString(combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn.toString(), currentOverlap));
                 endOfPath = true;
-
             }
-            else
+            else if(nextNodeNumber!=-1)
             {
                 rtrn = new CircularString(combineOverlaps(gr.stringSegments[nextNodeNumber].str, rtrn.toString(), currentOverlap));
             }
-            overlap = path[nextNodeNumber][1];
-            currentOverlap += overlap;
+            try{ //debug
+                overlap = path[nextNodeNumber][1];
+            } catch(NullPointerException e){ //debug
+                System.out.println(e); //debug
+            }
             nextNodeNumber = path[nextNodeNumber][0];
             started = true;            
-        } while (!endOfPath);
+            currentOverlap += overlap;
+         } while (!endOfPath);
         
         return rtrn;
     }        
@@ -220,7 +222,8 @@ public class GenomeErrorFree {
      *      <li>makes that the next item on path after item in pq</li>
      *  </ol>
      * </p>
-     * BUG: drawing a path but not the right one. taking the wrong node at some point.
+     * TODO: BUG: drawing a path but not the right one. taking the wrong node at some point.
+     * still the same problem
      * @param pq
      * @param gr
      * @param usedNodes
@@ -229,6 +232,11 @@ public class GenomeErrorFree {
      */
     Integer[][] drawPath (PriorityQueue pq, OverlapGraph gr, boolean[] usedNodes, int pathSize){
         Integer[][] rtrn = new Integer[pathSize][2];
+        for(Integer[] node:rtrn){
+            for(Integer i:node){
+                i=-1;
+            }
+        }
         while(!pq.isEmpty()){
             StringSegment currentSegment = (StringSegment)pq.poll();
             ArrayList<SuffixOverlap> possibleOverlaps = getLargestUnusedOverlaps(currentSegment, usedNodes);
@@ -237,9 +245,11 @@ public class GenomeErrorFree {
                 rootNode.addChildNode(ol);
             }
             rootNode.pruneChildNodesToOne(rootNode, gr, usedNodes);
-            SuffixOverlap nextOverlap = rootNode.children.get(0).overlapLink;
-            usedNodes[nextOverlap.overlappingString] = true;
-            rtrn[currentSegment.index] = nextOverlap.getValuesAsArray();
+            if(rootNode.children.size()>0){
+                SuffixOverlap nextOverlap = rootNode.children.get(0).overlapLink;
+                usedNodes[nextOverlap.overlappingString] = true;
+                rtrn[currentSegment.index] = nextOverlap.getValuesAsArray();
+            }
         }
         return rtrn;
     }
@@ -341,8 +351,8 @@ class OverlapGraph{
             this.index = index;
             this.parent = parent;
         }
-        public StringSegment addOverlap(int overlappingString, int lengthOfOverlap){
-            suffixOverlaps.add(new SuffixOverlap(this, overlappingString, lengthOfOverlap));
+        public StringSegment addOverlap(int overlappingString, int overlapPoint){
+            suffixOverlaps.add(new SuffixOverlap(this, overlappingString, overlapPoint));
             return this;
         }
 
@@ -365,9 +375,9 @@ class OverlapGraph{
         StringSegment parent;
         int overlappingString;
         int overlapPoint;
-        public SuffixOverlap(StringSegment parent, int overlappingString,int lengthOfOverlap){
+        public SuffixOverlap(StringSegment parent, int overlappingString,int overlapPoint){
             this.overlappingString=overlappingString;
-            this.overlapPoint=lengthOfOverlap;
+            this.overlapPoint=overlapPoint;
             this.parent=parent;
         }
         
@@ -705,10 +715,6 @@ class SimpleTreeNode  {
         }
     }
     
-    //TODO: I think my pruning strategy isn't right here. 
-    //I think I'm pruning any node that has a parent whose child is
-    //less than max for that level. What I neeed to do is prune
-    //only node where ALL the children are less than max for that level.
     /**
      * <p>
      *  prunes the node connected to Overlaps of StringSegment down to one. Beginning from

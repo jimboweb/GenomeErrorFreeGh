@@ -6,6 +6,7 @@
 package genomeerrorfree;
 
 import genomeerrorfree.GenomeErrorFreeTest.TestStringSeg;
+import genomeerrorfree.OverlapGraph.StringSegment;
 import genomeerrorfree.OverlapGraph.SuffixOverlap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,12 +42,13 @@ public class GenomeErrorFreeTest {
             System.out.println("returnGenome");
             String unbrokenString = createUnbrokenString(0, true);
             ReturnGenomeInputAndPath giap = new ReturnGenomeInputAndPath(unbrokenString, numberOfSegments, strLen, maxOlPoint);
+            giap.mixUpArrayListAndPath();
             ArrayList<String> input = giap.inputAsStringList();
             GenomeErrorFree instance = new GenomeErrorFree();
             CircularString expResult = new CircularString(unbrokenString);
             String result = instance.returnGenome(input);
             CircularString cResult = new CircularString(result);
-            assertEquals("Failed test number " + i + " got string " + result, expResult, result);
+            assertEquals("Failed test number " + i + " got string " + result, expResult, cResult);
         }
     }
 
@@ -109,11 +111,12 @@ public class GenomeErrorFreeTest {
     @Test
     public void testGreedyHamiltonianPath(){
         String originalString = createUnbrokenString(1000, false);
-        ReturnGenomeInputAndPath input = new ReturnGenomeInputAndPath(originalString,200,30,10);
+        ReturnGenomeInputAndPath input = new ReturnGenomeInputAndPath(originalString,400,30,10);
         
         GenomeErrorFree instance = new GenomeErrorFree();
         ArrayList<String> inputStrings = new ArrayList<>();
         Integer[][] expectedPath = createExpectedPath(input, inputStrings);
+//        input.mixUpArrayListAndPath();
         OverlapGraph graph = new OverlapGraph(inputStrings);
         graph = instance.findAllOverlaps(graph);
         Integer[][] path = instance.greedyHamiltonianPath(graph);
@@ -159,9 +162,6 @@ public class GenomeErrorFreeTest {
         OverlapGraph og = new OverlapGraph(new ArrayList<>());
         SuffixOverlap mainOverlap = og.new SuffixOverlap(null, 0, 0);
         SimpleTreeNode rootNode = new SimpleTreeNode(mainOverlap);
-        //TODO: make three levels of overlap graphs with different string
-        //segments. Maybe just create an overlap graph from an actual string
-        //instead of trying to mock it. 
     }
    
    private boolean testReturnString(String[] rtrn, String unbrokenString){
@@ -215,7 +215,6 @@ public class GenomeErrorFreeTest {
         public ReturnGenomeInputAndPath(String unbrokenString, int numberOfSegments, int strLen, int maxOlPoint){
             input = new ArrayList<>();
             createStringSegments(unbrokenString, numberOfSegments, strLen, maxOlPoint);
-            mixUpArrayListAndPath();
         }
         
         public ArrayList<String> inputAsStringList(){
@@ -248,54 +247,55 @@ public class GenomeErrorFreeTest {
                 input.add(nextStringSeg);
                         
                 lastStrBegin =  rnd.nextInt(maxOlPoint);
-                absLocation+= lastStrBegin;
+                absLocation = (absLocation + lastStrBegin)%unbrokenString.length();
                 if((lastStrBegin+200)>multString.length())
                     multString += unbrokenString;
             }
             for(TestStringSeg seg:input){
-                findAllOverlaps(seg, input, strLen);
+                findAllOverlaps(seg, input, strLen, unbrokenString.length());
             }
 
             
             int x=0;
         }
         
-        //TODO: BUG: doesn't get the wraparound still. I think I need to do
-        //something with modulus.
-        // formula is (a + strLen - b)%strLen
         /**
          * general function to assign all overlaps using absolute location
          * @param seg the segment to find overlaps for
          * @param input all the segments
          * @param strLen the length of the strings
          */
-        private void findAllOverlaps(TestStringSeg seg, ArrayList<TestStringSeg> input, int strLen){
+        private void findAllOverlaps(TestStringSeg seg, ArrayList<TestStringSeg> input, int strLen, int unbrStrLen){
             ArrayList<TestStringSeg> possibleOverlaps = (ArrayList<TestStringSeg>)input
                     .stream()
-                    .filter(olSeg->Math.abs((olSeg.absLocation + strLen - seg.absLocation) % strLen)<strLen)
+                    .filter(olSeg->
+                            Math.abs((olSeg.absLocation + unbrStrLen - seg.absLocation) % unbrStrLen)<strLen
+                            &&!olSeg.equals(seg))
                     .collect(Collectors.toList());
             possibleOverlaps.stream().forEach((olSeg) -> {
-                assignOverlap(seg, olSeg);
+                assignOverlap(seg, olSeg, strLen, unbrStrLen);
             });
         }
         
         /**
          * assigns overlap only at end
          * @param seg the segment to overlap
-         * @param overlappingStringSeg the last string segment
+         * @param olStringSeg the last string segment
          * @return 
          */
-        private void assignOverlap(TestStringSeg seg, TestStringSeg overlappingStringSeg){
-            if(seg.absLocation<overlappingStringSeg.absLocation){
-                int olPoint = overlappingStringSeg.absLocation - seg.absLocation;
-                seg.addOverlappedBy(overlappingStringSeg, olPoint);
-                overlappingStringSeg.addOverlaps(seg, olPoint);
-            } else if (seg.absLocation>overlappingStringSeg.absLocation){
-                int olPoint = seg.absLocation - overlappingStringSeg.absLocation;
-                overlappingStringSeg.addOverlappedBy(seg, olPoint);
-                seg.addOverlaps(overlappingStringSeg, olPoint);
+        private void assignOverlap(TestStringSeg seg, TestStringSeg olStringSeg, int strLen, int unbrStrLen){
+            TestStringSeg laterString = seg.absLocation>olStringSeg.absLocation?seg:olStringSeg;
+            TestStringSeg earlierString = laterString.equals(seg)?olStringSeg:seg;
+            int earlierStringModLocation = earlierString.absLocation+unbrStrLen;
+            int earlierStringCircularLocation = earlierString.absLocation;
+            int laterStringLocation = laterString.absLocation;
+            if(earlierStringModLocation-laterString.absLocation<strLen){
+                earlierStringCircularLocation = earlierStringModLocation;
             }
-            
+            int olPoint = Math.abs(earlierStringCircularLocation - laterStringLocation);
+            laterString.addOverlaps(earlierString, olPoint);
+            earlierString.addOverlappedBy(laterString, olPoint);
+            int x=0;        
         }
         
         private void mixUpArrayListAndPath(){
@@ -412,5 +412,125 @@ public class GenomeErrorFreeTest {
         boolean suffix;
         TestStringSeg stringSeg;
         int overlapPoint;
+    }
+
+    /**
+     * Test of findAllOverlaps method, of class GenomeErrorFree.
+     */
+    @Test
+    public void testFindAllOverlaps() {
+        System.out.println("findAllOverlaps");
+        OverlapGraph gr = null;
+        GenomeErrorFree instance = new GenomeErrorFree();
+        OverlapGraph expResult = null;
+        OverlapGraph result = instance.findAllOverlaps(gr);
+        assertEquals(expResult, result);
+        // TODO LATER review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+    
+    //TODO LATER: finish test method and find out what's wrong with findOverlaps
+    /**
+     * Test of findOverlaps method, of class GenomeErrorFree.
+     */
+    @Test
+    public void testFindOverlaps() {
+        System.out.println("findOverlaps");
+        for(int i=0;i<1000;i++){
+            int strLen = rnd.nextInt(30)+2;
+            int olPoint = rnd.nextInt(strLen);
+            StringSegment[] segs = mockOverlappingStringSegments(strLen, olPoint);
+            StringSegment potentialOverlappedString = segs[0];
+            StringSegment potentialOverlappingString = segs[1];
+            potentialOverlappedString.addOverlap(potentialOverlappingString.index, potentialOverlappingString.str.length()-olPoint);
+            int str1Pos = 0;
+            GenomeErrorFree instance = new GenomeErrorFree();
+            OverlapGraph.StringSegment expResult = potentialOverlappedString;
+            OverlapGraph.StringSegment result = instance.findOverlaps(potentialOverlappingString, potentialOverlappedString, str1Pos);
+
+            assertEquals(expResult, result);
+        }
+     }
+
+    private StringSegment[] mockOverlappingStringSegments(int segLength, int olPoint){
+        StringSegment[] stringSegments = new StringSegment[2];
+        String str1 = "";
+        
+        for(int i=0;i<segLength;i++){
+            str1+= randChar();
+        }
+        String str2 = str1.substring(olPoint);
+        for(int i=str2.length();i<segLength;i++){
+            str2+=randChar();
+        }
+        OverlapGraph mockOverlapGraph = new OverlapGraph(new ArrayList<>());
+        stringSegments[0] = mockOverlapGraph.new StringSegment(mockOverlapGraph, str1, rnd.nextInt(10));
+        stringSegments[1] = mockOverlapGraph.new StringSegment(mockOverlapGraph, str2, rnd.nextInt(10)+10);
+        return stringSegments;
+    }
+    /**
+     * Test of matchOverlaps method, of class GenomeErrorFree.
+     */
+    @Test
+    public void testMatchOverlaps() {
+        System.out.println("matchOverlaps");
+        String potentialOverlappingString = "";
+        String potentialOverlappedString = "";
+        int overlap = 0;
+        boolean expResult = false;
+        boolean result = GenomeErrorFree.matchOverlaps(potentialOverlappingString, potentialOverlappedString, overlap);
+        assertEquals(expResult, result);
+        // TODO LATER review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+
+    /**
+     * Test of drawPath method, of class GenomeErrorFree.
+     */
+    @Test
+    public void testDrawPath() {
+        System.out.println("drawPath");
+        PriorityQueue pq = null;
+        OverlapGraph gr = null;
+        boolean[] usedNodes = null;
+        int pathSize = 0;
+        GenomeErrorFree instance = new GenomeErrorFree();
+        Integer[][] expResult = null;
+        Integer[][] result = instance.drawPath(pq, gr, usedNodes, pathSize);
+        assertArrayEquals(expResult, result);
+        // TODO LATER review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+
+    /**
+     * Test of getLargestUnusedOverlaps method, of class GenomeErrorFree.
+     */
+    @Test
+    public void testGetLargestUnusedOverlaps() {
+        System.out.println("getLargestUnusedOverlaps");
+        OverlapGraph.StringSegment seg = null;
+        boolean[] nodeIsUsed = null;
+        GenomeErrorFree instance = new GenomeErrorFree();
+        ArrayList<SuffixOverlap> expResult = null;
+        ArrayList<SuffixOverlap> result = instance.getLargestUnusedOverlaps(seg, nodeIsUsed);
+        assertEquals(expResult, result);
+        // TODO LATER review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
+    }
+
+    /**
+     * Test of combineOverlaps method, of class GenomeErrorFree.
+     */
+    @Test
+    public void testCombineOverlaps() {
+        System.out.println("combineOverlaps");
+        String overlappingString = "";
+        String overlappedString = "";
+        int olPoint = 0;
+        String expResult = "";
+        String result = GenomeErrorFree.combineOverlaps(overlappingString, overlappedString, olPoint);
+        assertEquals(expResult, result);
+        // TODO LATER review the generated test code and remove the default call to fail.
+        fail("The test case is a prototype.");
     }
 }
