@@ -715,6 +715,7 @@ class SimpleTreeNode  {
         }
     }
     
+    //TODO: BUG: sometimes pruning child nodes to zero instead of one
     /**
      * <p>
      *  prunes the node connected to Overlaps of StringSegment down to one. Beginning from
