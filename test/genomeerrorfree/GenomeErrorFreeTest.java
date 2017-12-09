@@ -35,10 +35,10 @@ public class GenomeErrorFreeTest {
      */
     @Test
     public void testReturnGenome() {
-        for(int i=0;i<100;i++){
+        for(int i=0;i<5;i++){
             int numberOfSegments = 1618; 
             int strLen = 100;
-            int maxOlPoint = 50;
+            int maxOlPoint = 70;
             System.out.println("returnGenome");
             String unbrokenString = createUnbrokenString(0, true);
             ReturnGenomeInputAndPath giap = new ReturnGenomeInputAndPath(unbrokenString, numberOfSegments, strLen, maxOlPoint);
