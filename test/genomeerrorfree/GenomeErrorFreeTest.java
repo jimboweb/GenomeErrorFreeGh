@@ -127,8 +127,7 @@ public class GenomeErrorFreeTest {
         return unbrokenString;
     }
     /**
-     * @deprecated 
-     * @param input
+      * @param input
      * @return 
      */
     private ArrayList<String> mixUpStringSegments(ArrayList<String> input){

@@ -223,11 +223,12 @@ public class GenomeErrorFree {
         while(!pq.isEmpty()){
             OverlapGraph.StringSegment nextStringSeg = (OverlapGraph.StringSegment) pq.poll();
             rtrn[nextStringSeg.index]=findNextPath(nextStringSeg, usedNodes);
-            if (rtrn[nextStringSeg.index] == null)
+            if (rtrn[nextStringSeg.index] == null){
                 //then there was no further path available
                 //return null;
                 System.out.println("Incomplete path");
                 return rtrn; //debug while I'm running test
+            }
         }
         return rtrn;
     }
@@ -337,12 +338,6 @@ class OverlapGraph{
         }
     }
  
-    @Override
-    public int compareTo(Overlap o) {
-        Integer thisOverlapLength = this.overlapLength;
-        Integer otherOverlapLength = o.overlapLength;
-        return  otherOverlapLength.compareTo(thisOverlapLength);
-    }    
 }
 
 
