@@ -73,17 +73,39 @@ public class GenomeErrorFree {
         }
         return input;
     }
+    
     /**
      * 
      * @param input the genome strings sampled
      * @return the original genome string
      */
     String returnGenome(ArrayList<String> input){
-        
+        input = removeDupes(input);
         OverlapGraph gr = new OverlapGraph(input);
         gr = findAllOverlaps(gr);
         return assembleString(gr).toString();
         
+    }
+    
+    /**
+     * remove all inputs that are duplicates
+     * @param input the input with the dupes
+     * @return the input without the dupes
+     * put them in order so the dupes are together
+     * then loop through and find anything
+     * identical to the previous
+     * */
+    ArrayList<String> removeDupes(ArrayList<String> input){
+        Collections.sort(input); //may not be necessary if input is already sorted
+        String prevNonDupe = "";
+        ArrayList<String> rtrn = new ArrayList<>();
+        for(String inputItem:input){
+            if(!prevNonDupe.equals(inputItem)){
+                rtrn.add(inputItem);
+                prevNonDupe = inputItem;
+            } 
+        }
+        return rtrn;
     }
     
     /**
@@ -222,8 +244,6 @@ public class GenomeErrorFree {
      *      <li>makes that the next item on path after item in pq</li>
      *  </ol>
      * </p>
-     * TODO: BUG: drawing a path but not the right one. taking the wrong node at some point.
-     * still the same problem
      * @param pq
      * @param gr
      * @param usedNodes
@@ -715,7 +735,6 @@ class SimpleTreeNode  {
         }
     }
     
-    //TODO: BUG: sometimes pruning child nodes to zero instead of one
     /**
      * <p>
      *  prunes the node connected to Overlaps of StringSegment down to one. Beginning from
