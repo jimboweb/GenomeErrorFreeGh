@@ -8,9 +8,11 @@ package genomeerrorfree;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+import static org.junit.Assert.assertArrayEquals;
 import org.junit.Test;
-import static org.junit.Assert.*;
-import genomeerrorfree.OverlapGraph;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -77,8 +79,6 @@ public class GenomeErrorFreeTest {
         fail("The test case is a prototype.");
     }
 
-    //TODO: right now I think the mix up function isn't working 
-    //right. The overlaps it's giving aren't the right overlaps. 
     @Test
     public void testGreedyHamiltonianPath(){
         String originalString = createUnbrokenString(1000, false);
@@ -140,38 +140,6 @@ public class GenomeErrorFreeTest {
         
     }
     
-    /**
-     * @deprecated 
-     * @param unbrokenString
-     * @param numberOfSegments
-     * @param strLen
-     * @param maxOlPoint
-     * @return 
-     */
-    private ArrayList<String> createStringSegments(String unbrokenString, int numberOfSegments, int strLen, int maxOlPoint){
-        Random rnd = new Random();
-        String[] segments = new String[numberOfSegments];
-        
-        String multString = unbrokenString;
-        CircularString cString = new CircularString(unbrokenString);
-        ArrayList<String> rtrn;
-        //rtrn.add(cString.subString(0, cString.length()));
-        int lastStrBegin = 0;
-        String nextString = "";
-        for(int i=0;i<numberOfSegments;i++){
-            nextString = multString.substring(lastStrBegin, lastStrBegin+strLen);
-            multString = multString.substring(lastStrBegin);
-            lastStrBegin =  rnd.nextInt(maxOlPoint);
-            if((lastStrBegin+200)>multString.length())
-                multString += unbrokenString;
-            segments[i] = nextString;
-        }
-        boolean returnIsGood = testReturnString(segments, unbrokenString);
-        System.out.println("All segments in string: " + returnIsGood);
-        rtrn = new ArrayList<>(Arrays.asList(segments));
-        rtrn = mixUpStringSegments(rtrn);
-        return rtrn;
-    }
    
    private boolean testReturnString(String[] rtrn, String unbrokenString){
        CircularString cUnbr = new CircularString(unbrokenString);
