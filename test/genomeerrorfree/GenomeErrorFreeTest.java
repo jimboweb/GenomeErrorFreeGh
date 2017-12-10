@@ -35,14 +35,14 @@ public class GenomeErrorFreeTest {
      */
     @Test
     public void testReturnGenome() {
-        for(int i=0;i<5;i++){
+        for(int i=0;i<1;i++){
             int numberOfSegments = 1618; 
             int strLen = 100;
-            int maxOlPoint = 70;
+            int maxOlPoint = 5;
             System.out.println("returnGenome");
             String unbrokenString = createUnbrokenString(0, true);
             ReturnGenomeInputAndPath giap = new ReturnGenomeInputAndPath(unbrokenString, numberOfSegments, strLen, maxOlPoint);
-//            giap.mixUpArrayListAndPath();
+            giap.mixUpArrayListAndPath();
             ArrayList<String> input = giap.inputAsStringList();
             GenomeErrorFree instance = new GenomeErrorFree();
             CircularString expResult = new CircularString(unbrokenString);
@@ -241,6 +241,7 @@ public class GenomeErrorFreeTest {
             int absLocation = 0;
             for(int i=0;i<numberOfSegments;i++){
                 nextString = multString.substring(lastStrBegin, lastStrBegin+strLen);
+                //System.out.println(nextString);
                 multString = multString.substring(lastStrBegin);
                 TestStringSeg nextStringSeg = new TestStringSeg(nextString, i, absLocation);
                 input.add(nextStringSeg);

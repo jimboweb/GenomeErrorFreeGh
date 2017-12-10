@@ -74,6 +74,10 @@ public class GenomeErrorFree {
         return input;
     }
     
+    //TODO: BUG: (at least) one of the string segments has a very high suffix overlap,
+    //like at 96 instead of 2-4 like the rest. That's the one that's getting the null
+    //pointer exception most of the time. This only happens when the overlap length is
+    //very short. Need to find that string and figure out what's going on with it. 
     /**
      * 
      * @param input the genome strings sampled
