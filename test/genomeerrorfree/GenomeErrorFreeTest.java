@@ -38,11 +38,11 @@ public class GenomeErrorFreeTest {
         for(int i=0;i<1;i++){
             int numberOfSegments = 1618; 
             int strLen = 100;
-            int maxOlPoint = 5;
+            int maxOlPoint = 10;
             System.out.println("returnGenome");
             String unbrokenString = createUnbrokenString(0, true);
             ReturnGenomeInputAndPath giap = new ReturnGenomeInputAndPath(unbrokenString, numberOfSegments, strLen, maxOlPoint);
-            giap.mixUpArrayListAndPath();
+            //giap.mixUpArrayListAndPath();
             ArrayList<String> input = giap.inputAsStringList();
             GenomeErrorFree instance = new GenomeErrorFree();
             CircularString expResult = new CircularString(unbrokenString);
