@@ -35,11 +35,11 @@ public class GenomeErrorFreeTest {
      */
     @Test
     public void testReturnGenome() {
-        for(int i=0;i<1;i++){
+        for(int i=0;i<100;i++){
             int numberOfSegments = 1618; 
             int strLen = 100;
-            int maxOlPoint = 10;
-            System.out.println("returnGenome");
+            int maxOlPoint = rnd.nextInt(50)+10;
+            System.out.println("returnGenome trial " + i);
             String unbrokenString = createUnbrokenString(0, true);
             ReturnGenomeInputAndPath giap = new ReturnGenomeInputAndPath(unbrokenString, numberOfSegments, strLen, maxOlPoint);
             //giap.mixUpArrayListAndPath();
@@ -48,27 +48,65 @@ public class GenomeErrorFreeTest {
             CircularString expResult = new CircularString(unbrokenString);
             String result = instance.returnGenome(input);
             CircularString cResult = new CircularString(result);
-            assertEquals("Failed test number " + i + " got string " + result, expResult, cResult);
+            assertEquals(getTRGFailString(giap, unbrokenString, result), expResult, cResult);
         }
+    }
+    
+    private String getTRGFailString(ReturnGenomeInputAndPath giap, String expectedString, String actualString){
+        String failString = "";
+        failString += "failed on string \n";
+        failString += expectedString;
+        failString += "instead got\n";
+        failString += actualString;
+        failString += "input:\n";
+        for(TestStringSeg seg:giap.input){
+            failString += seg.str;
+            failString += "\n";
+        }
+        return failString;
     }
 
 
     @Test
     public void testCircularString(){
-        String str1 = "kjshfiui009830498)(*)(";
-        String str1Wrap = "i009830498)(*)(kjshfiu";
-        CircularString cStr1 = new CircularString(str1);
-        CircularString cStr1Wrap = new CircularString(str1Wrap);
-        assertEquals(cStr1,cStr1Wrap);
-        String subStrExp = ")(kjs";
-        String subStrTest = cStr1.subString(20, 3);
-        assertEquals(subStrExp, subStrTest);
-        for(int i=0;i<1000;i++){
-            int start = rnd.nextInt(str1.length());
-            int end = rnd.nextInt(str1.length());
-            String testContainsStr = cStr1.subString(start, start+end);
-            assertTrue(cStr1.contains(testContainsStr));
-        }
+        int maxStrLen = 10;
+        int minStrLen = 5;
+        int trials = 1;
+        for(int trial=0;trial<trials;trial++){
+            int strLen = rnd.nextInt(maxStrLen)+minStrLen;
+            String orgStr = "";
+            for(int i=0;i<strLen;i++){
+                orgStr += randChar();
+            }
+            int strBr = rnd.nextInt(strLen);
+            String cmpStr = orgStr.substring(strLen)+orgStr.substring(0, strLen);
+            boolean eqls = true;
+            int possibleError = rnd.nextInt(12);
+            if(possibleError<4){
+                eqls=false;
+                int replaceCharLoc = rnd.nextInt(strLen);
+                char replaceChar = cmpStr.charAt(replaceCharLoc);
+                char newChar;
+                do{
+                    newChar = randChar();
+                } while(newChar==replaceChar);
+                cmpStr = cmpStr.substring(0,replaceCharLoc-1) + newChar + cmpStr.substring(replaceCharLoc);
+            } else if(possibleError<6){
+                eqls=false;
+                int removeOrAdd = rnd.nextInt(2);
+                int removeOrAddLocation = rnd.nextInt(strLen);
+                if(removeOrAdd<1){
+                    cmpStr = cmpStr.substring(0,removeOrAddLocation) + randChar() + cmpStr.substring(removeOrAddLocation);
+                } else {
+                    cmpStr = cmpStr.substring(0,removeOrAddLocation-1) + cmpStr.substring(removeOrAddLocation);
+                }
+            }
+            CircularString cOrgStr = new CircularString(orgStr);
+            CircularString cCmpStr = new CircularString(cmpStr);
+            boolean testEqls = cOrgStr.equals(cCmpStr);
+            assertEquals("failed on string " + orgStr + " comparison string " + cmpStr + "should be " + eqls,eqls,testEqls);
+        }   
+        
     }
         @Test
         public void testStringSegment(){
