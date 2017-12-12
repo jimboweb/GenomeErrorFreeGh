@@ -510,6 +510,9 @@ class CircularString implements CharSequence {
         }
         return false;
     }
+    
+    //TODO: BUG: my f*$^ing equality check is returning false positives
+    //no wonder I never fail the tests
     /**
      * Check for circular equality
      * 

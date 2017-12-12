@@ -71,20 +71,22 @@ public class GenomeErrorFreeTest {
     public void testCircularString(){
         int maxStrLen = 10;
         int minStrLen = 5;
-        int trials = 1;
+        int trials = 10;
         for(int trial=0;trial<trials;trial++){
             int strLen = rnd.nextInt(maxStrLen)+minStrLen;
             String orgStr = "";
             for(int i=0;i<strLen;i++){
                 orgStr += randChar();
             }
-            int strBr = rnd.nextInt(strLen);
-            String cmpStr = orgStr.substring(strLen)+orgStr.substring(0, strLen);
+            int strBr = rnd.nextInt(strLen-1);
+            String firstHalf = orgStr.substring(0, strBr);
+            String secondHalf = orgStr.substring(strBr);
+            String cmpStr = secondHalf+firstHalf;
             boolean eqls = true;
             int possibleError = rnd.nextInt(12);
             if(possibleError<4){
                 eqls=false;
-                int replaceCharLoc = rnd.nextInt(strLen);
+                int replaceCharLoc = rnd.nextInt(strLen-1);
                 char replaceChar = cmpStr.charAt(replaceCharLoc);
                 char newChar;
                 do{
@@ -94,7 +96,7 @@ public class GenomeErrorFreeTest {
             } else if(possibleError<6){
                 eqls=false;
                 int removeOrAdd = rnd.nextInt(2);
-                int removeOrAddLocation = rnd.nextInt(strLen);
+                int removeOrAddLocation = rnd.nextInt(strLen-2)+1;
                 if(removeOrAdd<1){
                     cmpStr = cmpStr.substring(0,removeOrAddLocation) + randChar() + cmpStr.substring(removeOrAddLocation);
                 } else {
@@ -104,7 +106,7 @@ public class GenomeErrorFreeTest {
             CircularString cOrgStr = new CircularString(orgStr);
             CircularString cCmpStr = new CircularString(cmpStr);
             boolean testEqls = cOrgStr.equals(cCmpStr);
-            assertEquals("failed on string " + orgStr + " comparison string " + cmpStr + "should be " + eqls,eqls,testEqls);
+            assertEquals("failed on string " + orgStr + " comparison string " + cmpStr ,eqls,testEqls);
         }   
         
     }
