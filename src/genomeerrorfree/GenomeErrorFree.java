@@ -525,27 +525,30 @@ class CircularString implements CharSequence {
         if(!(other instanceof CircularString))
             return false;
         CircularString otherCs = (CircularString)other;
-        if(this.length == otherCs.length)
-        {
-            int i,j;
-        //otherwise cycle through other string
-            for(i=0;i<otherCs.length;i++){
-                //then cycle through this one
-                for(j=0;j<length;j++){
-                    //continue if the character at that point isn't the same
-                    char charJ = charAt(j);
-                    char charI = otherCs.charAt(i+j);
-                    if(!(charAt(j)==otherCs.charAt(i+j))){
-                        break;
-                    }
-                }
-                //if I got all the way through the word, then they're equal
-                if(i==length-1){
-                    return true;
-                }
+        //otherwise check if they're the same length and then cycle through other string
+        return length == otherCs.length && 
+                compareStringAtEachOverlap(otherCs);
+    }
+    
+    private boolean compareStringAtEachOverlap(CircularString otherCs){
+        for(int i=0;i<length;i++){
+            if(compareStringAtOverlap(otherCs, i)){
+                return true;
             }
         }
-          return false;
+        return false;
+    }
+    
+    private boolean compareStringAtOverlap(CircularString otherCs, int i){
+        for(int j=0;j<length;j++){
+            //continue if the character at that point isn't the same
+            char thisStringChar = charAt(j);
+            char otherStringChar = otherCs.charAt(i+j);
+            if(thisStringChar!=otherStringChar){
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
