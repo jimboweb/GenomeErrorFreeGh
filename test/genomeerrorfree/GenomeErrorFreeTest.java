@@ -35,7 +35,7 @@ public class GenomeErrorFreeTest {
      */
     @Test
     public void testReturnGenome() {
-        for(int i=0;i<100;i++){
+        for(int i=0;i<100000;i++){
             int numberOfSegments = 1618; 
             int strLen = 100;
             int maxOlPoint = rnd.nextInt(50)+10;
@@ -71,8 +71,9 @@ public class GenomeErrorFreeTest {
     public void testCircularString(){
         int maxStrLen = 10;
         int minStrLen = 5;
-        int trials = 10;
+        int trials = 100;
         for(int trial=0;trial<trials;trial++){
+            System.out.println("trial " + trial);
             int strLen = rnd.nextInt(maxStrLen)+minStrLen;
             String orgStr = "";
             for(int i=0;i<strLen;i++){
@@ -103,9 +104,12 @@ public class GenomeErrorFreeTest {
                     cmpStr = cmpStr.substring(0,removeOrAddLocation-1) + cmpStr.substring(removeOrAddLocation);
                 }
             }
+            System.out.println("original string:  " + orgStr);
+            System.out.println("compare string:" + cmpStr);
             CircularString cOrgStr = new CircularString(orgStr);
             CircularString cCmpStr = new CircularString(cmpStr);
             boolean testEqls = cOrgStr.equals(cCmpStr);
+            System.out.println("Expected result " + eqls + " actual result: " + testEqls);
             assertEquals("failed on string " + orgStr + " comparison string " + cmpStr ,eqls,testEqls);
         }   
         
