@@ -6,11 +6,7 @@
 package genomeerrorfree;
 
 import genomeerrorfree.GenomeErrorFreeTest.TestStringSeg;
-import genomeerrorfree.OverlapGraph.StringSegment;
-import genomeerrorfree.OverlapGraph.SuffixOverlap;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.stream.Collectors;
 import org.junit.Test;
@@ -35,7 +31,7 @@ public class GenomeErrorFreeTest {
      */
     @Test
     public void testReturnGenome() {
-        for(int i=0;i<4;i++){
+        for(int i=0;i<200;i++){
             int numberOfSegments = 1618; 
             int strLen = 100;
             int maxOlPoint = rnd.nextInt(50)+10;

@@ -4,20 +4,16 @@
  * and open the template in the editor.
  */
 
-
-import genomeerrorfree.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.PriorityQueue;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 
 
@@ -25,10 +21,11 @@ import java.util.stream.Collectors;
  *
  * @author jimstewart
  */
-public class GenomeErrorFree {
+public class GenomeErrorFreeNPM {
     boolean findOverlapsIsNaive = true;
     boolean findAllOverlapsIsNaive = true;
     private final int numberOfInputs = 1618; //will be 1618
+    private final int minOverlap = 75;
     /**
      * @param args the command line arguments
      */
@@ -40,12 +37,12 @@ public class GenomeErrorFree {
 
         @Override
         public void run() {
-            new GenomeErrorFree().run();
+            new GenomeErrorFreeNPM().run();
         }
         
     }
     
-    public GenomeErrorFree(){
+    public GenomeErrorFreeNPM(){
         
     }
     
@@ -66,7 +63,7 @@ public class GenomeErrorFree {
             try {
                 input.add(scanner.next());
             } catch (IOException ex) {
-                Logger.getLogger(GenomeErrorFree.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(GenomeErrorFreeNPM.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         return input;
@@ -142,7 +139,7 @@ public class GenomeErrorFree {
         
         if(findOverlapsIsNaive){
             int stopPoint = Math.max(0, potentialOverlappingString.str.length()-potentialOverlappedString.str.length());
-            for(int i=potentialOverlappedString.str.length()-1;i>stopPoint;i--){
+            for(int i=potentialOverlappedString.str.length()-minOverlap;i>stopPoint;i--){
                 if(matchOverlaps(potentialOverlappingString.str, potentialOverlappedString.str, i)){
                     int overlapPoint = i;
                     potentialOverlappedString = potentialOverlappedString.addOverlap(str1Pos, overlapPoint);
@@ -261,22 +258,11 @@ public class GenomeErrorFree {
         }
         while(!pq.isEmpty()){
             OverlapGraph.StringSegment currentSegment = (OverlapGraph.StringSegment)pq.poll();
-            ArrayList<OverlapGraph.SuffixOverlap> possibleOverlaps = getLargestUnusedOverlaps(currentSegment, usedNodes);
-            SimpleTreeNode rootNode = new SimpleTreeNode();
-            for(OverlapGraph.SuffixOverlap ol:possibleOverlaps){
-                rootNode.addChildNode(ol);
-            }
-            rootNode.pruneChildNodesToOne(rootNode, gr, usedNodes);
-            if(rootNode.children.size()>0){
-                OverlapGraph.SuffixOverlap nextOverlap = rootNode.children.get(0).overlapLink;
-                usedNodes[nextOverlap.overlappingString] = true;
-                rtrn[currentSegment.index] = nextOverlap.getValuesAsArray();
-            }
+            rtrn[currentSegment.index] = getLargestUnusedOverlap(currentSegment, usedNodes).getValuesAsArray();
         }
         return rtrn;
     }
-    
-    
+
     /**
      * <p>Finds the longest unused overlaps.
      *  <ol>
@@ -291,21 +277,18 @@ public class GenomeErrorFree {
      * @param nodeIsUsed nodes that have already been used
      * @return 
      */
-    ArrayList<OverlapGraph.SuffixOverlap> getLargestUnusedOverlaps(OverlapGraph.StringSegment seg, boolean[] nodeIsUsed){
-        ArrayList<OverlapGraph.SuffixOverlap> rtrn = new ArrayList<>();
+    OverlapGraph.SuffixOverlap getLargestUnusedOverlap(OverlapGraph.StringSegment seg, boolean[] nodeIsUsed){
+        OverlapGraph.SuffixOverlap rtrn=seg.suffixOverlaps.get(0);
         int maxOverlap = -1;
         for(OverlapGraph.SuffixOverlap ol:seg.suffixOverlaps){
             if(!nodeIsUsed[ol.overlappingString]){
                 if(maxOverlap ==-1){
                     maxOverlap = ol.getOverlapLength();
-                    rtrn.add(ol);
+                    rtrn=ol;
                 } else {
                     int overlapLength = ol.getOverlapLength();
                     if(overlapLength>=maxOverlap){
-                        if(overlapLength>maxOverlap)
-                            throw new IllegalArgumentException("overlaps not in order");
-                        maxOverlap = ol.getOverlapLength();
-                        rtrn.add(ol);
+                        rtrn=ol;
                     } else {
                         break;
                     }
@@ -314,6 +297,13 @@ public class GenomeErrorFree {
         }
         return rtrn;
     }
+
+
+
+
+    
+    
+
         
         /**
      * Combines overlapping strings into a single string
@@ -579,206 +569,3 @@ class FastScanner {
 
 }
 
-/**
- * Just a basic tree node with a value and links to parent and children
- * @author jim.stewart
- */
-class SimpleTreeNode  {
-    int value;
-    SimpleTreeNode parent;
-    ArrayList<SimpleTreeNode> children;
-    OverlapGraph.SuffixOverlap overlapLink;
-
-
-    public SimpleTreeNode(){
-        this.value = -1;
-        this.parent = null;
-        this.overlapLink = null;
-        this.children=new ArrayList<>();
-    }
-    
-    /**
-     * Only for root node
-     * @param value the node's value
-     */
-    public SimpleTreeNode(OverlapGraph.SuffixOverlap overlapLink){
-        this.value = overlapLink.getOverlapLength();
-        this.parent = null;
-        this.overlapLink = overlapLink;
-        this.children=new ArrayList<>();
-    }
-    
-    /**
-     * a node with a parent
-     * @param value node's value
-     * @param parent link to parent
-     */
-    public SimpleTreeNode(OverlapGraph.SuffixOverlap overlapLink, SimpleTreeNode parent){
-        this.value = overlapLink.getOverlapLength();
-        this.parent = parent;
-        this.overlapLink = overlapLink;
-        this.children=new ArrayList<>();
-    }
-    
-    /**
-     * Add a child
-     * @param value child's value
-     */
-    public void addChildNode(OverlapGraph.SuffixOverlap overlapLink){
-        SimpleTreeNode newNode = new SimpleTreeNode(overlapLink, this);
-        children.add(newNode);
-    }
-    
-    public void addAllChildNodes(ArrayList<OverlapGraph.SuffixOverlap> overlaps){
-        for(OverlapGraph.SuffixOverlap ol:overlaps){
-            addChildNode(ol);
-        }
-    }
-    
-    /**
-     * For all nodes at a given depth, prune branches of nodes whose value
-     * is less than the max at that level
-     * @param depth 
-     */
-    void pruneDescendantsAtDepth(int depth){
-        ArrayList<SimpleTreeNode> descendantsAtDepth = getDescendantsAtDepth(depth);
-        ArrayList<SimpleTreeNode> nodesToPrune = getNodesToPrune(descendantsAtDepth);
-        for(SimpleTreeNode node:nodesToPrune){
-            node.pruneBranch();
-        }
-     }
-    
-    /**
-     * from a list of descendant nodes, find all the ones whose value is less than the max
-     * @param descendantsAtDepth the nodes
-     * @return the nodes whose value is less than max value
-     */
-    private ArrayList<SimpleTreeNode> getNodesToPrune(ArrayList<SimpleTreeNode> descendantsAtDepth){
-        int max=0;
-        ArrayList<SimpleTreeNode> nodesToKeep = new ArrayList<>();
-        ArrayList<SimpleTreeNode> nodesToPrune = new ArrayList<>();
-        for(SimpleTreeNode desc:descendantsAtDepth){
-            if(desc.value>=max){
-                if(desc.value>max){
-                    nodesToPrune.addAll(nodesToKeep);
-                }
-                nodesToKeep.add(desc);
-            }
-        }
-        return nodesToPrune;
-    }
-    
-    /**
-     * gets all descendants from a node at a certain depth
-     * @param depth the depth
-     * @return all the descendants at that depth
-     */
-    public ArrayList<SimpleTreeNode> getDescendantsAtDepth(int depth){
-        int descendantDepth = 0;
-        ArrayList<SimpleTreeNode> parentNodes = new ArrayList<>();
-        ArrayList<SimpleTreeNode> childNodes = new ArrayList<>();
-        parentNodes.add(this);
-        while(descendantDepth<depth){
-            childNodes = getAllChildrenOfNodes(parentNodes);
-            if(childNodes.isEmpty())
-                return new ArrayList<>();
-            parentNodes = childNodes;
-            descendantDepth++;
-        }
-        return childNodes;
-        
-    }
-    
-    /**
-     * Returns all the children of a bunch of parent nodes
-     * @param nodes the parent nodes
-     * @return the children
-     */
-    public ArrayList<SimpleTreeNode> getAllChildrenOfNodes(ArrayList<SimpleTreeNode> nodes){
-        ArrayList<SimpleTreeNode> rtrn = new ArrayList<>();
-        for(SimpleTreeNode node:nodes){
-            rtrn.addAll(node.children);
-        }
-        return rtrn;
-    }
-    
-    /**
-     * prune a branch back to where it splits from a node without siblings
-     */
-    private void pruneBranch(){
-        deleteSelf();
-        if(parent==null)
-            return;
-        List<SimpleTreeNode> siblings = parent.children;
-        SimpleTreeNode grandparent = parent.parent;
-        if(grandparent==null)
-            return;
-        List<SimpleTreeNode> uncles = grandparent.children;
-        if(siblings.isEmpty() && uncles.size()>1){
-            parent.pruneBranch();
-        }
-    }
-    
-    /**
-     * removes this node from its parent's children
-     */
-    private void deleteSelf(){
-        parent.children.remove(this);
-    }
-    
-    void addChildrenAtDepth(int depth, ArrayList<ArrayList<OverlapGraph.SuffixOverlap>> children){
-        ArrayList<SimpleTreeNode> descendants = getDescendantsAtDepth(depth);
-        if(descendants.size()!=children.size()){
-            throw new IndexOutOfBoundsException("IndexOutOfBounds exception in addChildrenAtDepth. \n "
-                    + "Child groups not equal to number of descendants. \n" + 
-                    "Number of children = " +
-                        children.size() + "\n "
-                    + "Number of descendants = " + 
-                    descendants.size()
-                    );
-        }
-        for(int i=0;i<descendants.size();i++){
-            SimpleTreeNode descendant = descendants.get(i);
-            descendant.addAllChildNodes(children.get(i));
-        }
-    }
-    
-    /**
-     * <p>
-     *  prunes the node connected to Overlaps of StringSegment down to one. Beginning from
-     * one level below and proceeding down while the rootNode has more than one child:
-     *  <ol>
-     *      <li>runs pruneDescentantsAtDepth at that level</li>
-     *      <li>goes through remaining descendants</li>
-     *      <li>gets the suffix overlaps for each corresponding string segment</li>
-     *      <li>adds new nodes for those if they're not used</li>
-     *  </ol>
-     * </p>
-     * @param rootNode
-     * @param gr
-     * @param usedNodes 
-     */
-    void pruneChildNodesToOne(SimpleTreeNode rootNode, OverlapGraph gr, boolean[] usedNodes){
-        int iterator = 1;
-        int numberOfChildrenAdded = -1;
-        while (rootNode.children.size()>1){
-            if(numberOfChildrenAdded==0)
-                throw new RuntimeException("Can't prune to one");
-            numberOfChildrenAdded=0;
-            rootNode.pruneDescendantsAtDepth(iterator);
-            ArrayList<ArrayList<OverlapGraph.SuffixOverlap>> allOverlapsToAdd = new ArrayList<>();
-            for(SimpleTreeNode node:rootNode.getDescendantsAtDepth(iterator)){
-                ArrayList<OverlapGraph.SuffixOverlap> addOverlaps = gr.stringSegments[node.overlapLink.overlappingString].suffixOverlaps;
-                addOverlaps = (ArrayList<OverlapGraph.SuffixOverlap>)addOverlaps.stream()
-                        .filter(ol -> !usedNodes[ol.overlappingString])
-                        .collect(Collectors.toList());
-                allOverlapsToAdd.add(addOverlaps);
-                numberOfChildrenAdded+=addOverlaps.size();
-            }
-            rootNode.addChildrenAtDepth(iterator, allOverlapsToAdd);
-            iterator++;
-        }
-
-    }
-    
-}
