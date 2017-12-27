@@ -173,11 +173,6 @@ public class GenomeErrorFreeTest {
     }
     
     
-    private void testPruneChildNodesToOne(){
-        GenomeErrorFree.OverlapGraph og = gef.new OverlapGraph(new ArrayList<>());
-        GenomeErrorFree.OverlapGraph.SuffixOverlap mainOverlap = og.new SuffixOverlap(null, 0, 0);
-        GenomeErrorFree.SimpleTreeNode rootNode = gef.new SimpleTreeNode(mainOverlap);
-    }
    
    private boolean testReturnString(String[] rtrn, String unbrokenString){
        GenomeErrorFree.CircularString cUnbr = gef.new CircularString(unbrokenString);
