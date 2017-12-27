@@ -1,13 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package genomeerrorfree;
 
-import static genomeerrorfree.GenomeErrorFree.combineOverlaps;
-import genomeerrorfree.OverlapGraph.StringSegment;
-import genomeerrorfree.OverlapGraph.SuffixOverlap;
+//import static genomeerrorfree.GenomeErrorFree.combineOverlaps;
+//import genomeerrorfree.OverlapGraph.StringSegment;
+//import genomeerrorfree.OverlapGraph.SuffixOverlap;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -224,7 +218,7 @@ public class GenomeErrorFree {
     Integer[][] greedyHamiltonianPath(OverlapGraph input){
         boolean[] usedNodes = new boolean[input.stringSegments.length];
         int nodeNumber = 0;
-        for(StringSegment nodePath:input.stringSegments){
+        for(OverlapGraph.StringSegment nodePath:input.stringSegments){
             Collections.sort(nodePath.suffixOverlaps);
         }
         
@@ -257,15 +251,15 @@ public class GenomeErrorFree {
             }
         }
         while(!pq.isEmpty()){
-            StringSegment currentSegment = (StringSegment)pq.poll();
-            ArrayList<SuffixOverlap> possibleOverlaps = getLargestUnusedOverlaps(currentSegment, usedNodes);
+            OverlapGraph.StringSegment currentSegment = (OverlapGraph.StringSegment)pq.poll();
+            ArrayList<OverlapGraph.SuffixOverlap> possibleOverlaps = getLargestUnusedOverlaps(currentSegment, usedNodes);
             SimpleTreeNode rootNode = new SimpleTreeNode();
-            for(SuffixOverlap ol:possibleOverlaps){
+            for(OverlapGraph.SuffixOverlap ol:possibleOverlaps){
                 rootNode.addChildNode(ol);
             }
             rootNode.pruneChildNodesToOne(rootNode, gr, usedNodes);
             if(rootNode.children.size()>0){
-                SuffixOverlap nextOverlap = rootNode.children.get(0).overlapLink;
+                OverlapGraph.SuffixOverlap nextOverlap = rootNode.children.get(0).overlapLink;
                 usedNodes[nextOverlap.overlappingString] = true;
                 rtrn[currentSegment.index] = nextOverlap.getValuesAsArray();
             }
@@ -288,10 +282,10 @@ public class GenomeErrorFree {
      * @param nodeIsUsed nodes that have already been used
      * @return 
      */
-    ArrayList<SuffixOverlap> getLargestUnusedOverlaps(StringSegment seg, boolean[] nodeIsUsed){
-        ArrayList<SuffixOverlap> rtrn = new ArrayList<>();
+    ArrayList<OverlapGraph.SuffixOverlap> getLargestUnusedOverlaps(OverlapGraph.StringSegment seg, boolean[] nodeIsUsed){
+        ArrayList<OverlapGraph.SuffixOverlap> rtrn = new ArrayList<>();
         int maxOverlap = -1;
-        for(SuffixOverlap ol:seg.suffixOverlaps){
+        for(OverlapGraph.SuffixOverlap ol:seg.suffixOverlaps){
             if(!nodeIsUsed[ol.overlappingString]){
                 if(maxOverlap ==-1){
                     maxOverlap = ol.getOverlapLength();
@@ -333,94 +327,91 @@ public class GenomeErrorFree {
         
         return overlappedString.substring(0, olPoint) + overlappingString;
     }
-    
-}
 
 
-/**
- * an overlap graph of the strings
- * contains an array of string segments
- * @author jim.stewart
- */
-class OverlapGraph{
-    StringSegment[] stringSegments;
-    public OverlapGraph(ArrayList<String> stringSegments){
-        this.stringSegments = new StringSegment[stringSegments.size()];
-        for(int i=0;i<stringSegments.size();i++){
-            this.stringSegments[i]=new StringSegment(this,stringSegments.get(i),i);
-        }
-    }
     /**
-     * <p>a string segment in the overlap graph
-     * contains:</p>
-     * <ul>
-     * <li> a string</li>
-     * <li>the index in the graph</li>
-     * <li>a list of suffixOverlaps of strings it overlaps with</li>
-     * </ul>
+     * an overlap graph of the strings
+     * contains an array of string segments
+     * @author jim.stewart
      */
-    class StringSegment implements Comparable<StringSegment>{
-        private OverlapGraph parent;
-        public ArrayList<SuffixOverlap> suffixOverlaps;
-        final String str;
-        final int index;
-        public StringSegment(OverlapGraph parent, String str, int index){
-            this.str= str;
-            this.suffixOverlaps=new ArrayList<>();
-            this.index = index;
-            this.parent = parent;
+    class OverlapGraph{
+        StringSegment[] stringSegments;
+        public OverlapGraph(ArrayList<String> stringSegments){
+            this.stringSegments = new StringSegment[stringSegments.size()];
+            for(int i=0;i<stringSegments.size();i++){
+                this.stringSegments[i]=new StringSegment(this,stringSegments.get(i),i);
+            }
         }
-        public StringSegment addOverlap(int overlappingString, int overlapPoint){
-            suffixOverlaps.add(new SuffixOverlap(this, overlappingString, overlapPoint));
-            return this;
-        }
+        /**
+         * <p>a string segment in the overlap graph
+         * contains:</p>
+         * <ul>
+         * <li> a string</li>
+         * <li>the index in the graph</li>
+         * <li>a list of suffixOverlaps of strings it overlaps with</li>
+         * </ul>
+         */
+        class StringSegment implements Comparable<StringSegment>{
+            private OverlapGraph parent;
+            public ArrayList<SuffixOverlap> suffixOverlaps;
+            final String str;
+            final int index;
+            public StringSegment(OverlapGraph parent, String str, int index){
+                this.str= str;
+                this.suffixOverlaps=new ArrayList<>();
+                this.index = index;
+                this.parent = parent;
+            }
+            public StringSegment addOverlap(int overlappingString, int overlapPoint){
+                suffixOverlaps.add(new SuffixOverlap(this, overlappingString, overlapPoint));
+                return this;
+            }
 
-        //BUG??: right now this returns lowest-highest because that's how the 
-        //other function did it, which doesn't seem right. But other than that it
-        //works so I can flip it around when I need
-        @Override
-        public int compareTo(StringSegment o) {
-            return ((Integer)this.suffixOverlaps.get(0).overlapPoint).compareTo(o.suffixOverlaps.get(0).overlapPoint);      
+            //BUG??: right now this returns lowest-highest because that's how the 
+            //other function did it, which doesn't seem right. But other than that it
+            //works so I can flip it around when I need
+            @Override
+            public int compareTo(StringSegment o) {
+                return ((Integer)this.suffixOverlaps.get(0).overlapPoint).compareTo(o.suffixOverlaps.get(0).overlapPoint);      
+            }
+        }
+        /**
+         * <p> describes a suffix that overlaps. Contains:</p>
+         * <ul>
+         * <li>the index of the string that overlaps containing StringSegment</li>
+         * <li>the point at which the string segment overlaps</li>
+         * </ul>
+         */
+        class SuffixOverlap implements Comparable<SuffixOverlap> {
+            StringSegment parent;
+            int overlappingString;
+            int overlapPoint;
+            public SuffixOverlap(StringSegment parent, int overlappingString,int overlapPoint){
+                this.overlappingString=overlappingString;
+                this.overlapPoint=overlapPoint;
+                this.parent=parent;
+            }
+
+            public int getOverlapLength(){
+                StringSegment seg = parent.parent.stringSegments[this.overlappingString];
+                int segLength = seg.str.length();
+                return segLength-this.overlapPoint;
+            }
+
+            @Override
+            public int compareTo(SuffixOverlap o) {
+                return ((Integer)this.overlapPoint).compareTo(o.overlapPoint);
+            }
+
+            public Integer[] getValuesAsArray(){
+                Integer[] rtrn = {overlappingString, overlapPoint};
+                return rtrn;
+            }
         }
     }
-    /**
-     * <p> describes a suffix that overlaps. Contains:</p>
-     * <ul>
-     * <li>the index of the string that overlaps containing StringSegment</li>
-     * <li>the point at which the string segment overlaps</li>
-     * </ul>
-     */
-    class SuffixOverlap implements Comparable<SuffixOverlap> {
-        StringSegment parent;
-        int overlappingString;
-        int overlapPoint;
-        public SuffixOverlap(StringSegment parent, int overlappingString,int overlapPoint){
-            this.overlappingString=overlappingString;
-            this.overlapPoint=overlapPoint;
-            this.parent=parent;
-        }
-        
-        public int getOverlapLength(){
-            StringSegment seg = parent.parent.stringSegments[this.overlappingString];
-            int segLength = seg.str.length();
-            return segLength-this.overlapPoint;
-        }
-
-        @Override
-        public int compareTo(SuffixOverlap o) {
-            return ((Integer)this.overlapPoint).compareTo(o.overlapPoint);
-        }
-        
-        public Integer[] getValuesAsArray(){
-            Integer[] rtrn = {overlappingString, overlapPoint};
-            return rtrn;
-        }
-    }
-}
 
 
-
-/**
+ /**
  * <p>A character sequence that represents a circular string. Contains:</p>
  * <ul>
  * <li>a character array</li>
@@ -575,7 +566,7 @@ class SimpleTreeNode  {
     int value;
     SimpleTreeNode parent;
     ArrayList<SimpleTreeNode> children;
-    SuffixOverlap overlapLink;
+    OverlapGraph.SuffixOverlap overlapLink;
 
 
     public SimpleTreeNode(){
@@ -589,7 +580,7 @@ class SimpleTreeNode  {
      * Only for root node
      * @param value the node's value
      */
-    public SimpleTreeNode(SuffixOverlap overlapLink){
+    public SimpleTreeNode(OverlapGraph.SuffixOverlap overlapLink){
         this.value = overlapLink.getOverlapLength();
         this.parent = null;
         this.overlapLink = overlapLink;
@@ -601,7 +592,7 @@ class SimpleTreeNode  {
      * @param value node's value
      * @param parent link to parent
      */
-    public SimpleTreeNode(SuffixOverlap overlapLink, SimpleTreeNode parent){
+    public SimpleTreeNode(OverlapGraph.SuffixOverlap overlapLink, SimpleTreeNode parent){
         this.value = overlapLink.getOverlapLength();
         this.parent = parent;
         this.overlapLink = overlapLink;
@@ -612,13 +603,13 @@ class SimpleTreeNode  {
      * Add a child
      * @param value child's value
      */
-    public void addChildNode(SuffixOverlap overlapLink){
+    public void addChildNode(OverlapGraph.SuffixOverlap overlapLink){
         SimpleTreeNode newNode = new SimpleTreeNode(overlapLink, this);
         children.add(newNode);
     }
     
-    public void addAllChildNodes(ArrayList<SuffixOverlap> overlaps){
-        for(SuffixOverlap ol:overlaps){
+    public void addAllChildNodes(ArrayList<OverlapGraph.SuffixOverlap> overlaps){
+        for(OverlapGraph.SuffixOverlap ol:overlaps){
             addChildNode(ol);
         }
     }
@@ -714,7 +705,7 @@ class SimpleTreeNode  {
         parent.children.remove(this);
     }
     
-    void addChildrenAtDepth(int depth, ArrayList<ArrayList<SuffixOverlap>> children){
+    void addChildrenAtDepth(int depth, ArrayList<ArrayList<OverlapGraph.SuffixOverlap>> children){
         ArrayList<SimpleTreeNode> descendants = getDescendantsAtDepth(depth);
         if(descendants.size()!=children.size()){
             throw new IndexOutOfBoundsException("IndexOutOfBounds exception in addChildrenAtDepth. \n "
@@ -754,10 +745,10 @@ class SimpleTreeNode  {
                 throw new RuntimeException("Can't prune to one");
             numberOfChildrenAdded=0;
             rootNode.pruneDescendantsAtDepth(iterator);
-            ArrayList<ArrayList<SuffixOverlap>> allOverlapsToAdd = new ArrayList<>();
+            ArrayList<ArrayList<OverlapGraph.SuffixOverlap>> allOverlapsToAdd = new ArrayList<>();
             for(SimpleTreeNode node:rootNode.getDescendantsAtDepth(iterator)){
-                ArrayList<SuffixOverlap> addOverlaps = gr.stringSegments[node.overlapLink.overlappingString].suffixOverlaps;
-                addOverlaps = (ArrayList<SuffixOverlap>)addOverlaps.stream()
+                ArrayList<OverlapGraph.SuffixOverlap> addOverlaps = gr.stringSegments[node.overlapLink.overlappingString].suffixOverlaps;
+                addOverlaps = (ArrayList<OverlapGraph.SuffixOverlap>)addOverlaps.stream()
                         .filter(ol -> !usedNodes[ol.overlappingString])
                         .collect(Collectors.toList());
                 allOverlapsToAdd.add(addOverlaps);
@@ -769,4 +760,23 @@ class SimpleTreeNode  {
 
     }
     
+}   
+    
+    
+    
+    
+    
+    
+    
+
+
+
+    
 }
+
+
+
+
+
+
+

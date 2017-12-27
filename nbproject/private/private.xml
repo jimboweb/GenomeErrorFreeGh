@@ -1,28 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-<<<<<<< HEAD
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="2">
         <file>
             <url>test/genomeerrorfree/GenomeErrorFreeTest.java</url>
             <bookmark id="1">
                 <name/>
-                <line>87</line>
-=======
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="14">
-        <file>
-            <url>test/genomeerrorfree/GenomeErrorFreeTest.java</url>
-            <bookmark id="13">
-                <name/>
-                <line>36</line>
+                <line>129</line>
                 <key/>
             </bookmark>
         </file>
         <file>
             <url>src/genomeerrorfree/GenomeErrorFree.java</url>
-            <bookmark id="14">
+            <bookmark id="2">
                 <name/>
-                <line>115</line>
->>>>>>> EqualOverlapTree
+                <line>210</line>
                 <key/>
             </bookmark>
         </file>

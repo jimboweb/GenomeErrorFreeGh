@@ -5,9 +5,10 @@
  */
 package genomeerrorfree;
 
+import genomeerrorfree.GenomeErrorFree.CircularString;
 import genomeerrorfree.GenomeErrorFreeTest.TestStringSeg;
-import genomeerrorfree.OverlapGraph.StringSegment;
-import genomeerrorfree.OverlapGraph.SuffixOverlap;
+import genomeerrorfree.GenomeErrorFree.OverlapGraph.StringSegment;
+import genomeerrorfree.GenomeErrorFree.OverlapGraph.SuffixOverlap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.PriorityQueue;
@@ -31,7 +32,7 @@ public class GenomeErrorFreeTest {
     GenomeErrorFree gef = new GenomeErrorFree();
     char[] letters = {'A','C','T','G'};
     Random rnd = new Random();
-
+    
     public GenomeErrorFreeTest() {
     }
 
@@ -50,9 +51,9 @@ public class GenomeErrorFreeTest {
 //            giap.mixUpArrayListAndPath();
             ArrayList<String> input = giap.inputAsStringList();
             GenomeErrorFree instance = new GenomeErrorFree();
-            CircularString expResult = new CircularString(unbrokenString);
+            CircularString expResult = gef.new CircularString(unbrokenString);
             String result = instance.returnGenome(input);
-            CircularString cResult = new CircularString(result);
+            CircularString cResult = gef.new CircularString(result);
             assertEquals("Failed test number " + i + " got string " + result, expResult, cResult);
         }
     }
@@ -62,8 +63,8 @@ public class GenomeErrorFreeTest {
     public void testCircularString(){
         String str1 = "kjshfiui009830498)(*)(";
         String str1Wrap = "i009830498)(*)(kjshfiu";
-        CircularString cStr1 = new CircularString(str1);
-        CircularString cStr1Wrap = new CircularString(str1Wrap);
+        CircularString cStr1 = gef.new CircularString(str1);
+        CircularString cStr1Wrap = gef.new CircularString(str1Wrap);
         assertEquals(cStr1,cStr1Wrap);
         String subStrExp = ")(kjs";
         String subStrTest = cStr1.subString(20, 3);
@@ -81,19 +82,19 @@ public class GenomeErrorFreeTest {
             l.add("foo");
             l.add("bar");
             l.add("qaz");
-            OverlapGraph og = new OverlapGraph(l);
+            GenomeErrorFree.OverlapGraph og = gef.new OverlapGraph(l);
             og.stringSegments[0].suffixOverlaps.add(og.new SuffixOverlap(og.stringSegments[0],2,4));
             og.stringSegments[1].suffixOverlaps.add(og.new SuffixOverlap(og.stringSegments[1], 1,3));
             og.stringSegments[2].suffixOverlaps.add(og.new SuffixOverlap(og.stringSegments[2], 2,5));
             PriorityQueue pq = new PriorityQueue<>();
             pq.addAll(Arrays.asList(og.stringSegments));
-            ArrayList<OverlapGraph.StringSegment> expectedResult = new ArrayList<>();
+            ArrayList<GenomeErrorFree.OverlapGraph.StringSegment> expectedResult = new ArrayList<>();
             expectedResult.add(og.stringSegments[1]);
             expectedResult.add(og.stringSegments[0]);
             expectedResult.add(og.stringSegments[2]);
-            ArrayList<OverlapGraph.StringSegment> actualResult = new ArrayList<>();
+            ArrayList<GenomeErrorFree.OverlapGraph.StringSegment> actualResult = new ArrayList<>();
             while(!pq.isEmpty()){
-                actualResult.add((OverlapGraph.StringSegment)pq.poll());
+                actualResult.add((GenomeErrorFree.OverlapGraph.StringSegment)pq.poll());
             }
             assertArrayEquals(expectedResult.toArray(), actualResult.toArray());
         }
@@ -121,7 +122,7 @@ public class GenomeErrorFreeTest {
         ArrayList<String> inputStrings = new ArrayList<>();
         Integer[][] expectedPath = createExpectedPath(input, inputStrings);
 //        input.mixUpArrayListAndPath();
-        OverlapGraph graph = new OverlapGraph(inputStrings);
+        GenomeErrorFree.OverlapGraph graph = gef.new OverlapGraph(inputStrings);
         graph = instance.findAllOverlaps(graph);
         Integer[][] path = instance.greedyHamiltonianPath(graph);
         for(int i=0;i<path.length;i++){
@@ -176,13 +177,13 @@ public class GenomeErrorFreeTest {
     
     
     private void testPruneChildNodesToOne(){
-        OverlapGraph og = new OverlapGraph(new ArrayList<>());
+        GenomeErrorFree.OverlapGraph og = gef.new OverlapGraph(new ArrayList<>());
         SuffixOverlap mainOverlap = og.new SuffixOverlap(null, 0, 0);
-        SimpleTreeNode rootNode = new SimpleTreeNode(mainOverlap);
+        GenomeErrorFree.SimpleTreeNode rootNode = gef.new SimpleTreeNode(mainOverlap);
     }
    
    private boolean testReturnString(String[] rtrn, String unbrokenString){
-       CircularString cUnbr = new CircularString(unbrokenString);
+       GenomeErrorFree.CircularString cUnbr = gef.new CircularString(unbrokenString);
        for(int i=0;i<rtrn.length;i++){
            String s = rtrn[i];
            System.out.println(s);
@@ -437,10 +438,10 @@ public class GenomeErrorFreeTest {
     @Test
     public void testFindAllOverlaps() {
         System.out.println("findAllOverlaps");
-        OverlapGraph gr = null;
+        GenomeErrorFree.OverlapGraph gr = null;
         GenomeErrorFree instance = new GenomeErrorFree();
-        OverlapGraph expResult = null;
-        OverlapGraph result = instance.findAllOverlaps(gr);
+        GenomeErrorFree.OverlapGraph expResult = null;
+        GenomeErrorFree.OverlapGraph result = instance.findAllOverlaps(gr);
         assertEquals(expResult, result);
         // TODO LATER review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");
@@ -462,8 +463,8 @@ public class GenomeErrorFreeTest {
             potentialOverlappedString.addOverlap(potentialOverlappingString.index, potentialOverlappingString.str.length()-olPoint);
             int str1Pos = 0;
             GenomeErrorFree instance = new GenomeErrorFree();
-            OverlapGraph.StringSegment expResult = potentialOverlappedString;
-            OverlapGraph.StringSegment result = instance.findOverlaps(potentialOverlappingString, potentialOverlappedString, str1Pos);
+            GenomeErrorFree.OverlapGraph.StringSegment expResult = potentialOverlappedString;
+            GenomeErrorFree.OverlapGraph.StringSegment result = instance.findOverlaps(potentialOverlappingString, potentialOverlappedString, str1Pos);
 
             assertEquals(expResult, result);
         }
@@ -480,7 +481,7 @@ public class GenomeErrorFreeTest {
         for(int i=str2.length();i<segLength;i++){
             str2+=randChar();
         }
-        OverlapGraph mockOverlapGraph = new OverlapGraph(new ArrayList<>());
+        GenomeErrorFree.OverlapGraph mockOverlapGraph = gef.new OverlapGraph(new ArrayList<>());
         stringSegments[0] = mockOverlapGraph.new StringSegment(mockOverlapGraph, str1, rnd.nextInt(10));
         stringSegments[1] = mockOverlapGraph.new StringSegment(mockOverlapGraph, str2, rnd.nextInt(10)+10);
         return stringSegments;
@@ -508,7 +509,7 @@ public class GenomeErrorFreeTest {
     public void testDrawPath() {
         System.out.println("drawPath");
         PriorityQueue pq = null;
-        OverlapGraph gr = null;
+        GenomeErrorFree.OverlapGraph gr = null;
         boolean[] usedNodes = null;
         int pathSize = 0;
         GenomeErrorFree instance = new GenomeErrorFree();
@@ -525,7 +526,7 @@ public class GenomeErrorFreeTest {
     @Test
     public void testGetLargestUnusedOverlaps() {
         System.out.println("getLargestUnusedOverlaps");
-        OverlapGraph.StringSegment seg = null;
+        GenomeErrorFree.OverlapGraph.StringSegment seg = null;
         boolean[] nodeIsUsed = null;
         GenomeErrorFree instance = new GenomeErrorFree();
         ArrayList<SuffixOverlap> expResult = null;
