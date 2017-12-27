@@ -36,11 +36,7 @@ public class GenomeErrorFreeTest {
      */
     @Test
     public void testReturnGenome() {
-<<<<<<< HEAD
-        for(int i=0;i<5;i++){
-=======
         for(int i=0;i<200;i++){
->>>>>>> NoPackageNoTree
             int numberOfSegments = 1618; 
             int strLen = 100;
             int maxOlPoint = rnd.nextInt(50)+10;
@@ -101,19 +97,7 @@ public class GenomeErrorFreeTest {
         }
         return unbrokenString;
     }
-    /**
-      * @param input
-     * @return 
-     */
-    private ArrayList<String> mixUpStringSegments(ArrayList<String> input){
-        for(int i=0;i<input.size();i++){
-            input = swapSegments(input,i,rnd.nextInt(input.size()));
-
-        }
-        return input;   
-        
-    }
-    
+   
     
     
     private char randChar(){
