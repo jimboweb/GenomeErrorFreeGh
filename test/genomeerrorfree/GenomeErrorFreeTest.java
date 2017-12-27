@@ -34,7 +34,7 @@ public class GenomeErrorFreeTest {
         for(int i=0;i<10000;i++){
             int numberOfSegments = 1618; 
             int strLen = 100;
-            int maxOlPoint = rnd.nextInt(70)+10;
+            int maxOlPoint = rnd.nextInt(200)+10;
             System.out.println("returnGenome trial " + i);
             String unbrokenString = createUnbrokenString(0, true);
             ReturnGenomeInputAndPath giap = new ReturnGenomeInputAndPath(unbrokenString, numberOfSegments, strLen, maxOlPoint);
@@ -42,8 +42,15 @@ public class GenomeErrorFreeTest {
             ArrayList<String> input = giap.inputAsStringList();
             GenomeErrorFree instance = new GenomeErrorFree();
             CircularString expResult = new CircularString(unbrokenString);
-            String result = instance.returnGenome(input);
+            String result = "";
+            try{
+            result = instance.returnGenome(input);
+            } catch(Exception e){
+                System.out.println(e);
+                fail(getTRGFailString(giap, unbrokenString, result));
+            }
             CircularString cResult = new CircularString(result);
+            System.out.println("Expresult: " + expResult.toString() + "\n returned result " + cResult.toString());
             assertEquals(getTRGFailString(giap, unbrokenString, result), expResult, cResult);
         }
     }
