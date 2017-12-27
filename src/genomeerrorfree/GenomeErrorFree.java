@@ -139,11 +139,15 @@ public class GenomeErrorFree {
     OverlapGraph.StringSegment findOverlaps(OverlapGraph.StringSegment potentialOverlappingString, OverlapGraph.StringSegment potentialOverlappedString, int str1Pos){
         
         if(findOverlapsIsNaive){
-            int stopPoint = Math.max(0, potentialOverlappingString.str.length()-potentialOverlappedString.str.length());
-            for(int i=potentialOverlappedString.str.length()-minOverlap;i>stopPoint;i--){
+            int startPoint = Math.max(0, potentialOverlappingString.str.length()-potentialOverlappedString.str.length());
+            int stopPoint = potentialOverlappedString.str.length()-minOverlap;
+            for(int i=startPoint;i<stopPoint;i++){
                 if(matchOverlaps(potentialOverlappingString.str, potentialOverlappedString.str, i)){
                     int overlapPoint = i;
                     potentialOverlappedString = potentialOverlappedString.addOverlap(str1Pos, overlapPoint);
+                }
+                if(potentialOverlappedString.suffixOverlaps.size()>4){
+                    break;
                 }
             }
         }
