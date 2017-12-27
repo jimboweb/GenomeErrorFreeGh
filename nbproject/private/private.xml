@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
 <<<<<<< HEAD
+<<<<<<< HEAD
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="1">
         <file>
             <url>test/genomeerrorfree/GenomeErrorFreeTest.java</url>
@@ -9,20 +10,27 @@
                 <line>87</line>
 =======
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="14">
+=======
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="2">
+>>>>>>> NoPackageNoTree
         <file>
             <url>test/genomeerrorfree/GenomeErrorFreeTest.java</url>
-            <bookmark id="13">
+            <bookmark id="1">
                 <name/>
-                <line>36</line>
+                <line>129</line>
                 <key/>
             </bookmark>
         </file>
         <file>
             <url>src/genomeerrorfree/GenomeErrorFree.java</url>
-            <bookmark id="14">
+            <bookmark id="2">
                 <name/>
+<<<<<<< HEAD
                 <line>115</line>
 >>>>>>> EqualOverlapTree
+=======
+                <line>210</line>
+>>>>>>> NoPackageNoTree
                 <key/>
             </bookmark>
         </file>
