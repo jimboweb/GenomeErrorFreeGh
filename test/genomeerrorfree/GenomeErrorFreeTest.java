@@ -35,7 +35,7 @@ public class GenomeErrorFreeTest {
      */
     @Test
     public void testReturnGenome() {
-        for(int i=0;i<100000;i++){
+        for(int i=0;i<100;i++){
             int numberOfSegments = 1618; 
             int strLen = 100;
             int maxOlPoint = rnd.nextInt(50)+10;
