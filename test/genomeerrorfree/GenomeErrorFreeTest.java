@@ -44,23 +44,48 @@ public class GenomeErrorFreeTest {
         for(int i=0;i<5;i++){
             int numberOfSegments = 1618; 
             int strLen = 100;
+<<<<<<< HEAD
             int maxOlPoint = 20;
             System.out.println("returnGenome");
+=======
+            int maxOlPoint = rnd.nextInt(50)+10;
+            System.out.println("returnGenome trial " + i);
+>>>>>>> EqualOverlapTree
             String unbrokenString = createUnbrokenString(0, true);
             ReturnGenomeInputAndPath giap = new ReturnGenomeInputAndPath(unbrokenString, numberOfSegments, strLen, maxOlPoint);
-//            giap.mixUpArrayListAndPath();
+            //giap.mixUpArrayListAndPath();
             ArrayList<String> input = giap.inputAsStringList();
             GenomeErrorFree instance = new GenomeErrorFree();
             CircularString expResult = gef.new CircularString(unbrokenString);
             String result = instance.returnGenome(input);
+<<<<<<< HEAD
             CircularString cResult = gef.new CircularString(result);
             assertEquals("Failed test number " + i + " got string " + result, expResult, cResult);
+=======
+            CircularString cResult = new CircularString(result);
+            assertEquals(getTRGFailString(giap, unbrokenString, result), expResult, cResult);
+>>>>>>> EqualOverlapTree
         }
+    }
+    
+    private String getTRGFailString(ReturnGenomeInputAndPath giap, String expectedString, String actualString){
+        String failString = "";
+        failString += "failed on string \n";
+        failString += expectedString;
+        failString += "instead got\n";
+        failString += actualString;
+        failString += "input:\n";
+        for(TestStringSeg seg:giap.input){
+            failString += seg.str;
+            failString += "\n";
+        }
+        return failString;
     }
 
 
     @Test
     public void testCircularString(){
+<<<<<<< HEAD
         String str1 = "kjshfiui009830498)(*)(";
         String str1Wrap = "i009830498)(*)(kjshfiu";
         CircularString cStr1 = gef.new CircularString(str1);
@@ -75,6 +100,52 @@ public class GenomeErrorFreeTest {
             String testContainsStr = cStr1.subString(start, start+end);
             assertTrue(cStr1.contains(testContainsStr));
         }
+=======
+        int maxStrLen = 10;
+        int minStrLen = 5;
+        int trials = 100;
+        for(int trial=0;trial<trials;trial++){
+            System.out.println("trial " + trial);
+            int strLen = rnd.nextInt(maxStrLen)+minStrLen;
+            String orgStr = "";
+            for(int i=0;i<strLen;i++){
+                orgStr += randChar();
+            }
+            int strBr = rnd.nextInt(strLen-1);
+            String firstHalf = orgStr.substring(0, strBr);
+            String secondHalf = orgStr.substring(strBr);
+            String cmpStr = secondHalf+firstHalf;
+            boolean eqls = true;
+            int possibleError = rnd.nextInt(12);
+            if(possibleError<4){
+                eqls=false;
+                int replaceCharLoc = rnd.nextInt(strLen-1);
+                char replaceChar = cmpStr.charAt(replaceCharLoc);
+                char newChar;
+                do{
+                    newChar = randChar();
+                } while(newChar==replaceChar);
+                cmpStr = cmpStr.substring(0,replaceCharLoc-1) + newChar + cmpStr.substring(replaceCharLoc);
+            } else if(possibleError<6){
+                eqls=false;
+                int removeOrAdd = rnd.nextInt(2);
+                int removeOrAddLocation = rnd.nextInt(strLen-2)+1;
+                if(removeOrAdd<1){
+                    cmpStr = cmpStr.substring(0,removeOrAddLocation) + randChar() + cmpStr.substring(removeOrAddLocation);
+                } else {
+                    cmpStr = cmpStr.substring(0,removeOrAddLocation-1) + cmpStr.substring(removeOrAddLocation);
+                }
+            }
+            System.out.println("original string:  " + orgStr);
+            System.out.println("compare string:" + cmpStr);
+            CircularString cOrgStr = new CircularString(orgStr);
+            CircularString cCmpStr = new CircularString(cmpStr);
+            boolean testEqls = cOrgStr.equals(cCmpStr);
+            System.out.println("Expected result " + eqls + " actual result: " + testEqls);
+            assertEquals("failed on string " + orgStr + " comparison string " + cmpStr ,eqls,testEqls);
+        }   
+        
+>>>>>>> EqualOverlapTree
     }
         @Test
         public void testStringSegment(){
@@ -260,6 +331,7 @@ public class GenomeErrorFreeTest {
             int absLocation = 0;
             for(int i=0;i<numberOfSegments;i++){
                 nextString = multString.substring(lastStrBegin, lastStrBegin+strLen);
+                //System.out.println(nextString);
                 multString = multString.substring(lastStrBegin);
                 TestStringSeg nextStringSeg = new TestStringSeg(nextString, i, absLocation);
                 input.add(nextStringSeg);

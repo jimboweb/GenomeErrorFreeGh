@@ -74,6 +74,10 @@ public class GenomeErrorFree {
         return input;
     }
     
+    //TODO: BUG: (at least) one of the string segments has a very high suffix overlap,
+    //like at 96 instead of 2-4 like the rest. That's the one that's getting the null
+    //pointer exception most of the time. This only happens when the overlap length is
+    //very short. Need to find that string and figure out what's going on with it. 
     /**
      * 
      * @param input the genome strings sampled
@@ -499,6 +503,9 @@ class CircularString implements CharSequence {
         }
         return false;
     }
+    
+    //TODO: BUG: my f*$^ing equality check is returning false positives
+    //no wonder I never fail the tests
     /**
      * Check for circular equality
      * 
@@ -511,27 +518,30 @@ class CircularString implements CharSequence {
         if(!(other instanceof CircularString))
             return false;
         CircularString otherCs = (CircularString)other;
-        if(this.length == otherCs.length)
-        {
-            int i,j;
-        //otherwise cycle through other string
-            for(i=0;i<otherCs.length;i++){
-                //then cycle through this one
-                for(j=0;j<length;j++){
-                    //continue if the character at that point isn't the same
-                    char charJ = charAt(j);
-                    char charI = otherCs.charAt(i+j);
-                    if(!(charAt(j)==otherCs.charAt(i+j))){
-                        break;
-                    }
-                }
-                //if I got all the way through the word, then they're equal
-                if(i==length-1){
-                    return true;
-                }
+        //otherwise check if they're the same length and then cycle through other string
+        return length == otherCs.length && 
+                compareStringAtEachOverlap(otherCs);
+    }
+    
+    private boolean compareStringAtEachOverlap(CircularString otherCs){
+        for(int i=0;i<length;i++){
+            if(compareStringAtOverlap(otherCs, i)){
+                return true;
             }
         }
-          return false;
+        return false;
+    }
+    
+    private boolean compareStringAtOverlap(CircularString otherCs, int i){
+        for(int j=0;j<length;j++){
+            //continue if the character at that point isn't the same
+            char thisStringChar = charAt(j);
+            char otherStringChar = otherCs.charAt(i+j);
+            if(thisStringChar!=otherStringChar){
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
