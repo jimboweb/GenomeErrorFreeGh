@@ -373,12 +373,16 @@ class OverlapGraph{
             return this;
         }
 
-        //BUG??: right now this returns lowest-highest because that's how the 
-        //other function did it, which doesn't seem right. But other than that it
-        //works so I can flip it around when I need
+        //TODO: put a try-catch and debugger on this so I can see
+        //what is happening when it fails
         @Override
         public int compareTo(StringSegment o) {
+            try{
             return ((Integer)this.suffixOverlaps.get(0).overlapPoint).compareTo(o.suffixOverlaps.get(0).overlapPoint);      
+            } catch(IndexOutOfBoundsException e){
+                System.out.println(e);
+            }
+            return -1;
         }
     }
     /**

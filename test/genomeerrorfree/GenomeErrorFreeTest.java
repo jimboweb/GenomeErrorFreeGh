@@ -47,21 +47,23 @@ public class GenomeErrorFreeTest {
             result = instance.returnGenome(input);
             } catch(Exception e){
                 System.out.println(e);
-                fail(getTRGFailString(giap, unbrokenString, result));
+                fail(getTRGFailString(giap, unbrokenString, result, maxOlPoint));
             }
             CircularString cResult = new CircularString(result);
             System.out.println("Expresult: " + expResult.toString() + "\n returned result " + cResult.toString());
-            assertEquals(getTRGFailString(giap, unbrokenString, result), expResult, cResult);
+            assertEquals(getTRGFailString(giap, unbrokenString, result, maxOlPoint), expResult, cResult);
         }
     }
     
-    private String getTRGFailString(ReturnGenomeInputAndPath giap, String expectedString, String actualString){
+    private String getTRGFailString(ReturnGenomeInputAndPath giap, String expectedString, String actualString, int maxOlPoint){
         String failString = "";
         failString += "failed on string \n";
         failString += expectedString;
-        failString += "instead got\n";
+        failString += "\ninstead got\n";
+        failString += "max overlap point: \n";
+        failString += maxOlPoint + "\n";
         failString += actualString;
-        failString += "input:\n";
+        failString += "\ninput:\n";
         for(TestStringSeg seg:giap.input){
             failString += seg.str;
             failString += "\n";
