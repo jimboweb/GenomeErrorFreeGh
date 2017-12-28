@@ -26,7 +26,7 @@ public class GenomeErrorFree {
     boolean findOverlapsIsNaive = true;
     boolean findAllOverlapsIsNaive = true;
     private final int numberOfInputs = 1618; //will be 1618
-    private final int minOverlap = 60;
+    private final int minOverlap = 20;
     /**
      * @param args the command line arguments
      */
